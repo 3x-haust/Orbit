@@ -3340,6 +3340,17 @@
         }
       }
     },
+    "Apple Intelligence needs macOS 26 or later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence는 macOS 26 이상에서 쓸 수 있어요."
+          }
+        }
+      }
+    },
     "Apple Passwords": {
       "extractionState": "manual",
       "localizations": {

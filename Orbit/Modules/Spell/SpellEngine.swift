@@ -546,6 +546,7 @@ enum SpellChecker {
 
     static var intelligenceStatus: (ready: Bool, note: String?) {
         #if canImport(FoundationModels)
+        guard #available(macOS 26, *) else { return (false, "Apple Intelligence needs macOS 26 or later.".loc) }
         switch SystemLanguageModel.default.availability {
         case .available: return (true, nil)
         case .unavailable(.deviceNotEligible): return (false, "This Mac doesn’t support Apple Intelligence.".loc)
@@ -561,13 +562,14 @@ enum SpellChecker {
     /// Warms the model up while the panel opens, so the first check doesn't wait for it to load.
     static func prewarm() {
         #if canImport(FoundationModels)
-        guard intelligenceStatus.ready else { return }
+        guard #available(macOS 26, *), intelligenceStatus.ready else { return }
         Proofreader.session().prewarm()
         #endif
     }
 
     static func intelligence(_ text: String) async throws -> (String, [SpellHint]) {
         #if canImport(FoundationModels)
+        guard #available(macOS 26, *) else { throw SpellError.unavailable("Apple Intelligence needs macOS 26 or later.".loc) }
         var corrected = ""
         var hints: [SpellHint] = []
         for chunk in Proofreader.chunks(text) {
@@ -585,6 +587,7 @@ enum SpellChecker {
 
 #if canImport(FoundationModels)
 
+@available(macOS 26, *)
 @Generable
 struct ProofreadReply {
     @Guide(description: "The whole input text with only spelling, spacing, grammar and punctuation mistakes fixed. Everything else is copied exactly. Identical to the input when nothing is wrong.")
@@ -593,6 +596,7 @@ struct ProofreadReply {
     var edits: [ProofreadFix]
 }
 
+@available(macOS 26, *)
 @Generable
 struct ProofreadFix {
     @Guide(description: "The wrong text, copied character for character from the input.")
@@ -602,6 +606,7 @@ struct ProofreadFix {
     var kind: ProofreadKind
 }
 
+@available(macOS 26, *)
 @Generable
 enum ProofreadKind {
     case spelling, spacing, grammar, punctuation, wording
@@ -610,6 +615,7 @@ enum ProofreadKind {
 /// The on-device model as a strict proofreader. What it returns is checked against the source:
 /// edits that quote text that isn't there are dropped, and a reply that rewrote too much is
 /// replaced by the source with just its listed fixes.
+@available(macOS 26, *)
 @MainActor
 enum Proofreader {
     static let instructions = """

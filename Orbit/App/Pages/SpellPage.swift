@@ -186,7 +186,7 @@ private struct SpellEngineCard: View {
                             .padding(.horizontal, 7).frame(height: 18).background(Capsule().fill(Palette.raised))
                     }
                     Spacer()
-                    Image(systemName: combined ? "checkmark.circle.badge.plus" : selected ? "checkmark.circle.fill" : "circle")
+                    Image(systemName: combined ? Self.combinedSymbol : selected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 15)).foregroundStyle(selected || combined ? Palette.accent : Palette.inkSecondary.opacity(0.5))
                 }
                 Text(engine.detail.loc).font(.system(size: 12)).foregroundStyle(Palette.inkSecondary)
@@ -207,6 +207,12 @@ private struct SpellEngineCard: View {
         .buttonStyle(.plain)
         .disabled(!status.ready)
         .onHover { h in withAnimation(.spring(duration: 0.25)) { hovering = h } }
+    }
+
+    /// checkmark.circle.badge.plus only ships with macOS 26.
+    private static var combinedSymbol: String {
+        if #available(macOS 26, *) { return "checkmark.circle.badge.plus" }
+        return "plus.circle.fill"
     }
 }
 

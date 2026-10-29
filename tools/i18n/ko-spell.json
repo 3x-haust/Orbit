@@ -102,5 +102,6 @@
   "Unofficial. Off: Korean is checked on this Mac only.": "비공식 연결이에요. 끄면 한국어도 이 Mac 안에서만 검사해요.",
   "Text goes only to the engine you pick, and to the next one if it fails. Apple Intelligence and Apple Spelling never leave this Mac. Orbit keeps no copy of what you check.": "글은 고른 검사기로만 보내지고, 실패하면 다음 검사기로 넘어가요. Apple Intelligence와 Apple 맞춤법은 이 Mac 밖으로 보내지 않아요. Orbit은 검사한 글을 저장하지 않아요.",
   "The selection was lost, so it’s copied": "선택이 풀려서 복사해 뒀어요",
-  "Press ⌘V to paste it": "⌘V로 붙여 넣으세요"
+  "Press ⌘V to paste it": "⌘V로 붙여 넣으세요",
+  "Apple Intelligence needs macOS 26 or later.": "Apple Intelligence는 macOS 26 이상에서 쓸 수 있어요."
 }
