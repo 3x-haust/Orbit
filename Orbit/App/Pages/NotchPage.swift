@@ -11,7 +11,7 @@ struct NotchPage: View {
     @AppStorage(NotchPrefs.swipe) private var swipe = true
     @AppStorage(NotchPrefs.haptics) private var haptics = true
     @AppStorage(NotchPrefs.scale) private var scale = 1.0
-    @AppStorage(NotchPrefs.radius) private var radius = 22.0
+    @AppStorage(NotchPrefs.radius) private var radius = 30.0
     @AppStorage(NotchPrefs.shadow) private var shadow = true
     @AppStorage(NotchPrefs.screens) private var screens = "notch"
     @AppStorage(NotchPrefs.hideFullScreen) private var hideFullScreen = true
@@ -138,7 +138,7 @@ struct NotchPage: View {
                 SettingsGroup(title: "Look") {
                     NotchSlider(title: "Size", symbol: "arrow.up.left.and.arrow.down.right", value: applied($scale), range: 0.85...1.25, step: 0.05, percent: true)
                     RowDivider()
-                    NotchSlider(title: "Corners", symbol: "app", value: applied($radius), range: 10...34, step: 1)
+                    NotchSlider(title: "Corners", symbol: "app", value: applied($radius), range: 16...44, step: 1)
                     RowDivider()
                     SettingsRow(title: "Shadow", symbol: "shadow") {
                         Toggle("", isOn: applied($shadow)).toggleStyle(.switch).labelsHidden()

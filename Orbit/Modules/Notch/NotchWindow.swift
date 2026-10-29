@@ -52,10 +52,12 @@ enum NotchGeometry {
 
     static func radius(_ phase: NotchCenter.Phase, config c: NotchCenter.Config) -> CGFloat {
         switch phase {
-        case .hidden, .idle, .ears, .hud: restRadius
-        case .peek: min(c.radius, 20)
-        case .banner: c.radius
-        case .expanded: c.radius + 4
+        case .hidden, .idle: restRadius
+        // Ears and HUDs end a little rounder than the housing, so they read as one pill.
+        case .ears, .hud: restRadius + 3
+        case .peek: min(c.radius, 28)
+        case .banner: c.radius + 4
+        case .expanded: c.radius + 10
         }
     }
 
@@ -255,21 +257,38 @@ struct NotchBezelShape: Shape {
         let w = max(rect.width, minBody.width + 2 * e0), h = max(rect.height, minBody.height)
         let x0 = rect.minX - (w - rect.width) / 2
         let e = min(e0, w / 4)
-        let r = max(0, min(radius, h / 2, (w - 2 * e) / 2))
-        let d = max(0, min(earDepth, h - r))
-        // Quarter arcs from cubics (0.552); the fillets a little longer (0.74) so they flow.
-        let k: CGFloat = 1 - 0.552, soft: CGFloat = 0.74
+        // A continuous corner runs `reach` times its radius along each edge, so it needs that much room.
+        let reach = Self.reach
+        let d0 = max(0, min(earDepth, h / 2))
+        let r = max(0, min(radius, (h - d0) / reach, (w - 2 * e) / (2 * reach)))
+        let d = max(0, min(earDepth, h - r * reach))
+        // The fillets are cubics a little longer than a quarter arc (0.74) so they flow.
+        let soft: CGFloat = 0.74
         var p = Path()
         p.move(to: CGPoint(x: 0, y: 0))
         p.addCurve(to: CGPoint(x: e, y: d), control1: CGPoint(x: e * soft, y: 0), control2: CGPoint(x: e, y: d * (1 - soft)))
-        p.addLine(to: CGPoint(x: e, y: h - r))
-        p.addCurve(to: CGPoint(x: e + r, y: h), control1: CGPoint(x: e, y: h - r * k), control2: CGPoint(x: e + r * k, y: h))
-        p.addLine(to: CGPoint(x: w - e - r, y: h))
-        p.addCurve(to: CGPoint(x: w - e, y: h - r), control1: CGPoint(x: w - e - r * k, y: h), control2: CGPoint(x: w - e, y: h - r * k))
+        Self.corner(&p, at: CGPoint(x: e, y: h), from: CGVector(dx: 0, dy: -1), to: CGVector(dx: 1, dy: 0), radius: r)
+        Self.corner(&p, at: CGPoint(x: w - e, y: h), from: CGVector(dx: -1, dy: 0), to: CGVector(dx: 0, dy: -1), radius: r)
         p.addLine(to: CGPoint(x: w - e, y: d))
         p.addCurve(to: CGPoint(x: w, y: 0), control1: CGPoint(x: w - e, y: d * (1 - soft)), control2: CGPoint(x: w - e * soft, y: 0))
         p.closeSubpath()
         return p.applying(CGAffineTransform(translationX: x0, y: rect.minY))
+    }
+
+    static let reach: CGFloat = 1.528665
+
+    /// Adds a line to, then around, the corner at `c` the way iOS rounds its continuous corners
+    /// (and the Dynamic Island): curvature eases in along each edge instead of starting at once,
+    /// so the corner reads softer and rounder than a quarter circle. `from` points back along the
+    /// edge we arrive on, `to` along the edge we leave on.
+    static func corner(_ p: inout Path, at c: CGPoint, from u: CGVector, to v: CGVector, radius r: CGFloat) {
+        func pt(_ a: CGFloat, _ b: CGFloat) -> CGPoint {
+            CGPoint(x: c.x + (u.dx * a + v.dx * b) * r, y: c.y + (u.dy * a + v.dy * b) * r)
+        }
+        p.addLine(to: pt(reach, 0))
+        p.addCurve(to: pt(0.631494, 0.074911), control1: pt(1.088493, 0), control2: pt(0.868407, 0))
+        p.addCurve(to: pt(0.074911, 0.631494), control1: pt(0.372824, 0.169057), control2: pt(0.169057, 0.372824))
+        p.addCurve(to: pt(0, reach), control1: pt(0, 0.868407), control2: pt(0, 1.088493))
     }
 }
 
