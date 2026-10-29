@@ -42,6 +42,18 @@ final class NowPlaying {
     private var likedKeys: Set<String> = []
 
     private let bridge = MediaRemoteBridge()
+    /// What one app last reported.
+    struct Report: Equatable {
+        var track: Track
+        var rate: Double
+        var elapsed: Double?
+        var anchor: Date
+    }
+    /// Every app Now Playing reported, and which of them shows.
+    @ObservationIgnored private var sources = NowPlayingSources<Report>()
+    /// Each app's cover for its last song.
+    @ObservationIgnored private var covers: [String: (key: String, artworkKey: String?, image: NSImage)] = [:]
+    @ObservationIgnored private var settleWork: DispatchWorkItem?
     private var pollTimer: Timer?
     private var started = false
     private var usingScripts = false
@@ -234,37 +246,93 @@ final class NowPlaying {
                                    key: p.title.map { "\($0)\u{1}\(p.artist ?? "")\u{1}\(p.album ?? "")" },
                                    playing: p.playing ?? ((p.rate ?? 0) > 0))
         guard let title = p.title, (p.pid ?? 0) != 0 || p.bundle != nil else {
-            clear()
+            sources.reportNothing()
+            settle()
             return
         }
-        let bundle = source
-        lastSource = bundle.map { ($0, p.appName ?? Self.appName(for: $0) ?? $0) }
-        if !Self.allowed(bundle ?? "", isMusicApp: p.isMusicApp ?? false) {
-            if lastSkipped != bundle {
-                lastSkipped = bundle
-                NowPlayingLog.write("not showing \(bundle ?? "an unknown app") (not a music app, or skipped)")
-            }
-            clear()
-            return
+        let bundle = source ?? "pid.\(p.pid ?? 0)"
+        lastSource = source.map { ($0, p.appName ?? Self.appName(for: $0) ?? $0) }
+        let allowed = Self.allowed(bundle, isMusicApp: p.isMusicApp ?? false)
+        if !allowed, lastSkipped != bundle {
+            lastSkipped = bundle
+            NowPlayingLog.write("not showing \(bundle) (not a music app, or skipped)")
         }
         let new = Track(title: title, artist: p.artist ?? "", album: p.album ?? "", duration: p.duration ?? 0,
-                        bundle: bundle, appName: p.appName, isMusic: p.isMusicApp ?? Self.musicApps.contains(bundle ?? ""))
-        let changed = new.key != track?.key
-        playing = p.playing ?? ((p.rate ?? 0) > 0)
-        rate = p.rate ?? (playing ? 1 : 0)
-        if let e = p.elapsed {
-            elapsedAnchor = e
-            anchorDate = p.timestamp.map { Date(timeIntervalSince1970: $0) } ?? Date()
+                        bundle: bundle, appName: p.appName ?? Self.appName(for: bundle),
+                        isMusic: p.isMusicApp ?? Self.musicApps.contains(bundle))
+        let playing = p.playing ?? ((p.rate ?? 0) > 0)
+        var report = Report(track: new, rate: p.rate ?? (playing ? 1 : 0), elapsed: p.elapsed, anchor: Date())
+        if p.elapsed != nil {
             // MediaRemote's timestamp can be well in the past for paused tracks.
-            if !playing { anchorDate = Date() }
+            if playing, let t = p.timestamp { report.anchor = Date(timeIntervalSince1970: t) }
+        } else if let old = sources.sources[bundle]?.info, old.track.key == new.key {
+            report.elapsed = old.elapsed
+            report.anchor = old.anchor
         }
-        if let art = p.artwork, let data = Data(base64Encoded: art), let image = NSImage(data: data) {
-            setArtwork(image)
-            artworkKey = p.artworkKey
-        } else if p.artworkKey == nil, changed {
-            setArtwork(nil)
+        if allowed {
+            if let art = p.artwork, let data = Data(base64Encoded: art), let image = NSImage(data: data) {
+                covers[bundle] = (new.key, p.artworkKey, image)
+            } else if let c = covers[bundle], c.key != new.key {
+                // The same picture carried over to the next song (an album), or none yet.
+                covers[bundle] = p.artworkKey != nil && c.artworkKey == p.artworkKey ? (new.key, c.artworkKey, c.image) : nil
+            }
         }
-        if changed { begin(new) } else { track = new }
+        sources.report(bundle, key: new.key, info: report, playing: playing, allowed: allowed, now: Self.uptime)
+        settle()
+    }
+
+    private static var uptime: TimeInterval { ProcessInfo.processInfo.systemUptime }
+
+    /// Shows what `sources` picked, announces a new song, and comes back when a switch is due.
+    private func settle() {
+        settleWork?.cancel()
+        settleWork = nil
+        let now = Self.uptime
+        let step = sources.step(now: now)
+        switch step.change {
+        case .keep: break
+        case .clear: clear()
+        case .show(let s): show(s)
+        }
+        syncArtwork()
+        if let a = step.announce, a.key == track?.key, let track {
+            NowPlayingLog.write("new song: \(track.appName ?? a.bundle) — \(track.title.prefix(40))")
+            onTrackChange?(track)
+        }
+        if let wake = step.wake {
+            let work = DispatchWorkItem { [weak self] in self?.settle() }
+            settleWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + max(0.01, wake - now), execute: work)
+        }
+    }
+
+    private func show(_ s: NowPlayingSources<Report>.Source) {
+        let r = s.info
+        playing = s.playing
+        rate = r.rate
+        if let e = r.elapsed {
+            elapsedAnchor = e
+            anchorDate = r.anchor
+        }
+        if r.track.key != track?.key || r.track.bundle != track?.bundle { begin(r.track) } else { track = r.track }
+    }
+
+    private func syncArtwork() {
+        guard let t = track, let bundle = t.bundle else { return }
+        let image = covers[bundle].flatMap { $0.key == t.key ? $0.image : nil }
+        if image !== artwork { setArtwork(image) }
+    }
+
+    /// Auto-pause paused this app. Now Playing may not say so while a video is its current app.
+    func autoPaused(_ bundle: String) {
+        sources.held(bundle, now: Self.uptime)
+        settle()
+    }
+
+    /// Auto-pause is playing it again: it comes back as it was, without a banner.
+    func autoResumed(_ bundle: String) {
+        sources.resumed(bundle, now: Self.uptime)
+        settle()
     }
 
     private func begin(_ new: Track) {
@@ -274,8 +342,7 @@ final class NowPlaying {
         trackStarted = Date().addingTimeInterval(-elapsed())
         liked = likedKeys.contains(new.key)
         if new.bundle != previous?.bundle { appIcon = Self.icon(for: new.bundle) }
-        NowPlayingLog.write("track: \(new.appName ?? new.bundle ?? "?") — \(new.title.prefix(40))")
-        onTrackChange?(new)
+        NowPlayingLog.write("track: \(new.appName ?? new.bundle ?? "?") — \(new.title.prefix(40))\(playing ? "" : " (paused)")")
         if ScriptedPlayers.enabled { poll() }
         fetchMissingArtwork(for: generation)
     }
@@ -295,8 +362,9 @@ final class NowPlaying {
                     if let s = await ScriptedPlayers.read(.spotify), s.title == title, let url = s.artworkURL,
                        let (data, _) = try? await URLSession.shared.data(from: url) { image = NSImage(data: data) }
                 }
-                guard let image, self.generation == gen, self.artwork == nil else { return }
+                guard let image, self.generation == gen, self.artwork == nil, let track = self.track else { return }
                 NowPlayingLog.write("artwork: filled in from \(app.scriptName)")
+                if let bundle = track.bundle { self.covers[bundle] = (track.key, nil, image) }
                 self.setArtwork(image)
             }
         }
@@ -325,7 +393,7 @@ final class NowPlaying {
         let bundle = track?.bundle
         Task {
             if useAsSource {
-                guard let s = await ScriptedPlayers.read() else { clear(); return }
+                guard let s = await ScriptedPlayers.read() else { sources.reportNothing(); settle(); return }
                 applyScripted(s)
             } else if bundle == ScriptedPlayers.App.music.rawValue, let s = await ScriptedPlayers.read(.music), s.title == track?.title {
                 if let l = s.liked { liked = l }
@@ -334,19 +402,22 @@ final class NowPlaying {
     }
 
     private func applyScripted(_ s: ScriptedPlayers.State) {
-        guard Self.allowed(s.app.rawValue, isMusicApp: true) else { clear(); return }
-        let new = Track(title: s.title, artist: s.artist, album: s.album, duration: s.duration, bundle: s.app.rawValue,
+        let bundle = s.app.rawValue
+        let new = Track(title: s.title, artist: s.artist, album: s.album, duration: s.duration, bundle: bundle,
                         appName: s.app.scriptName, isMusic: true)
-        playing = s.playing
-        rate = s.playing ? 1 : 0
-        elapsedAnchor = s.position
-        anchorDate = Date()
         if let l = s.liked { liked = l }
-        guard new.key != track?.key else { track = new; return }
-        begin(new)
+        let isNew = sources.sources[bundle]?.key != new.key
+        sources.report(bundle, key: new.key, info: Report(track: new, rate: s.playing ? 1 : 0, elapsed: s.position, anchor: Date()),
+                       playing: s.playing, allowed: Self.allowed(bundle, isMusicApp: true), now: Self.uptime)
+        settle()
+        guard isNew else { return }
         Task {
-            if s.app == .music { setArtwork(await ScriptedPlayers.musicArtwork()) }
-            else if let url = s.artworkURL, let (data, _) = try? await URLSession.shared.data(from: url) { setArtwork(NSImage(data: data)) }
+            var image: NSImage?
+            if s.app == .music { image = await ScriptedPlayers.musicArtwork() }
+            else if let url = s.artworkURL, let (data, _) = try? await URLSession.shared.data(from: url) { image = NSImage(data: data) }
+            guard let image else { return }
+            covers[bundle] = (new.key, nil, image)
+            syncArtwork()
         }
     }
 
@@ -385,6 +456,7 @@ final class NowPlaying {
 
     /// Re-reads after "Show from" or the skipped apps change.
     func sourcesChanged() {
+        sources.reset()
         clear()
         bridge.refresh()
     }

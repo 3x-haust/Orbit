@@ -219,6 +219,39 @@ enum MenuBarLayoutEditorDebug {
                 MainActor.assumeIsolated { MenuBarLog.write("agent plist:\n  " + MenuBarAgentPrefs.describe()) }
                 return
             }
+            // "mb-known" logs which apps count as known to the new-icon watch; "mb-forget:<bundle id>"
+            // drops everything about one app (Orbit's notes and macOS's tracked record) — for test apps.
+            if note.object as? String == "mb-known" {
+                MainActor.assumeIsolated {
+                    let known = MenuBarNewItems.shared.knownApps
+                    MenuBarLog.write("known apps (\(known.count)): \(known.sorted().joined(separator: ", "))")
+                }
+                return
+            }
+            if let cmd = note.object as? String, cmd.hasPrefix("mb-forget:") {
+                let bundle = String(cmd.dropFirst(10))
+                MainActor.assumeIsolated {
+                    MenuBarNewItems.shared.forget(bundle)
+                    MenuBarRemoval.shared.forget(bundle: bundle)
+                    let records: String
+                    do { records = "\(try MenuBarAgentPrefs.removeEntries(bundleID: bundle))" } catch { records = "\(error)" }
+                    if let icons = try? FileManager.default.contentsOfDirectory(at: Storage.dir("MenuBar/icons"), includingPropertiesForKeys: nil) {
+                        for url in icons where url.lastPathComponent.hasPrefix(bundle + "_") { try? FileManager.default.removeItem(at: url) }
+                    }
+                    MenuBarLog.write("mb-forget: \(bundle) forgotten (tracked records removed: \(records))")
+                    Task { await MenuBarItems.shared.refresh(reveal: false) }
+                }
+                return
+            }
+            if note.object as? String == "mb-items" {
+                MainActor.assumeIsolated {
+                    let m = MenuBarItems.shared
+                    for section in MenuBarItems.Section.allCases {
+                        MenuBarLog.write("items \(section.rawValue): \(m.items(in: section).map(\.id).joined(separator: ", "))")
+                    }
+                }
+                return
+            }
             if note.object as? String == "mb-refresh" {
                 MainActor.assumeIsolated { Task { await MenuBarItems.shared.refresh(reveal: true) } }
                 return

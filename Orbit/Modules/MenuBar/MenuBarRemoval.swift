@@ -100,6 +100,12 @@ final class MenuBarRemoval {
         scheduleCommit()
     }
 
+    /// Drops everything Orbit kept about an app (for cleaning up after a test app).
+    func forget(bundle: String) {
+        for (id, r) in removed where r.bundleID == bundle { removed[id] = nil }
+        MenuBarAgentPrefs.forget(bundle)
+    }
+
     private var commitTask: Task<Void, Never>?
 
     private func scheduleCommit() {

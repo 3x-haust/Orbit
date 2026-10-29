@@ -309,6 +309,37 @@ enum MenuBarAgentPrefs {
         MenuBarLog.write("agent prefs: adopted originals for \(adopted.sorted())")
     }
 
+    #if DEBUG
+    /// Takes an app out of the tracked list altogether — its entry and the key paired with it — as if
+    /// it had never had an icon (debug: cleaning up after a throwaway test app). Returns how many went.
+    static func removeEntries(bundleID id: String) throws -> Int {
+        guard let plist = export() else { throw Failure.unreadable }
+        guard let raw = plist[key] else { throw Failure.unknownShape }
+        let format: Format?
+        let value: Any
+        if let data = raw as? Data {
+            guard let decoded = decode(data) else { throw Failure.unknownShape }
+            (value, format) = (decoded.0, decoded.1)
+        } else {
+            (value, format) = (raw, nil)
+        }
+        guard let list = value as? [Any] else { throw Failure.unknownShape }
+        let kept = list.filter { v in (v as? [String: Any]).map { bundleID(of: $0) != id } ?? true }
+        let dropped = list.count - kept.count
+        guard dropped > 0 else { return 0 }
+        let stored: Any
+        if let format {
+            guard let data = encode(kept, format) else { throw Failure.writeFailed }
+            stored = data
+        } else {
+            stored = kept
+        }
+        guard store(stored, whole: plist) else { throw Failure.writeFailed }
+        MenuBarLog.write("agent prefs: removed \(dropped) tracked record(s) of \(id)")
+        return dropped
+    }
+    #endif
+
     /// Puts back every switch Orbit flipped. Returns whether MenuBarAgent needs a restart.
     @discardableResult
     static func restoreOriginals() -> Bool {

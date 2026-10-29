@@ -423,6 +423,7 @@ struct MenuBarPage: View {
     @AppStorage(Pref.hiderStyle) private var hiderStyle = "bar"
     @AppStorage(Pref.hideSystemOverflow) private var hideOverflow = true
     @AppStorage(Pref.hiderIcon) private var hiderIcon = "sparkle"
+    @AppStorage(Pref.hideNewItems) private var hideNew = true
     @Bindable private var removal = MenuBarRemoval.shared
 
     private var barbeeRunning: Bool { NSWorkspace.shared.runningApplications.contains { $0.localizedName == "Barbee" } }
@@ -474,6 +475,12 @@ struct MenuBarPage: View {
                         }
                         .animation(.spring(duration: 0.25), value: hiderIcon)
                         .onChange(of: hiderIcon) { MenuBarHider.shared.updateToggleImage() }
+                    }
+                    if removal.active {
+                        RowDivider()
+                        SettingsRow(title: "Hide new icons automatically", subtitle: "When an app puts an icon in the menu bar for the first time, it goes straight to Hidden.", symbol: "eye.slash") {
+                            Toggle("", isOn: $hideNew).toggleStyle(.switch).labelsHidden()
+                        }
                     }
                     if !removal.active {
                         RowDivider()

@@ -27,6 +27,7 @@ final class MenuBarHider: NSObject {
         // ✦ and ✦✦ are one pair now.
         if Pref.defaults.string(forKey: Pref.hiderIcon) == "sparkles" { Pref.defaults.set("sparkle", forKey: Pref.hiderIcon) }
         if Pref.defaults.bool(forKey: Pref.hiderEnabled) {
+            MenuBarNewItems.shared.start()
             guard toggle == nil else { return }
             let t = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
             t.autosaveName = "OrbitHiderToggle"
@@ -59,6 +60,7 @@ final class MenuBarHider: NSObject {
             }
             OverflowCover.shared.apply()
         } else {
+            MenuBarNewItems.shared.stop()
             Task { await MenuBarRemoval.shared.restoreAll() }
             OverflowCover.shared.apply()
             HiddenBar.shared.hide()

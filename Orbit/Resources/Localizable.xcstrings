@@ -836,9 +836,6 @@
     "&quot;": {
       "extractionState": "manual"
     },
-    ") (not a music app, or skipped)": {
-      "extractionState": "manual"
-    },
     ") by AppleScript": {
       "extractionState": "manual"
     },
@@ -12151,6 +12148,17 @@
         }
       }
     },
+    "Hid a new menu bar icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 메뉴 막대 아이콘을 숨겼어요"
+          }
+        }
+      }
+    },
     "Hidden": {
       "extractionState": "manual",
       "localizations": {
@@ -12337,6 +12345,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "메뉴 막대 아이콘 숨기기"
+          }
+        }
+      }
+    },
+    "Hide new icons automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 아이콘은 숨김으로"
           }
         }
       }
@@ -29656,6 +29675,17 @@
         }
       }
     },
+    "When an app puts an icon in the menu bar for the first time, it goes straight to Hidden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱이 메뉴 막대에 처음 아이콘을 띄우면 바로 숨김으로 보내요."
+          }
+        }
+      }
+    },
     "When it’s already in that language": {
       "extractionState": "manual",
       "localizations": {
@@ -31646,6 +31676,12 @@
     "mb-allow:<bundle id>:<0|1>[:agent|cc|none]": {
       "extractionState": "manual"
     },
+    "mb-forget:": {
+      "extractionState": "manual"
+    },
+    "mb-forget:<bundle id>": {
+      "extractionState": "manual"
+    },
     "mb-reveal:": {
       "extractionState": "manual"
     },
@@ -31694,6 +31730,9 @@
     "menubar.calendarStyle": {
       "extractionState": "manual"
     },
+    "menubar.hideNewItems": {
+      "extractionState": "manual"
+    },
     "menubar.hideSystemOverflow": {
       "extractionState": "manual"
     },
@@ -31709,10 +31748,16 @@
     "menubar.hiderStyle": {
       "extractionState": "manual"
     },
+    "menubar.knownApps": {
+      "extractionState": "manual"
+    },
     "menubar.launcherStubborn": {
       "extractionState": "manual"
     },
     "menubar.launcherWrites": {
+      "extractionState": "manual"
+    },
+    "menubar.newItemsWatching": {
       "extractionState": "manual"
     },
     "menubar.showOrbitIcon": {

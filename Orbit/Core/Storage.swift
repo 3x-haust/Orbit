@@ -91,6 +91,8 @@ enum Pref {
     static let hiderAutoCollapse = "menubar.hiderAutoCollapse"
     static let hiderStyle = "menubar.hiderStyle"
     static let hiderAlways = "menubar.hiderAlways"
+    /// Icons from apps Orbit has never seen go straight to Hidden (see MenuBarNewItems).
+    static let hideNewItems = "menubar.hideNewItems"
     /// The hider button's look: "chevron" (‹ › showing the state) or one of MenuBarHider.icons.
     static let hiderIcon = "menubar.hiderIcon"
     static let fanMode = "fans.mode"
@@ -143,6 +145,7 @@ enum Pref {
             hiderAutoCollapse: 10,
             hiderStyle: "bar",
             hiderAlways: false,
+            hideNewItems: true,
             fanMode: "auto",
             fanFixedLevel: 0.5,
             fanCurveLow: 55.0,

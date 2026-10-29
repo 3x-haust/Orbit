@@ -169,6 +169,7 @@ final class MediaDucker {
         hold = Hold(bundle: m.bundle, key: m.key, at: Date(), cause: cause)
         music?.playing = false
         log("pausing \(m.bundle) because \(cause) started")
+        NowPlaying.shared.autoPaused(m.bundle)
         let isTarget = other == nil
         Task { await send(play: false, to: m.bundle, isTarget: isTarget) }
     }
@@ -186,6 +187,7 @@ final class MediaDucker {
                 }
             }
             log("\(h.cause) stopped — resuming \(h.bundle)")
+            NowPlaying.shared.autoResumed(h.bundle)
             await send(play: true, to: h.bundle, isTarget: isTarget)
         }
     }

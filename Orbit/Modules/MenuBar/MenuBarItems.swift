@@ -859,6 +859,27 @@ final class MenuBarItems {
         Set(MenuBarHosted.read(ownFrames: MenuBarHider.shared.ownFrames).slots.compactMap { NSRunningApplication(processIdentifier: $0.pid)?.bundleIdentifier })
     }
 
+    /// Every app with a menu bar item right now, by bundle id (or name) — read the long way, through
+    /// each app's own Accessibility tree, so it also finds items MenuBarAgent doesn't list.
+    static func bundlesWithItems() -> Set<String> {
+        Set(read().filter { $0.button == nil }.map { MenuBarRemoval.bundleID(ofItem: $0.id) })
+    }
+
+    /// A newly arrived app's icons as they are on the bar right now, photographed first so the Hidden
+    /// row can show them once they're switched off. Empty while the app hasn't any to read yet.
+    func newItems(of bundle: String) async -> [Item] {
+        let raw = Self.read().filter { $0.button == nil && $0.mobility == .free && MenuBarRemoval.bundleID(ofItem: $0.id) == bundle }
+        guard !raw.isEmpty else { return [] }
+        await capture(raw)
+        let start = (items.filter { $0.section == .hidden }.map(\.order).max() ?? 0) + 1
+        return raw.sorted { $0.frame.minX < $1.frame.minX }.enumerated().map { k, r in
+            known[r.id] = .hidden
+            return Item(id: r.id, name: r.name, appIcon: r.appIcon, element: r.element, button: nil, frame: r.frame,
+                        section: .hidden, shown: r.shown, order: start + CGFloat(k), image: images[r.id], mobility: r.mobility,
+                        identifier: r.identifier)
+        }
+    }
+
     /// MenuBarAgent's slots as last read.
     private(set) static var lastLayout = MenuBarHosted.Layout.empty
 

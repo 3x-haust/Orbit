@@ -13,15 +13,24 @@ enum Toast {
     }
 
     /// `level`: above the capture overlay (screen-saver level) when shown from it.
-    static func show(_ message: String, symbol: String = "checkmark.circle.fill", detail: String? = nil, level: NSWindow.Level = .statusBar) {
+    /// `action`: the toast takes a click (with a small `actionTitle` pill) and stays up a little longer.
+    static func show(_ message: String, symbol: String = "checkmark.circle.fill", detail: String? = nil, level: NSWindow.Level = .statusBar,
+                     actionTitle: String? = nil, action: (() -> Void)? = nil) {
         let panel = self.panel ?? FloatingPanel(contentRect: .zero, focusable: false)
         self.panel = panel
         panel.level = level
-        panel.ignoresMouseEvents = true
+        panel.ignoresMouseEvents = action == nil
         panel.hasShadow = false
 
-        let view = ToastView(message: message.loc, symbol: symbol, detail: detail?.loc)
-        let host = NSHostingView(rootView: view.orbitTint())
+        var view = ToastView(message: message.loc, symbol: symbol, detail: detail?.loc)
+        if let action {
+            view.actionTitle = (actionTitle ?? "Show").loc
+            view.action = {
+                dismiss()
+                action()
+            }
+        }
+        let host = FirstMouseHostingView(rootView: view.orbitTint())
         let size = host.fittingSize
         // A fixed frame; letting the hosting view also size the window loops layout until AppKit aborts.
         host.sizingOptions = []
@@ -35,7 +44,7 @@ enum Toast {
         hideWork?.cancel()
         let work = DispatchWorkItem { panel.dismiss() }
         hideWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + (action == nil ? 1.6 : 4), execute: work)
     }
 }
 
@@ -43,6 +52,8 @@ private struct ToastView: View {
     let message: String
     let symbol: String
     let detail: String?
+    var actionTitle: String? = nil
+    var action: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: Space.compact) {
@@ -58,10 +69,21 @@ private struct ToastView: View {
             // Measured at its natural width: a flexible frame here let the window come out too
             // narrow and cut Korean words down to "복…".
             .fixedSize()
+            if let actionTitle {
+                Text(actionTitle)
+                    .font(.orbitCaption.weight(.semibold))
+                    .foregroundStyle(Palette.accent)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 3)
+                    .background(Capsule().fill(Palette.accent.opacity(0.14)))
+                    .fixedSize()
+            }
         }
         .padding(.horizontal, Space.standard)
         .padding(.vertical, Space.compact + 2)
         .glassEffect(.regular, in: Capsule())
+        .contentShape(Capsule())
+        .onTapGesture { action?() }
         .padding(Space.standard)
     }
 }
