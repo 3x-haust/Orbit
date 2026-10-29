@@ -89,7 +89,7 @@ final class NotchCenter {
 
     struct Config: Equatable {
         var scale: CGFloat = 1
-        var radius: CGFloat = 22
+        var radius: CGFloat = 30
         var shadow = true
         var haptics = true
         var hoverOpen = true
@@ -107,7 +107,7 @@ final class NotchCenter {
             let d = Pref.defaults
             var c = Config()
             c.scale = CGFloat(min(max(d.double(forKey: NotchPrefs.scale), 0.85), 1.25))
-            c.radius = CGFloat(min(max(d.double(forKey: NotchPrefs.radius), 10), 34))
+            c.radius = CGFloat(min(max(d.double(forKey: NotchPrefs.radius), 16), 44))
             c.shadow = d.bool(forKey: NotchPrefs.shadow)
             c.haptics = d.bool(forKey: NotchPrefs.haptics)
             c.hoverOpen = d.bool(forKey: NotchPrefs.hoverOpen)

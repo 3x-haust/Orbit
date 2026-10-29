@@ -52,10 +52,12 @@ enum NotchGeometry {
 
     static func radius(_ phase: NotchCenter.Phase, config c: NotchCenter.Config) -> CGFloat {
         switch phase {
-        case .hidden, .idle, .ears, .hud: restRadius
-        case .peek: min(c.radius, 20)
-        case .banner: c.radius
-        case .expanded: c.radius + 4
+        case .hidden, .idle: restRadius
+        // Ears and HUDs end a little rounder than the housing, so they read as one pill.
+        case .ears, .hud: restRadius + 3
+        case .peek: min(c.radius, 28)
+        case .banner: c.radius + 4
+        case .expanded: c.radius + 10
         }
     }
 

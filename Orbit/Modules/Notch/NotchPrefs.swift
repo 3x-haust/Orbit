@@ -49,7 +49,7 @@ enum NotchPrefs {
         Pref.defaults.register(defaults: [
             enabled: true,
             hoverOpen: true, openDelay: 0.12, closeDelay: 0.35, swipe: true, haptics: true,
-            scale: 1.0, radius: 22.0, shadow: true, screens: "notch", hideFullScreen: true,
+            scale: 1.0, radius: 30.0, shadow: true, screens: "notch", hideFullScreen: true,
             tabHome: true, tabShelf: true, tabMirror: true, tabTimer: true, tabClipboard: true,
             liveMusic: true, liveCharging: true, liveTimer: true, liveRecording: true, liveAwake: true,
             liveFocus: true, liveDownloads: false, liveBluetooth: false,
