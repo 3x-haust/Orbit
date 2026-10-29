@@ -1,0 +1,10 @@
+{
+  "Right": "오른쪽",
+  "Left": "왼쪽",
+  "Top": "위",
+  "Bottom": "아래",
+  "Shelf on the %@ edge": "%@ 가장자리에 선반 두기",
+  "Drag a file to that edge of any display and the shelf slides out of it.": "파일을 그 화면 끝으로 끌어가면 선반이 거기서 스르륵 나와요.",
+  "Shelf position": "선반 위치",
+  "Which edge of the screen it comes out of.": "화면 어느 쪽 끝에서 나올지 골라요."
+}

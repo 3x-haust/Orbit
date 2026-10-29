@@ -1,0 +1,23 @@
+{
+  "My ring": "내 링",
+  "Your own layout, saved as you edit": "직접 꾸민 배치 · 바꿀 때마다 저장돼요",
+  "Saved preset": "저장한 프리셋",
+  "My preset": "내 프리셋",
+  "Update to Current Ring": "지금 링으로 바꾸기",
+  "Save as preset": "프리셋으로 저장",
+  "Keep the ring as it is now": "지금 링을 그대로 저장해요",
+  "Save the current ring as a preset": "지금 링을 프리셋으로 저장",
+  "Preset name": "프리셋 이름",
+  "Rename preset": "프리셋 이름 바꾸기",
+  "Preset applied": "프리셋 적용됨",
+  "Undo": "되돌리기",
+  "Open with a mouse button": "마우스 버튼으로 링 열기",
+  "Hold the button you pick to open the ring. A quick click still does what it always did.": "고른 버튼을 길게 누르면 링이 열려요. 짧게 누르면 원래 기능 그대로예요.",
+  "Back button": "뒤로 버튼",
+  "Forward button": "앞으로 버튼",
+  "The wheel — press it down": "휠을 꾹 누르는 버튼",
+  "Side button nearer your wrist": "옆면, 손목 쪽 버튼",
+  "Side button further forward": "옆면, 앞쪽 버튼",
+  "Back and forward are the two buttons on the side of most mice.": "뒤로·앞으로는 대부분 마우스 옆면에 있는 두 버튼이에요.",
+  "Turn it on to pick a button.": "켜면 버튼을 고를 수 있어요."
+}

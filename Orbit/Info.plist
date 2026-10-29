@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Orbit</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.zip-archive</string>
+				<string>org.7-zip.7-zip-archive</string>
+				<string>com.rarlab.rar-archive</string>
+				<string>public.tar-archive</string>
+				<string>org.gnu.gnu-zip-archive</string>
+				<string>org.gnu.gnu-zip-tar-archive</string>
+				<string>public.bzip2-archive</string>
+				<string>public.tar-bzip2-archive</string>
+				<string>org.tukaani.xz-archive</string>
+				<string>org.tukaani.tar-xz-archive</string>
+				<string>public.lzip-archive</string>
+				<string>org.tukaani.lzma-archive</string>
+				<string>com.facebook.zstandard-archive</string>
+				<string>public.z-archive</string>
+				<string>public.cpio-archive</string>
+				<string>public.archive.lha</string>
+				<string>com.microsoft.cab</string>
+				<string>public.archive</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Orbit uses this to switch Dark Mode and empty the Trash when you ask it to.</string>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Orbit routes each app's sound through its volume and EQ controls. Nothing is recorded.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Orbit shows your events in the menu bar calendar. They never leave this Mac.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Orbit uses the camera on this Mac to recognize your face and unlock the apps you locked. Nothing leaves your Mac.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Orbit</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Orbit records your microphone only while you're making a screen recording with it turned on.</string>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>Orbit needs screen access to take screenshots and recognize text on screen.</string>
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Compress with Orbit</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>compressWithOrbit</string>
+			<key>NSPortName</key>
+			<string>Orbit</string>
+			<key>NSRequiredContext</key>
+			<dict/>
+			<key>NSSendFileTypes</key>
+			<array>
+				<string>public.item</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Extract with Orbit</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>extractWithOrbit</string>
+			<key>NSPortName</key>
+			<string>Orbit</string>
+			<key>NSRequiredContext</key>
+			<dict/>
+			<key>NSSendFileTypes</key>
+			<array>
+				<string>public.zip-archive</string>
+				<string>org.7-zip.7-zip-archive</string>
+				<string>com.rarlab.rar-archive</string>
+				<string>public.tar-archive</string>
+				<string>org.gnu.gnu-zip-archive</string>
+				<string>org.gnu.gnu-zip-tar-archive</string>
+				<string>public.bzip2-archive</string>
+				<string>public.tar-bzip2-archive</string>
+				<string>org.tukaani.xz-archive</string>
+				<string>org.tukaani.tar-xz-archive</string>
+				<string>public.lzip-archive</string>
+				<string>org.tukaani.lzma-archive</string>
+				<string>com.facebook.zstandard-archive</string>
+				<string>public.z-archive</string>
+				<string>public.cpio-archive</string>
+				<string>public.archive.lha</string>
+				<string>com.microsoft.cab</string>
+				<string>public.archive</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

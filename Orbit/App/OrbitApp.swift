@@ -1,0 +1,313 @@
+import SwiftUI
+import QuartzCore
+import KeyboardShortcuts
+
+@main
+struct OrbitApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+
+    var body: some Scene {
+        // The planet is an AppKit status item (OrbitPlanet), only there when the user wants it, so
+        // the app's one scene is an empty, never-opened Settings.
+        Settings { EmptyView() }
+            .commands {
+                CommandGroup(replacing: .appSettings) {
+                    Button("Settings…") { MainWindow.show(.general) }.keyboardShortcut(",")
+                }
+            }
+    }
+}
+
+/// Orbit's planet in the menu bar — off by default (General); the ✦, the ring and shortcuts
+/// reach everything without it. Added and removed outright, so no empty slot stays behind.
+@MainActor
+enum OrbitPlanet {
+    private static var item: NSStatusItem?
+
+    static func apply() {
+        let show = Pref.defaults.bool(forKey: Pref.showOrbitIcon)
+        if show, item == nil {
+            let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+            // The name SwiftUI used to give it, so it comes back where the user left it.
+            item.autosaveName = "Item-0"
+            item.menu = NSHostingMenu(rootView: MenuContent())
+            self.item = item
+            refreshIcon()
+        } else if !show, let item {
+            NSStatusBar.system.removeStatusItem(item)
+            self.item = nil
+        }
+    }
+
+    /// The dot on the planet while the Mac is kept awake.
+    static func refreshIcon() {
+        guard let item else { return }
+        item.button?.image = KeepAwake.shared.isOn ? MenuBarIcon.awake : MenuBarIcon.image
+        withObservationTracking { _ = KeepAwake.shared.isOn } onChange: {
+            DispatchQueue.main.async { MainActor.assumeIsolated { refreshIcon() } }
+        }
+    }
+}
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        // SwiftUI's MenuBarExtra item; keep Orbit's mark next to the calendar on the right.
+        Pref.seedMenuBarPosition("Item-0", 120)
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Pref.register()
+        _ = Permissions.shared
+        ClipboardStore.shared.start()
+        Paster.start()
+        SnippetEngine.shared.start()
+        Vault.shared.start()
+        AppIndex.shared.start()
+        MouseTrigger.shared.start()
+        HotCorners.shared.start()
+        AppsCatalog.shared.start()
+        Shelf.shared.startEdgeReveal()
+        KeepAwake.shared.recoverIfNeeded()
+        TranslateController.shared.start()
+        AudioMixer.shared.start()
+        MenuBarHider.shared.apply()
+        OrbitPlanet.apply()
+        MenuBarCalendar.shared.apply()
+        FanControl.shared.start()
+        BatteryManager.shared.start()
+        DisplayManager.shared.start() // only when Displays is on
+        FaceUnlock.start()
+        ScrollReverser.shared.start()
+        MacUnlock.shared.start()
+        MenuBarRunner.shared.start()
+        Archives.shared.start()
+        NowPlaying.shared.update() // listens only if a Now Playing feature is on
+        Updater.shared.start() // first look 30s in, then every 6 hours
+        // The Storage page opens with last time's breakdown; refresh it quietly once Orbit has settled in.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 45) { StorageModel.shared.refreshInBackground() }
+        // The panels people open by shortcut, built ahead (once launch has settled) so even the first
+        // open shows at once.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            LauncherPanel.shared.prewarm()
+            ClipboardPanel.shared.prewarm()
+            AppsPanel.shared.prewarm()
+        }
+        registerShortcuts()
+        Overlaps.shared.refresh()
+        #if DEBUG
+        DebugHook.install()
+        #endif
+
+        // Accessibility may be granted later — start the mouse trigger once it is.
+        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated {
+                MouseTrigger.shared.start()
+                TranslateController.shared.start() // key monitoring starts working once Accessibility is granted
+                FanControl.shared.refresh() // the helper may have just been allowed in System Settings
+                Overlaps.shared.refresh()
+            }
+        }
+
+        if !Pref.defaults.bool(forKey: Pref.onboarded) {
+            OnboardingWindow.show()
+        }
+    }
+
+    /// Archives double-clicked in Finder once Orbit opens them (Archives page).
+    func application(_ application: NSApplication, open urls: [URL]) {
+        Archives.shared.open(urls)
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        AudioMixer.shared.shutdown() // never leave an app's audio muted behind a dead tap
+    }
+
+    /// ⌘Q or Dock → Quit while the window is open only closes the window: Orbit keeps running in
+    /// the menu bar. Quitting for real goes through "Quit Orbit" in the menu bar menu (or General).
+    /// Logging out, restarting and shutting down always quit.
+    /// Closed-lid mode must never outlive Orbit.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if !AppQuit.confirmed, !AppQuit.systemIsEnding, MainWindow.shared.isOpen {
+            MainWindow.shared.close()
+            return .terminateCancel
+        }
+        guard KeepAwake.shared.closedLidActive else { return .terminateNow }
+        Task {
+            await KeepAwake.shared.restoreForQuit()
+            sender.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
+    /// Clicking Orbit in the Dock or Finder while it's running opens the app window.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        MainWindow.show()
+        return true
+    }
+
+    private func registerShortcuts() {
+        KeyboardShortcuts.onKeyDown(for: .ring) { OrbitRing.shared.open(hold: true) }
+        KeyboardShortcuts.onKeyUp(for: .ring) { OrbitRing.shared.release() }
+
+        for action in OrbitAction.allCases {
+            guard let name = action.shortcutName else { continue }
+            KeyboardShortcuts.onKeyDown(for: name) { action.perform() }
+        }
+    }
+}
+
+private struct MenuContent: View {
+    private var capture: CaptureService { .shared }
+
+    var body: some View {
+        Button("Open Orbit") { MainWindow.show() }
+        Divider()
+        Button("Open Orbit Ring") { OrbitRing.shared.open(hold: false) }
+        Button("Open Launcher") { LauncherPanel.shared.show() }
+        Button("Clipboard History") { ClipboardPanel.shared.show() }
+        Divider()
+        Section("Capture") {
+            ForEach([OrbitAction.captureArea, .captureWindow, .captureScreen, .captureText]) { a in
+                Button { a.perform() } label: { Label(a.title, systemImage: a.symbol) }
+            }
+            if !capture.recent.isEmpty {
+                Menu("Recent Captures") {
+                    ForEach(capture.recent.prefix(8)) { c in
+                        Button(c.date.formatted(date: .omitted, time: .shortened) + " · " + c.fileURL.deletingPathExtension().lastPathComponent) {
+                            EditorWindow.open(image: c.image, fileURL: c.fileURL)
+                        }
+                    }
+                    Divider()
+                    Button("Show in Finder") { NSWorkspace.shared.open(CaptureService.dir) }
+                }
+            }
+        }
+        Divider()
+        Menu(KeepAwake.shared.isOn ? "Awake · " + KeepAwake.describe(KeepAwake.shared.session ?? .indefinite) : "Keep Mac Awake") {
+            if KeepAwake.shared.isOn {
+                Button("Turn Off") { KeepAwake.shared.stop() }
+                Divider()
+            }
+            Button("15 Minutes") { KeepAwake.shared.start(for: 900) }
+            Button("1 Hour") { KeepAwake.shared.start(for: 3600) }
+            Button("4 Hours") { KeepAwake.shared.start(for: 14400) }
+            Button("Until I Turn It Off") { KeepAwake.shared.start(for: nil) }
+            Divider()
+            Toggle("Closed-Lid Mode", isOn: Binding(get: { KeepAwake.closedLid }, set: { KeepAwake.shared.setClosedLid($0) }))
+            Button("More Options…") { MainWindow.show(.awake) }
+        }
+        Button("Shelf") { Shelf.shared.toggle() }
+        Button("Pick Color") { SystemActions.pickColor() }
+        Toggle("Pause Clipboard", isOn: Binding(get: { ClipboardStore.shared.paused },
+                                                set: { $0 ? ClipboardStore.shared.pause(for: nil) : ClipboardStore.shared.resume() }))
+        Divider()
+        Button("Settings…") { MainWindow.show(.general) }.keyboardShortcut(",")
+        Button("Quit Orbit") { AppQuit.now() }.keyboardShortcut("q")
+    }
+}
+
+/// The Orbit mark; gains its satellite while Keep Awake runs.
+/// Template menu bar glyph: the Orbit mark, rendered once and tinted by the menu bar.
+enum MenuBarIcon {
+    @MainActor static let image = render(dot: false)
+    @MainActor static let awake = render(dot: true)
+
+    @MainActor private static func render(dot: Bool) -> NSImage {
+        let renderer = ImageRenderer(content: OrbitMark(size: 20, color: .black, dot: dot).environment(\.colorScheme, .light))
+        renderer.scale = 2
+        let image = renderer.nsImage ?? NSImage()
+        image.size = NSSize(width: 20, height: 20)
+        image.isTemplate = true
+        return image
+    }
+}
+
+enum AppQuit {
+    @MainActor static var confirmed = false
+
+    /// Quit for real (menu bar menu, General page).
+    @MainActor static func now() {
+        confirmed = true
+        NSApp.terminate(nil)
+    }
+
+    /// A quit Apple event that carries a reason comes from logout, restart or shutdown.
+    static var systemIsEnding: Bool {
+        guard let event = NSAppleEventManager.shared().currentAppleEvent,
+              event.eventClass == kCoreEventClass, event.eventID == kAEQuitApplication else { return false }
+        return event.attributeDescriptor(forKeyword: kAEQuitReason) != nil
+    }
+}
+
+#if DEBUG
+/// Lets scripts open any surface for visual checks:
+///   swift -e 'import Foundation; DistributedNotificationCenter.default().post(name: .init("com.lyu.orbit.debug"), object: "ring")'
+enum DebugHook {
+    @MainActor static func install() {
+        DistributedNotificationCenter.default().addObserver(forName: .init("com.lyu.orbit.debug"), object: nil, queue: .main) { note in
+            let command = note.object as? String ?? ""
+            MainActor.assumeIsolated { run(command) }
+        }
+    }
+
+    @MainActor static func run(_ command: String) {
+        switch command {
+        case "ring": OrbitRing.shared.open(hold: true) // hold: no dwell or flick fires while a script inspects it
+        case "launcher": LauncherPanel.shared.show()
+        case "clipboard": ClipboardPanel.shared.show()
+        case "onboarding": OnboardingWindow.show()
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        case "system": NSApp.appearance = nil
+        case "close": OrbitRing.shared.close(); LauncherPanel.shared.hide(); ClipboardPanel.shared.hide(); AppsPanel.shared.hide()
+        case let c where c.hasPrefix("fan:"):
+            FanControl.shared.mode = FanControl.Mode(rawValue: String(c.dropFirst(4))) ?? .auto
+        case let c where c.hasPrefix("page:"):
+            MainWindow.show(Page(rawValue: String(c.dropFirst(5))) ?? .home)
+        case let c where c.hasPrefix("type:"):
+            LauncherPanel.shared.debugType(String(c.dropFirst(5)))
+        case let c where c.hasPrefix("editor:"):
+            if let image = NSImage(contentsOfFile: String(c.dropFirst(7))) { EditorWindow.open(image: image, fileURL: nil) }
+        case "apps": AppsPanel.shared.show()
+        case let c where c.hasPrefix("movable:"):
+            NSApp.windows.first { $0.title == "Orbit" }?.isMovableByWindowBackground = c.hasSuffix("1")
+        case "bench-layout":
+            // Lays the main window out 20 times at alternating widths: what a resize or a
+            // relayout costs.
+            guard let w = NSApp.windows.first(where: { $0.title == "Orbit" && $0.isVisible }) else { break }
+            let original = w.frame
+            let started = CACurrentMediaTime()
+            for i in 0..<20 {
+                var f = original
+                f.size.width += i % 2 == 0 ? 8 : 0
+                w.setFrame(f, display: true)
+                w.contentView?.layoutSubtreeIfNeeded()
+                w.displayIfNeeded()
+            }
+            w.setFrame(original, display: true)
+            let ms = (CACurrentMediaTime() - started) * 1000 / 20
+            let line = "\(Date()) bench-layout movable=\(w.isMovableByWindowBackground): \(String(format: "%.1f", ms))ms per layout\n"
+            let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Orbit/perf.log")
+            if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
+            else { try? Data(line.utf8).write(to: url) }
+        case let c where c.hasPrefix("time:"):
+            // How long a command takes until its window has drawn (two run-loop turns later).
+            let inner = String(c.dropFirst(5))
+            let started = CACurrentMediaTime()
+            run(inner)
+            DispatchQueue.main.async {
+                CATransaction.flush()
+                DispatchQueue.main.async {
+                    let ms = (CACurrentMediaTime() - started) * 1000
+                    let line = "\(Date()) \(inner): \(String(format: "%.1f", ms))ms\n"
+                    let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Orbit/perf.log")
+                    if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
+                    else { try? Data(line.utf8).write(to: url) }
+                }
+            }
+        default: break
+        }
+    }
+}
+#endif

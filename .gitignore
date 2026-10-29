@@ -1,0 +1,22 @@
+# Xcode / build output
+build/
+build-*/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+Orbit.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/configuration/
+
+# Release artifacts
+dist/
+*.zip
+*.dmg
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.pyc
