@@ -92,7 +92,7 @@ private struct OSDView: View {
         }
         .padding(.horizontal, 18)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: model.caption == nil ? 32 : 26, style: .continuous))
+        .orbitGlass(in: RoundedRectangle(cornerRadius: model.caption == nil ? 32 : 26, style: .continuous))
         .padding(6)
         .environment(\.colorScheme, .dark)
     }

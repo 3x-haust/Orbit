@@ -63,7 +63,7 @@ private struct QuickDisplaysView: View {
         .padding(Space.standard)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(RoundedRectangle(cornerRadius: Radius.panel, style: .continuous).fill(Palette.canvas.opacity(0.92)))
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
+        .orbitGlass(in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
     }
 }
 

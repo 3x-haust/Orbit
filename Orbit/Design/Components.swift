@@ -45,6 +45,22 @@ struct PanelShell: ViewModifier {
 
 extension View {
     func panelShell(radius: CGFloat = Radius.panel) -> some View { modifier(PanelShell(radius: radius)) }
+
+    /// Liquid Glass on macOS 26; before it, a HUD material in the same shape with a hairline edge.
+    @ViewBuilder
+    func orbitGlass<S: Shape>(interactive: Bool = false, tint: Color? = nil, in shape: S) -> some View {
+        if #available(macOS 26, *) {
+            glassEffect(interactive ? Glass.regular.tint(tint).interactive() : Glass.regular.tint(tint), in: shape)
+        } else {
+            background {
+                ZStack {
+                    VisualEffect(material: .hudWindow).clipShape(shape)
+                    if let tint { shape.fill(tint) }
+                }
+            }
+            .overlay { shape.stroke(Palette.hairline, lineWidth: 0.5) }
+        }
+    }
 }
 
 /// A single keycap glyph, e.g. ⌘ or K.

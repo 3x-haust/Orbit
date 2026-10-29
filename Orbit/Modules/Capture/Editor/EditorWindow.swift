@@ -318,7 +318,7 @@ struct EditorView: View {
                         .overlay(Label("Drop to put it next to this one", systemImage: "rectangle.split.2x1")
                             .font(.system(size: 13, weight: .semibold)).foregroundStyle(.white)
                             .padding(.horizontal, 14).padding(.vertical, 8)
-                            .glassEffect(.regular, in: Capsule()))
+                            .orbitGlass(in: Capsule()))
                         .padding(12)
                         .allowsHitTesting(false)
                 }
@@ -376,7 +376,7 @@ struct EditorView: View {
                 Text("\(Int((model.zoom * 100).rounded()))%")
                     .font(.system(size: 11, weight: .semibold).monospacedDigit()).foregroundStyle(.white)
                     .padding(.horizontal, 10).frame(height: 24)
-                    .glassEffect(.regular, in: Capsule())
+                    .orbitGlass(in: Capsule())
             }
             .buttonStyle(.plain)
             .hoverHint("Actual fit · ⌘0".loc, below: false)
@@ -494,7 +494,7 @@ struct EditorView: View {
             liveText
         }
         .padding(ToolButton.inset)
-        .glassEffect(.regular, in: Capsule())
+        .orbitGlass(in: Capsule())
     }
 
     /// One button per group: a click picks the group's last tool. Grouped buttons carry a small
@@ -548,7 +548,7 @@ struct EditorView: View {
                     .contentShape(Circle())
             }
             .buttonStyle(.plain)
-            .glassEffect(.regular, in: Circle())
+            .orbitGlass(in: Circle())
             .hoverHint("Color".loc)
             .popover(isPresented: $colorsOpen, arrowEdge: .bottom) {
                 swatches { colorsOpen = false }.padding(8)
@@ -557,7 +557,7 @@ struct EditorView: View {
             swatches(onPick: {})
                 .padding(.horizontal, 6)
                 .frame(height: 34)
-                .glassEffect(.regular, in: Capsule())
+                .orbitGlass(in: Capsule())
         }
     }
 

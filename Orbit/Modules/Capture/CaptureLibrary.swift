@@ -485,7 +485,7 @@ private struct TileButton: View {
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: Circle())
+        .orbitGlass(interactive: true, in: Circle())
         .hoverHint(hint.loc)
         .accessibilityLabel(hint.loc)
     }

@@ -81,7 +81,7 @@ private struct ToastView: View {
         }
         .padding(.horizontal, Space.standard)
         .padding(.vertical, Space.compact + 2)
-        .glassEffect(.regular, in: Capsule())
+        .orbitGlass(in: Capsule())
         .contentShape(Capsule())
         .onTapGesture { action?() }
         .padding(Space.standard)

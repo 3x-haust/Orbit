@@ -117,7 +117,7 @@ private struct HiddenBarView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // See-through like the menu bar itself (macOS 26 glass), not a solid panel.
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .orbitGlass(in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

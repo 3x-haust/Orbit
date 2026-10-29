@@ -64,7 +64,7 @@ struct AppsView: View {
         }
         .padding(.horizontal, 16)
         .frame(width: 440, height: 42)
-        .glassEffect(.regular, in: Capsule())
+        .orbitGlass(in: Capsule())
     }
 
     private var categoryChips: some View {
@@ -311,7 +311,7 @@ private struct AppInfoCard: View {
         }
         .padding(22)
         .frame(width: 380)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .orbitGlass(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(alignment: .topTrailing) {
             Button(action: close) { Image(systemName: "xmark").font(.system(size: 11, weight: .bold)).foregroundStyle(.secondary).padding(14) }
                 .buttonStyle(.plain)

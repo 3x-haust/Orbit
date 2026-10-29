@@ -137,7 +137,7 @@ struct NowPlayingWidgetView: View {
             }
             .opacity(style.backgroundOpacity)
         case .glass:
-            Color.clear.glassEffect(.regular.tint(content.palette.background.opacity(style.colors == .artwork ? 0.35 : 0)), in: shape)
+            Color.clear.orbitGlass(tint: content.palette.background.opacity(style.colors == .artwork ? 0.35 : 0), in: shape)
         case .solid:
             (style.colors == .dark ? Color.white : style.colors == .light ? Color(white: 0.06) : content.palette.background)
                 .opacity(style.backgroundOpacity)
