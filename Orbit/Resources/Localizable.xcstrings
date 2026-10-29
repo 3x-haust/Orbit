@@ -6580,6 +6580,17 @@
         }
       }
     },
+    "Close Window": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "창 닫기"
+          }
+        }
+      }
+    },
     "Close delay": {
       "extractionState": "manual",
       "localizations": {
@@ -15752,6 +15763,17 @@
         }
       }
     },
+    "Menu": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴"
+          }
+        }
+      }
+    },
     "Menu Bar": {
       "extractionState": "manual",
       "localizations": {
@@ -15781,6 +15803,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "메뉴 막대 설정…"
+          }
+        }
+      }
+    },
+    "Menu Commands": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 명령"
           }
         }
       }
@@ -15901,6 +15934,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "내 것"
+          }
+        }
+      }
+    },
+    "Minimized": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최소화됨"
           }
         }
       }
@@ -18473,6 +18517,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "날씨 앱 열기"
+          }
+        }
+      }
+    },
+    "Open Windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열린 창"
           }
         }
       }
@@ -21072,6 +21127,17 @@
         }
       }
     },
+    "Quit App": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 종료"
+          }
+        }
+      }
+    },
     "Quit Barbee": {
       "extractionState": "manual",
       "localizations": {
@@ -22294,6 +22360,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "명령 실행"
+          }
+        }
+      }
+    },
+    "Run Menu Command": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 실행"
           }
         }
       }
@@ -25725,6 +25802,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "데스크탑 %ld로 전환"
+          }
+        }
+      }
+    },
+    "Switch to Window": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "창으로 전환"
           }
         }
       }

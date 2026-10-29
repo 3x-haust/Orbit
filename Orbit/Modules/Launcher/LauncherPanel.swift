@@ -28,6 +28,9 @@ final class LauncherPanel {
     func toggle() { isVisible ? hide() : show() }
 
     func show() {
+        // Read before the panel opens; it doesn't activate Orbit, so this is still the user's app.
+        MenuCommands.shared.reload(for: NSWorkspace.shared.frontmostApplication)
+        OpenWindows.shared.reload()
         model.query = ""
         model.refresh()
         let screen = NSScreen.active.visibleFrame

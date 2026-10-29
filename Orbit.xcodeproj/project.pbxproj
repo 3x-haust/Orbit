@@ -34,6 +34,7 @@
 		1F52EB42C52EFDB3A4CA4DB5 /* RunnerPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3F1CAD9A0A4492CB489628 /* RunnerPage.swift */; };
 		1F6ADA95864EF03FDC1A0F86 /* NotchCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D868E5FDB67716BF9496EFF /* NotchCenter.swift */; };
 		200156BADC0A815191A295AF /* MenuBarRemoval.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81C22C75C738843DE6FA0AD /* MenuBarRemoval.swift */; };
+		2094B461A6FD1E0644664C7C /* OpenWindows.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3942721151051DAD9121083 /* OpenWindows.swift */; };
 		22A02155963767F30C04A1EA /* OCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E45AC14BC50F97256E5028F /* OCR.swift */; };
 		238A1DEF76A868ADDD9DA804 /* ServicesMenu.strings in Resources */ = {isa = PBXBuildFile; fileRef = B7EC6C5E1B5E9418DD38FAE8 /* ServicesMenu.strings */; };
 		23DD1BF48DCBAFB03FE63B58 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72BB0F140BC7CBCA574D8677 /* main.swift */; };
@@ -122,6 +123,7 @@
 		97CBDE27A63895F86FE78813 /* BatteryPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9171DD5AC3FD8F7372B764 /* BatteryPage.swift */; };
 		984D3AA3F912342A57E8C610 /* RecordPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E202285F2A53FBC6DB8C7743 /* RecordPicker.swift */; };
 		99521B499048728273B7E99F /* AppsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AF473498FAA90059FE74B6 /* AppsPanel.swift */; };
+		99E61AE282CA542BB13A9F7D /* MenuCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051B3849AFE7B68FBB770536 /* MenuCommands.swift */; };
 		9B920CE216E9796BF2ED4582 /* MenuBarCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840129039E3BCBDF10883756 /* MenuBarCalendar.swift */; };
 		9D47D1C129E210954E010BF0 /* PermissionPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */; };
 		9F2728A0FC19E7AA803CF6D5 /* FaceUnlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4AA143231EE285383B831E /* FaceUnlock.swift */; };
@@ -284,6 +286,7 @@
 		0298EB6B0E9F6C4EDEE0E364 /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
 		02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPrompt.swift; sourceTree = "<group>"; };
 		0489E383085140B8C153BB99 /* AuthPromptUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthPromptUnlock.swift; sourceTree = "<group>"; };
+		051B3849AFE7B68FBB770536 /* MenuCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuCommands.swift; sourceTree = "<group>"; };
 		05EABB958605751517434087 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		0729D6EBC389EC7C64A4424A /* PageShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageShortcuts.swift; sourceTree = "<group>"; };
 		0828531D6A12CF39075F3E03 /* OrbitQuickLook.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OrbitQuickLook.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -464,6 +467,7 @@
 		DCB401E34D45DB5A0E8B37F6 /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
 		DD4A450337E47E83A9DF3DCB /* OrbitFanHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = OrbitFanHelper; sourceTree = BUILT_PRODUCTS_DIR; };
 		E202285F2A53FBC6DB8C7743 /* RecordPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordPicker.swift; sourceTree = "<group>"; };
+		E3942721151051DAD9121083 /* OpenWindows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenWindows.swift; sourceTree = "<group>"; };
 		E691E1A576C579A627A7BDDF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E6B8E26C39F30D9E06D317F6 /* PasswordsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsComponents.swift; sourceTree = "<group>"; };
 		E79F65BDD24BE20F2CD875EF /* SettingsSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSearchView.swift; sourceTree = "<group>"; };
@@ -998,6 +1002,8 @@
 				6425C398F27D814B72602854 /* LauncherModel.swift */,
 				46A8ED97B013D95859769F92 /* LauncherPanel.swift */,
 				67F2C7D6D02F4FF3D2ADF535 /* LauncherView.swift */,
+				051B3849AFE7B68FBB770536 /* MenuCommands.swift */,
+				E3942721151051DAD9121083 /* OpenWindows.swift */,
 				79A6C1AA941972C6FCD6198C /* SmartAnswers.swift */,
 			);
 			path = Launcher;
@@ -1340,6 +1346,7 @@
 				200156BADC0A815191A295AF /* MenuBarRemoval.swift in Sources */,
 				FE032D92E7E52E6543BDA6CA /* MenuBarRunner.swift in Sources */,
 				8377DB4B5497BDAA16CD907C /* MenuBarSystemSwitches.swift in Sources */,
+				99E61AE282CA542BB13A9F7D /* MenuCommands.swift in Sources */,
 				8C272F523E642B35F8D11943 /* MouseTrigger.swift in Sources */,
 				81D3657D49116E00460CC860 /* NotchActivities.swift in Sources */,
 				1F6ADA95864EF03FDC1A0F86 /* NotchCenter.swift in Sources */,
@@ -1358,6 +1365,7 @@
 				F8467B17E8363ADE89E6117C /* NowPlayingWidget.swift in Sources */,
 				22A02155963767F30C04A1EA /* OCR.swift in Sources */,
 				5DA223BEC8F89873CB104960 /* OnboardingWindow.swift in Sources */,
+				2094B461A6FD1E0644664C7C /* OpenWindows.swift in Sources */,
 				FC0E220D1D7474B338F4FFD3 /* OrbitAction.swift in Sources */,
 				E65C66D700AE1B182DC8BC7B /* OrbitApp.swift in Sources */,
 				B122E86FCF717A7E23C2F24C /* OrbitRing.swift in Sources */,
