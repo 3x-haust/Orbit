@@ -38,7 +38,7 @@ struct TranslatePage: View {
             VStack(alignment: .leading, spacing: 10) {
                 SectionLabel("Engine")
                 HStack(spacing: 12) {
-                    ForEach(TranslationEngine.allCases) { e in
+                    ForEach(TranslationEngine.available) { e in
                         EngineCard(engine: e, selected: engine == e.rawValue) {
                             withAnimation(.spring(duration: 0.3)) { engine = e.rawValue }
                         }
