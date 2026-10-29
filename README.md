@@ -7,7 +7,7 @@
 **Every Mac utility, in one orbit.**
 
 [![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases/latest)
-[![macOS](https://img.shields.io/badge/macOS-26%2B-000000?style=flat-square&logo=apple&logoColor=white)](#requirements)
+[![macOS](https://img.shields.io/badge/macOS-15%2B-000000?style=flat-square&logo=apple&logoColor=white)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
 
@@ -121,7 +121,7 @@ Everything stays on your Mac. Orbit has no account, no server and no analytics; 
 
 ## Requirements
 
-- macOS 26 or later
+- macOS 15 Sequoia or later (Liquid Glass, Apple Translation and Apple Intelligence spell check need macOS 26)
 - Apple silicon (tested on M-series MacBooks)
 
 ## Build from source
