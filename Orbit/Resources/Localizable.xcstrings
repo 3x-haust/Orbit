@@ -13,6 +13,9 @@
     " : $0.laidOut ? ": {
       "extractionState": "manual"
     },
+    " : full.map { ": {
+      "extractionState": "manual"
+    },
     " and certificate leaf[subject.OU] = ": {
       "extractionState": "manual"
     },
@@ -32,6 +35,9 @@
       "extractionState": "manual"
     },
     " | loose": {
+      "extractionState": "manual"
+    },
+    " }.joined(separator: ": {
       "extractionState": "manual"
     },
     "#%02X%02X%02X": {
@@ -869,7 +875,16 @@
     ", ms))ms per layout\n": {
       "extractionState": "manual"
     },
+    ", now.timeIntervalSince(b.since)))s": {
+      "extractionState": "manual"
+    },
     ", s))": {
+      "extractionState": "manual"
+    },
+    ", unnamed": {
+      "extractionState": "manual"
+    },
+    ", unpaired": {
       "extractionState": "manual"
     },
     "--type=": {
@@ -30794,6 +30809,9 @@
     "awake.stopWhenHot": {
       "extractionState": "manual"
     },
+    "ax ": {
+      "extractionState": "manual"
+    },
     "a␣␣ → a␣": {
       "extractionState": "manual"
     },
@@ -32326,6 +32344,9 @@
       "extractionState": "manual"
     },
     "tokyo 도쿄 동경": {
+      "extractionState": "manual"
+    },
+    "top edge": {
       "extractionState": "manual"
     },
     "toronto 토론토": {

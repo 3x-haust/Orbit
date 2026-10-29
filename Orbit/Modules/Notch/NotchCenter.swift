@@ -177,6 +177,7 @@ final class NotchCenter {
         if observers.isEmpty { observe() }
         rebuildWindows()
         NotchLive.shared.apply(config)
+        watchFrontApp()
         checkFullScreen()
     }
 
@@ -191,6 +192,7 @@ final class NotchCenter {
         observers.removeAll()
         pointerMonitors.forEach(NSEvent.removeMonitor)
         pointerMonitors.removeAll()
+        watchFrontApp()
         hovering.removeAll()
         expandedOn = nil
         stopClickMonitor()
@@ -215,16 +217,62 @@ final class NotchCenter {
             observers.append(ws.addObserver(forName: name, object: nil, queue: .main) { _ in
                 MainActor.assumeIsolated {
                     let c = NotchCenter.shared
-                    c.checkFullScreen()
+                    let why = name == NSWorkspace.activeSpaceDidChangeNotification ? "space" : "app"
+                    c.watchFrontApp()
+                    c.checkFullScreen(why)
                     c.measureRooms()
-                    // A Space switch animates; look again once it has landed.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                        c.checkFullScreen()
+                    // Decided now; these only confirm once the Space animation has landed.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { c.checkFullScreen(why + " +0.6") }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                        c.checkFullScreen(why + " +1.4")
                         c.measureRooms(force: true)
                     }
                 }
             })
         }
+        watchFrontApp()
+    }
+
+    // MARK: Front window (full screen)
+
+    @ObservationIgnored private var axObserver: AXObserver?
+    @ObservationIgnored private var axPID: pid_t = 0
+
+    /// Follows the front app's windows, so a window going full screen is caught as its animation starts
+    /// rather than once the Space has switched. One observer, for the front app only.
+    func watchFrontApp() {
+        let pid = Self.enabled && config.hideFullScreen ? NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0 : 0
+        guard pid != axPID else { return }
+        if let o = axObserver { CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(o), .commonModes) }
+        axObserver = nil
+        axPID = pid
+        guard pid > 0, pid != ProcessInfo.processInfo.processIdentifier, AXIsProcessTrusted() else { return }
+        var observer: AXObserver?
+        guard AXObserverCreate(pid, { _, _, note, _ in
+            let name = note as String
+            MainActor.assumeIsolated { NotchCenter.shared.frontWindowChanged(name) }
+        }, &observer) == .success, let observer else { return }
+        let app = AXUIElementCreateApplication(pid)
+        for n in [kAXWindowResizedNotification, kAXWindowMovedNotification, kAXFocusedWindowChangedNotification] {
+            AXObserverAddNotification(observer, app, n as CFString, nil)
+        }
+        CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .commonModes)
+        axObserver = observer
+    }
+
+    /// The front window moved, resized or changed: ask Accessibility alone (a few calls, no window list)
+    /// whether it's full screen now, for its display.
+    private func frontWindowChanged(_ note: String) {
+        guard config.hideFullScreen, !windows.isEmpty else { return }
+        var full = hiddenFor
+        if let id = Self.axFullScreenDisplay(), windows[id] != nil {
+            full.insert(id)
+            fullScreenVia[id] = "AX"
+        } else {
+            // Only what Accessibility hid; the window-list check owns the rest.
+            for (id, via) in fullScreenVia where via == "AX" { full.remove(id); fullScreenVia[id] = nil }
+        }
+        setHidden(full, why: note.replacingOccurrences(of: "AX", with: "ax "))
     }
 
     private func rebuildWindows() {
@@ -278,6 +326,10 @@ final class NotchCenter {
     /// over that window's shape, and that's also what hovering means — a drag included, so files
     /// can be dropped on the notch.
     func pointerMoved(_ p: NSPoint) {
+        if config.hideFullScreen, !hiddenFor.isEmpty, ProcessInfo.processInfo.systemUptime - lastFullScreenCheck > 1,
+           let s = NSScreen.screens.first(where: { $0.frame.contains(p) }), p.y >= s.frame.maxY - 2 {
+            checkFullScreen("top edge")
+        }
         for (id, w) in windows {
             let inside = w.hitRect()?.contains(p) ?? false
             if w.ignoresMouseEvents == inside { w.ignoresMouseEvents = !inside }
@@ -576,32 +628,88 @@ final class NotchCenter {
 
     // MARK: Full screen
 
-    private func checkFullScreen() {
+    /// Hides the notch on each display showing a full-screen app.
+    private func checkFullScreen(_ why: String = "settings") {
+        lastFullScreenCheck = ProcessInfo.processInfo.systemUptime
         guard config.hideFullScreen, !windows.isEmpty else {
-            if !hiddenFor.isEmpty { hiddenFor = [] }
+            setHidden([], why: why)
             return
         }
+        var full = Set<CGDirectDisplayID>()
+        var via: [CGDirectDisplayID: String] = [:]
+        if let id = Self.axFullScreenDisplay(), windows[id] != nil { full.insert(id); via[id] = "AX" }
+        // Other displays (each has its own Space), and apps that don't answer Accessibility.
         let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
         let top = NSScreen.screens.first?.frame.maxY ?? 0
         let me = ProcessInfo.processInfo.processIdentifier
-        var full = Set<CGDirectDisplayID>()
-        for (id, w) in windows {
+        for (id, w) in windows where !full.contains(id) {
             guard let s = w.targetScreen else { continue }
             let cg = CGRect(x: s.frame.minX, y: top - s.frame.maxY, width: s.frame.width, height: s.frame.height)
+            // A full-screen window fills the screen — or, on a screen with a camera housing, everything
+            // below it (macOS keeps the strip beside the notch black). A zoomed window starts below the
+            // menu bar, which is taller than the housing, so it doesn't match.
             let covered = list.contains { info in
                 guard (info[kCGWindowLayer as String] as? Int) == 0,
                       (info[kCGWindowOwnerPID as String] as? pid_t) != me,
                       ((info[kCGWindowAlpha as String] as? Double) ?? 1) > 0.01,
                       let b = info[kCGWindowBounds as String] as? NSDictionary,
                       let r = CGRect(dictionaryRepresentation: b) else { return false }
-                return abs(r.minX - cg.minX) < 1 && abs(r.minY - cg.minY) < 1 && abs(r.width - cg.width) < 1 && abs(r.height - cg.height) < 1
+                return Self.fillsScreen(r, cg, housing: s.safeAreaInsets.top)
             }
-            if covered { full.insert(id) }
+            if covered { full.insert(id); via[id] = "windows" }
         }
-        if full != hiddenFor {
-            hiddenFor = full
-            if let e = expandedOn, full.contains(e) { close() }
+        fullScreenVia = via
+        setHidden(full, why: why)
+    }
+
+    /// Hides at once: the window goes transparent this instant, with no fade. Coming back, it shows
+    /// straight away and the notch pops in quickly.
+    private func setHidden(_ full: Set<CGDirectDisplayID>, why: String) {
+        guard full != hiddenFor else { return }
+        NotchLog.write("full screen: \(full.isEmpty ? "none" : full.map { "\($0) (\(fullScreenVia[$0] ?? "?"))" }.joined(separator: ", ")) ← \(why)")
+        for (id, w) in windows { w.alphaValue = full.contains(id) ? 0 : 1 }
+        var t = Transaction(animation: nil)
+        t.disablesAnimations = true
+        withTransaction(t) { hiddenFor = full }
+        if let e = expandedOn, full.contains(e) { close() }
+        pointerMoved(NSEvent.mouseLocation)
+    }
+
+    /// Whether a window (CG coordinates) is a full-screen one on this screen.
+    static func fillsScreen(_ r: CGRect, _ screen: CGRect, housing: CGFloat) -> Bool {
+        abs(r.minX - screen.minX) < 1 && abs(r.width - screen.width) < 1 && abs(r.maxY - screen.maxY) < 1
+            && [screen.minY, screen.minY + housing].contains { abs(r.minY - $0) < 0.5 }
+    }
+
+    @ObservationIgnored private var lastFullScreenCheck: TimeInterval = 0
+    @ObservationIgnored private var fullScreenVia: [CGDirectDisplayID: String] = [:]
+
+    /// The display of the front app's window when Accessibility says it's full screen.
+    private static func axFullScreenDisplay() -> CGDirectDisplayID? {
+        guard AXIsProcessTrusted(), let front = NSWorkspace.shared.frontmostApplication,
+              front.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return nil }
+        let app = AXUIElementCreateApplication(front.processIdentifier)
+        AXUIElementSetMessagingTimeout(app, 0.25)
+        var ref: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &ref) == .success,
+              let win = ref, CFGetTypeID(win) == AXUIElementGetTypeID() else { return nil }
+        let window = win as! AXUIElement
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(window, "AXFullScreen" as CFString, &value) == .success,
+              (value as? Bool) == true else { return nil }
+        var pos = CGPoint.zero, size = CGSize.zero
+        var p: CFTypeRef?, z: CFTypeRef?
+        if AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &p) == .success, let p {
+            AXValueGetValue(p as! AXValue, .cgPoint, &pos)
         }
+        if AXUIElementCopyAttributeValue(window, kAXSizeAttribute as CFString, &z) == .success, let z {
+            AXValueGetValue(z as! AXValue, .cgSize, &size)
+        }
+        // AX is top-left based, from the main screen's top.
+        let top = NSScreen.screens.first?.frame.maxY ?? 0
+        let mid = CGPoint(x: pos.x + size.width / 2, y: top - (pos.y + size.height / 2))
+        let screen = NSScreen.screens.first { $0.frame.contains(mid) } ?? NSScreen.main
+        return screen?.displayID
     }
 
     static var morph: Animation {
@@ -669,7 +777,8 @@ extension NotchCenter {
             let r = w.hitRect()
             return ["display": id, "phase": String(describing: phase(on: id)), "ignoresMouseEvents": w.ignoresMouseEvents,
                     "window": NSStringFromRect(w.frame), "hitRect": r.map(NSStringFromRect) ?? "none",
-                    "pointer": NSStringFromPoint(NSEvent.mouseLocation), "hovering": hovering.contains(id), "tab": tab.rawValue]
+                    "pointer": NSStringFromPoint(NSEvent.mouseLocation), "hovering": hovering.contains(id), "tab": tab.rawValue,
+                    "hidden": hiddenFor.contains(id), "fullScreenVia": fullScreenVia[id] ?? "-", "hideFullScreen": config.hideFullScreen]
         }
     }
 }
@@ -694,5 +803,29 @@ extension NSScreen {
     var notchMidX: CGFloat {
         if hasCameraHousing, let l = auxiliaryTopLeftArea { return frame.minX + l.width + notchSize.width / 2 }
         return frame.midX
+    }
+}
+
+/// ~/Library/Logs/Orbit/notch.log: when and why the notch hid for full screen.
+enum NotchLog {
+    private static let url: URL = {
+        let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Orbit")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("notch.log")
+    }()
+
+    private static let stamp: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    static func write(_ line: String) {
+        let text = "\(stamp.string(from: Date())) \(line)\n"
+        if let h = try? FileHandle(forWritingTo: url) {
+            h.seekToEndOfFile(); h.write(Data(text.utf8)); try? h.close()
+        } else {
+            try? Data(text.utf8).write(to: url)
+        }
     }
 }

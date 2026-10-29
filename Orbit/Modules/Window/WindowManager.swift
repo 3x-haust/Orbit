@@ -188,8 +188,9 @@ final class WindowManager {
         AXValueGetValue(p as! AXValue, .cgPoint, &origin)
         AXValueGetValue(sz as! AXValue, .cgSize, &size)
         guard size.width > 10, size.height > 10 else { return nil }
-        // The icon list sits inside the Dock's background; 8pt covers the background and its shadow edge.
-        return CGRect(origin: origin, size: size).insetBy(dx: -8, dy: -8)
+        // The list's frame includes 4.5pt of clear padding around the Dock's glass (measured on
+        // macOS 27: the glass border sits 4.5pt inside it), so windows meet the glass exactly.
+        return CGRect(origin: origin, size: size).insetBy(dx: 4.5, dy: 4.5)
     }
 
     /// Width and side of the Stage Manager recent-apps strip, when it's on screen.

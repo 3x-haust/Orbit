@@ -222,6 +222,8 @@ struct NotchSurfaceView: View {
         .onDrop(of: [.fileURL, .image, .plainText, .url], isTargeted: $targeted) { center.drop($0) }
         .onChange(of: targeted) { center.setDropTargeted(targeted, on: display) }
         .opacity(p == .hidden ? 0 : 1)
+        // Out of full screen: a quick pop, not the morph's spring.
+        .animation(.easeOut(duration: 0.12), value: p == .hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .environment(\.colorScheme, .dark)
         .animation(NotchCenter.morph, value: p)

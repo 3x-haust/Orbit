@@ -78,20 +78,45 @@ final class NotchLive {
 // MARK: - Bluetooth
 
 /// Connect and disconnect notices, with battery levels when the device reports them (AirPods: each
-/// bud and the case). IOBluetooth tells about every connection — classic and the AirPods' audio link
-/// — on the main run loop; its battery figures arrive a moment after the link, so the notice waits
-/// for them briefly. One notice per device per connection, however many times the link flaps.
+/// bud and the case). IOBluetooth's battery figures arrive a moment after the link, so the notice waits
+/// for them briefly.
+///
+/// IOBluetooth says "connected" far more often than anything connects: for every device already
+/// connected when Orbit registers or the Mac wakes, when AirPods switch profile or mic mode, and for an
+/// iPhone or Watch opening a link for Handoff. So each device's state is tracked, and a notice is only
+/// for a real change: headphones, speakers, keyboards, mice, trackpads or game controllers that were
+/// off for at least 3s and stayed on for 1.5s (or the other way round), and not again within 30s.
+/// Every event and what was decided goes to notch.log (device kind and the end of its address only).
 final class NotchBluetooth: NSObject {
+    private struct Link {
+        var connected: Bool
+        var since: Date
+    }
+
     private var connect: IOBluetoothUserNotification?
     private var disconnects: [String: IOBluetoothUserNotification] = [:]
-    /// When each device last got a notice, so a flapping link doesn't repeat it.
-    private var shown: [String: Date] = [:]
-    /// IOBluetooth reports every device that's already connected right after registering.
-    private let started = Date()
+    private var links: [String: Link] = [:]
+    /// When each device last got each kind of notice.
+    private var noticed: [String: Date] = [:]
+    /// IOBluetooth replays every connected device right after registering, and again after a wake.
+    private var quietUntil = Date().addingTimeInterval(5)
+    private var sleepObservers: [Any] = []
+
+    private static let settle: TimeInterval = 1.5
+    private static let minOff: TimeInterval = 3
+    private static let repeatAfter: TimeInterval = 30
 
     override init() {
         super.init()
         connect = IOBluetoothDevice.register(forConnectNotifications: self, selector: #selector(connected(_:device:)))
+        let ws = NSWorkspace.shared.notificationCenter
+        // Links drop on sleep and come back on wake: neither is news.
+        sleepObservers.append(ws.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.quietUntil = .distantFuture
+        })
+        sleepObservers.append(ws.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.quietUntil = Date().addingTimeInterval(10)
+        })
     }
 
     func stop() {
@@ -99,6 +124,8 @@ final class NotchBluetooth: NSObject {
         connect = nil
         disconnects.values.forEach { $0.unregister() }
         disconnects.removeAll()
+        sleepObservers.forEach { NSWorkspace.shared.notificationCenter.removeObserver($0) }
+        sleepObservers.removeAll()
     }
 
     @objc private func connected(_ note: IOBluetoothUserNotification, device: IOBluetoothDevice) {
@@ -106,17 +133,33 @@ final class NotchBluetooth: NSObject {
         if disconnects[key] == nil, let n = device.register(forDisconnectNotification: self, selector: #selector(disconnected(_:device:))) {
             disconnects[key] = n
         }
-        guard Date().timeIntervalSince(started) > 3 else { return }
-        if let last = shown[key], Date().timeIntervalSince(last) < 15 { return }
-        shown[key] = Date()
-        // Give the battery figures a moment to arrive, but not so long the notice feels late.
-        tellWhenReady(device, key: key, tries: 0)
+        let before = links[key]
+        let now = Date()
+        if before?.connected != true { links[key] = Link(connected: true, since: now) }
+        guard let kind = Self.kind(of: device) else { return log("connect", device, "skip: \(Self.className(device)), not a device people notice") }
+        if now < quietUntil { return log("connect", device, "skip: \(kind), already connected (start or wake)") }
+        if before?.connected == true { return log("connect", device, "skip: \(kind), already connected (profile change)") }
+        if let b = before, now.timeIntervalSince(b.since) < Self.minOff {
+            return log("connect", device, "skip: \(kind), was off only \(String(format: "%.1f", now.timeIntervalSince(b.since)))s")
+        }
+        // Still on in a moment: then it's a connection.
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.settle) { [weak self] in
+            guard let self, let link = self.links[key], link.connected, link.since == now else {
+                self?.log("connect", device, "skip: \(kind), dropped again within \(Self.settle)s"); return
+            }
+            if let last = self.noticed["+" + key], Date().timeIntervalSince(last) < Self.repeatAfter {
+                return self.log("connect", device, "skip: \(kind), shown <\(Int(Self.repeatAfter))s ago")
+            }
+            self.noticed["+" + key] = Date()
+            self.log("connect", device, "show: \(kind)")
+            self.tellWhenReady(device, tries: 0)
+        }
     }
 
-    private func tellWhenReady(_ device: IOBluetoothDevice, key: String, tries: Int) {
+    private func tellWhenReady(_ device: IOBluetoothDevice, tries: Int) {
         let levels = Self.levels(of: device)
         if levels.isEmpty, tries < 4, Self.reportsBattery(device) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in self?.tellWhenReady(device, key: key, tries: tries + 1) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in self?.tellWhenReady(device, tries: tries + 1) }
             return
         }
         let name = device.name ?? "Device".loc
@@ -131,12 +174,59 @@ final class NotchBluetooth: NSObject {
         note.unregister()
         let key = device.addressString ?? device.name ?? "?"
         disconnects[key] = nil
-        shown[key] = nil
-        let name = device.name ?? "Device".loc
-        let symbol = Self.symbol(for: device)
-        Task { @MainActor in
-            NotchCenter.shared.flash(.init(symbol: symbol, tint: .white.opacity(0.6), title: "Disconnected", detail: name, trailing: nil), for: 2)
+        let before = links[key]
+        let now = Date()
+        links[key] = Link(connected: false, since: now)
+        guard let kind = Self.kind(of: device) else { return log("disconnect", device, "skip: \(Self.className(device)), not a device people notice") }
+        if now < quietUntil { return log("disconnect", device, "skip: \(kind), sleep or wake") }
+        if let b = before, b.connected, now.timeIntervalSince(b.since) < Self.minOff {
+            return log("disconnect", device, "skip: \(kind), was on only \(String(format: "%.1f", now.timeIntervalSince(b.since)))s")
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.settle) { [weak self] in
+            guard let self, let link = self.links[key], !link.connected, link.since == now else {
+                self?.log("disconnect", device, "skip: \(kind), back within \(Self.settle)s"); return
+            }
+            if let last = self.noticed["-" + key], Date().timeIntervalSince(last) < Self.repeatAfter {
+                return self.log("disconnect", device, "skip: \(kind), shown <\(Int(Self.repeatAfter))s ago")
+            }
+            self.noticed["-" + key] = Date()
+            self.log("disconnect", device, "show: \(kind)")
+            let name = device.name ?? "Device".loc
+            let symbol = Self.symbol(for: device)
+            Task { @MainActor in
+                NotchCenter.shared.flash(.init(symbol: symbol, tint: .white.opacity(0.6), title: "Disconnected", detail: name, trailing: nil), for: 2)
+            }
+        }
+    }
+
+    /// Headphones, speakers and input devices people pair themselves; nil for phones, computers,
+    /// watches, unnamed or unpaired accessories.
+    private static func kind(of device: IOBluetoothDevice) -> String? {
+        guard let name = device.name, !name.isEmpty, device.isPaired() else { return nil }
+        let minor = device.deviceClassMinor
+        switch device.deviceClassMajor {
+        case UInt32(kBluetoothDeviceClassMajorAudio):
+            return "audio"
+        case UInt32(kBluetoothDeviceClassMajorPeripheral):
+            // Minor bits 6–7: keyboard, pointing; 2–5: joystick, gamepad, remote, …
+            if minor & 0x30 != 0 { return minor & 0x10 != 0 ? "keyboard" : "pointer" }
+            if minor & 0x0F == 0x01 || minor & 0x0F == 0x02 { return "gamepad" }
+            return nil
+        default:
+            return nil
+        }
+    }
+
+    private static func className(_ device: IOBluetoothDevice) -> String {
+        let major = ["misc", "computer", "phone", "network", "audio", "peripheral", "imaging", "wearable", "toy", "health"]
+        let m = Int(device.deviceClassMajor)
+        let named = device.name?.isEmpty == false ? "" : ", unnamed"
+        return (m < major.count ? major[m] : "class \(m)") + (device.isPaired() ? "" : ", unpaired") + named
+    }
+
+    private func log(_ event: String, _ device: IOBluetoothDevice, _ decision: String) {
+        let tail = String((device.addressString ?? "??-??").suffix(5))
+        NotchLog.write("bt \(event) …\(tail) → \(decision)")
     }
 
     private static func symbol(for device: IOBluetoothDevice) -> String {

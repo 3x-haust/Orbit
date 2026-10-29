@@ -364,6 +364,15 @@ enum DebugHook {
         case "notch-info":
             // `probe`: test a point instead of the pointer (no event is sent), then go back to the real one.
             var probed: [[String: Any]] = []
+            // `fullScreen`: window rects [x, y, w, h] (CG) to classify against the main screen.
+            if let rects = spec["fullScreen"] as? [[Double]], let out = spec["out"] as? String, let screen = NSScreen.screens.first {
+                let result = rects.map { r in
+                    ["rect": r, "full": NotchCenter.fillsScreen(CGRect(x: r[0], y: r[1], width: r[2], height: r[3]),
+                                                             CGRect(origin: .zero, size: screen.frame.size), housing: screen.safeAreaInsets.top)] as [String: Any]
+                }
+                if let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) { try? data.write(to: URL(fileURLWithPath: out)) }
+                return
+            }
             if let probe = spec["probe"] as? [Double] {
                 NotchCenter.shared.pointerMoved(NSPoint(x: probe[0], y: probe[1]))
                 probed = NotchCenter.shared.debugInfo()
