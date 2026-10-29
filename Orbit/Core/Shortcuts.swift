@@ -17,6 +17,7 @@ extension KeyboardShortcuts.Name {
     static let colorPicker = Self("colorPicker", default: .init(.c, modifiers: [.option, .shift]))
     static let shelf = Self("shelf", default: .init(.s, modifiers: [.option, .shift]))
     static let translate = Self("translate", default: .init(.t, modifiers: [.option, .shift]))
+    static let spellCheck = Self("spellCheck", default: .init(.k, modifiers: [.option, .shift]))
 
     // Window — Rectangle-compatible defaults.
     static let winLeft = Self("winLeft", default: .init(.leftArrow, modifiers: [.control, .option]))

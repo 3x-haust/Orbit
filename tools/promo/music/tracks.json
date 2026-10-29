@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "The promo's soundtrack. orbit-original-a is our own composition, arranged on the film's bar grid from Apple's",
+    "GarageBand loops (royalty-free inside an original soundtrack; the loops themselves are never committed).",
+    "bpm: the beat grid. downbeat: bar 0 of that grid, the reveal (the track starts at bar -2, the film's first frame).",
+    "edit: [film_bar, track_bar] pairs. Film bar 0 is the reveal at 4.0s on the film's 120 BPM grid (bar n starts",
+    "at 4 + 2n film seconds); from that film bar on, the music plays from that track bar. The film is time-scaled",
+    "by bpm/120 so its cuts land on the track's beats. The last segment plays out to the track's own ending.",
+    "fade_in: seconds of fade at the very start (0 = start clean on a downbeat).",
+    "key_root: pitch class of the (major) key, for the in-key UI chimes (0 = C)."
+  ],
+  "orbit-original-a": {
+    "file": "orbit-original-a/orbit-original-a.flac",
+    "title": "Orbit Original A (keynote indie-pop)",
+    "bpm": 120.0,
+    "downbeat": 4.0,
+    "edit": [[-2, -2]],
+    "fade_in": 0,
+    "key_root": 1,
+    "sections": "bar -2 filtered intro, -1 build + riser, 0 drop (reveal), 4 lead guitar, 5.5 two-beat drop-out, 6 notch hit, 8 a stab per verb, 9 second peak, 12 logo hit + ring-out"
+  }
+}

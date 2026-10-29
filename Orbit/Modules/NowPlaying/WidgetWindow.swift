@@ -99,7 +99,16 @@ final class NowPlayingWidgetController {
         observers.append(NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.place(animated: false) }
         })
+        // A floating widget would sit on top of Orbit's own window and swallow its clicks (the page's
+        // switches are right under it in the top-right corner). While an Orbit window is in front,
+        // the widget steps behind it; it floats again once that window loses focus.
+        for name in [NSWindow.didBecomeKeyNotification, NSWindow.didResignKeyNotification] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.yieldToOrbitWindows() }
+            })
+        }
         watchPlayback()
+        yieldToOrbitWindows()
     }
 
     private func close() {
@@ -110,8 +119,29 @@ final class NowPlayingWidgetController {
         panel = nil
     }
 
+    /// Orbit's own titled window that has focus, if any (not panels, toasts or overlays).
+    private var focusedOrbitWindow: NSWindow? {
+        guard let key = NSApp.keyWindow, key !== panel, key.styleMask.contains(.titled), key.isVisible else { return nil }
+        return key
+    }
+
+    private func yieldToOrbitWindows() {
+        guard let panel, flashWork == nil || state.flashing == false else { return }
+        if state.style.level == .floating, let front = focusedOrbitWindow {
+            panel.level = .normal
+            panel.order(.below, relativeTo: front.windowNumber)
+        } else {
+            applyLevel()
+        }
+    }
+
     private func applyLevel() {
         guard let panel else { return }
+        if state.style.level == .floating, let front = focusedOrbitWindow, !state.flashing {
+            panel.level = .normal
+            panel.order(.below, relativeTo: front.windowNumber)
+            return
+        }
         switch state.style.level {
         case .desktop:
             // Just above the desktop icons: under every window, like a widget on the wallpaper.

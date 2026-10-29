@@ -36,6 +36,7 @@ struct PageShortcuts: View {
         case .system: OrbitAction.allCases.filter { $0.group == "System" && $0 != .keepAwake && $0 != .batteryTopUp && $0 != .chargeLimit }
         case .battery: [.chargeLimit, .batteryTopUp]
         case .nowPlaying: [.mediaPlayPause, .mediaNext, .mediaPrevious, .mediaLike]
+        case .notch: [.notchToggle, .notchShelf, .notchTimer]
         default: []
         }
     }

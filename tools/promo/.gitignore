@@ -1,0 +1,8 @@
+# Captured frames (~130 MB, and they come from a live Orbit): regenerate with capture.py + prepare.py
+assets/
+# Renders, the soundtrack mix-down, compiled helpers
+build/
+post
+# The soundtrack's arrangement sources: Apple Loops may not be redistributed on their own
+private/
+__pycache__/

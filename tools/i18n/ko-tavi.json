@@ -1,0 +1,14 @@
+{
+  "Updating Tavi…": "Tavi 업데이트 중…",
+  "Tavi updates": "Tavi 업데이트",
+  "Tavi %@": "Tavi %@",
+  "Update Tavi automatically": "Tavi 자동으로 업데이트",
+  "Checks Tavi’s releases a minute after launch, then daily. Each update is verified before it’s installed.": "실행 1분 뒤, 그다음엔 하루에 한 번 Tavi 릴리즈를 확인해요. 설치 전에 서명을 꼭 확인해요.",
+  "Tavi is up to date": "Tavi가 최신 버전이에요",
+  "From Tavi’s GitHub releases": "Tavi의 GitHub 릴리즈에서 받아요",
+  "Update Tavi too": "Tavi도 자동으로 업데이트",
+  "Keeps automatic 한/영 on Tavi’s newest release.": "자동 한/영을 늘 최신 Tavi로 유지해요.",
+  "Couldn’t download the update": "업데이트를 받지 못했어요",
+  "The update didn’t pass its checks, so it wasn’t installed": "업데이트가 확인을 통과하지 못해서 설치하지 않았어요",
+  "One step only you can do: in Keyboard Settings, Text Input › Edit… › + › Korean › Tavi › Add. Orbit switches to Tavi as soon as it’s added.": "이건 직접 한 번만 해 주세요: 키보드 설정 › 텍스트 입력 › 편집… › + › 한국어 › Tavi › 추가. 추가하는 순간 Orbit이 Tavi로 바꿔요."
+}

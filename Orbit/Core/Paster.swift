@@ -52,6 +52,9 @@ enum Paster {
         return true
     }
 
+    /// ⌘V now, to whatever has the keyboard (the caller has made sure it's the right app).
+    static func sendPaste() { send() }
+
     private static func send() {
         let src = CGEventSource(stateID: .hidSystemState)
         let v = CGKeyCode(kVK_ANSI_V), cmd = CGKeyCode(kVK_Command)

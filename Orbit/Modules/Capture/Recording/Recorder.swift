@@ -84,18 +84,33 @@ final class Recorder: NSObject {
             case .area, .window: await RecordPicker.run(windowMode: mode == .window)
             }
             guard let picked else { state = .idle; return }
-            // The microphone track is there whenever the mic may be used, so it can be switched on
-            // mid-recording; it's only listening while it's on.
-            let micWanted = RecordPrefs.mic
-            micOn = micWanted ? await Self.micAllowed() : AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
-            micMuted = !micWanted
-            showsCursor = RecordPrefs.cursor
-            highlightsClicks = RecordPrefs.clicks
-            systemAudioOn = RecordPrefs.systemAudio
-            let seconds = RecordPrefs.countdown
-            if seconds > 0, !(await Countdown.run(seconds: seconds, over: picked)) { state = .idle; return }
-            await begin(picked)
+            await prepare(picked)
         }
+    }
+
+    /// Records an area already picked elsewhere (V in the capture overlay): countdown, then record.
+    func start(target: RecordTarget) {
+        guard state == .idle else { return }
+        guard Permissions.shared.screenCapture || CGPreflightScreenCaptureAccess() else {
+            PermissionPrompt.show(.screenCapture)
+            return
+        }
+        state = .preparing
+        Task { await prepare(target) }
+    }
+
+    private func prepare(_ picked: RecordTarget) async {
+        // The microphone track is there whenever the mic may be used, so it can be switched on
+        // mid-recording; it's only listening while it's on.
+        let micWanted = RecordPrefs.mic
+        micOn = micWanted ? await Self.micAllowed() : AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+        micMuted = !micWanted
+        showsCursor = RecordPrefs.cursor
+        highlightsClicks = RecordPrefs.clicks
+        systemAudioOn = RecordPrefs.systemAudio
+        let seconds = RecordPrefs.countdown
+        if seconds > 0, !(await Countdown.run(seconds: seconds, over: picked)) { state = .idle; return }
+        await begin(picked)
     }
 
     func stop() {
@@ -301,9 +316,11 @@ final class Recorder: NSObject {
         let me = ProcessInfo.processInfo.processIdentifier
         let apps = content.applications.filter { $0.processID == me }
         let clicks = ClickHighlighter.shared.windowID
+        let notch = notchWindowIDs(on: target.screen)
         let keep = content.windows.filter { w in
             w.owningApplication?.processID == me
-                && (w.windowLayer == 0 || w.windowLayer == Int(CGWindowLevelForKey(.statusWindow)) || w.windowID == clicks)
+                && (w.windowLayer == 0 || w.windowLayer == Int(CGWindowLevelForKey(.statusWindow)) || w.windowID == clicks
+                    || notch.contains(w.windowID))
                 && !RecordingChrome.windowIDs.contains(w.windowID)
         }
         RecordingLog.write("filter: click overlay \(clicks.map(String.init) ?? "none"), kept in \(keep.contains { $0.windowID == clicks })")
@@ -313,6 +330,20 @@ final class Recorder: NSObject {
     }
 
     /// The window's frame right now (global, top-left origin), or nil once it's gone.
+    /// What grows out of the notch (the notch itself, its player and HUDs, the top shelf) is part of
+    /// the screen people see, so it's recorded like a real window: anything of Orbit's hanging from
+    /// the top edge across the notch's middle.
+    private static func notchWindowIDs(on screen: NSScreen) -> Set<CGWindowID> {
+        let top = screen.frame.maxY, mid = screen.frame.midX
+        let ids = NSApp.windows.filter { w in
+            guard w.isVisible else { return false }
+            let named = String(describing: type(of: w)).contains("Notch")
+            let hanging = w.frame.maxY >= top - 2 && w.frame.minX <= mid && w.frame.maxX >= mid && w.frame.height < screen.frame.height * 0.8
+            return (named || hanging) && screen.frame.intersects(w.frame)
+        }.compactMap { CGWindowID(exactly: $0.windowNumber) }
+        return Set(ids)
+    }
+
     private static func bounds(of id: CGWindowID) -> CGRect? {
         guard let info = (CGWindowListCopyWindowInfo([.optionIncludingWindow], id) as? [[String: Any]])?.first,
               let dict = info[kCGWindowBounds as String] as! CFDictionary? else { return nil }

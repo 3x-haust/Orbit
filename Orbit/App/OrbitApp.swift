@@ -58,6 +58,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         Pref.register()
+        NotchPrefs.register()
         _ = Permissions.shared
         ClipboardStore.shared.start()
         Paster.start()
@@ -83,7 +84,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         MenuBarRunner.shared.start()
         Archives.shared.start()
         NowPlaying.shared.update() // listens only if a Now Playing feature is on
+        NotchCenter.shared.apply()
         Updater.shared.start() // first look 30s in, then every 6 hours
+        TaviBridge.shared.startUpdates() // Tavi too: a minute in, then daily
         // The Storage page opens with last time's breakdown; refresh it quietly once Orbit has settled in.
         DispatchQueue.main.asyncAfter(deadline: .now() + 45) { StorageModel.shared.refreshInBackground() }
         // The panels people open by shortcut, built ahead (once launch has settled) so even the first
@@ -291,6 +294,8 @@ enum DebugHook {
             let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Orbit/perf.log")
             if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
             else { try? Data(line.utf8).write(to: url) }
+        case let c where c.hasPrefix("promo:"):
+            promo(URL(fileURLWithPath: String(c.dropFirst(6))))
         case let c where c.hasPrefix("time:"):
             // How long a command takes until its window has drawn (two run-loop turns later).
             let inner = String(c.dropFirst(5))
@@ -307,6 +312,117 @@ enum DebugHook {
                 }
             }
         default: break
+        }
+    }
+
+    /// Promo frames from Orbit's real components. The JSON spec names a `kind` and its state; window
+    /// kinds write their window number to `wid` for `screencapture -l`, render kinds write PNGs to `out`.
+    @MainActor private static func promo(_ url: URL) {
+        guard let data = try? Data(contentsOf: url),
+              let spec = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let kind = spec["kind"] as? String else { return }
+        func point(_ key: String) -> CGPoint {
+            let v = spec[key] as? [Double] ?? [0, 0]
+            return CGPoint(x: v[0], y: v[1])
+        }
+        func image(_ key: String) -> NSImage? {
+            guard let path = spec[key] as? String, let im = NSImage(contentsOfFile: path),
+                  let rep = im.representations.first else { return nil }
+            im.size = NSSize(width: CGFloat(rep.pixelsWide) / 2, height: CGFloat(rep.pixelsHigh) / 2) // 2x pictures
+            return im
+        }
+        func png(_ view: some View, scale: CGFloat, to path: String) {
+            let renderer = ImageRenderer(content: view.orbitTint().environment(\.colorScheme, .dark))
+            renderer.scale = scale
+            guard let cg = renderer.cgImage else { return }
+            try? NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: path))
+        }
+        var wid: Int?
+        switch kind {
+        case "overlay":
+            SelectionOverlay.debugRender(spec: url)
+        case "ring":
+            wid = OrbitRing.shared.debugPose(appear: spec["appear"] as? Double ?? 1, angle: spec["angle"] as? Double)
+        case "ring-close":
+            OrbitRing.shared.debugClose()
+        case "toast":
+            guard let backdrop = image("backdrop") else { return }
+            wid = Toast.debugStage(spec["message"] as? String ?? "Copied", symbol: spec["symbol"] as? String ?? "checkmark.circle.fill",
+                                   detail: spec["detail"] as? String, backdrop: backdrop, bottom: spec["bottom"] as? Double ?? 64)
+        case "toast-close":
+            Toast.debugUnstage()
+        case "quickaccess":
+            guard let picture = image("image") else { return }
+            wid = QuickAccess.shared.debugShow(picture, fileURL: URL(fileURLWithPath: spec["image"] as? String ?? "/tmp/Orbit.png"))
+        case "quickaccess-close":
+            QuickAccess.shared.debugClear()
+        case "editor-drag", "editor-end":
+            wid = EditorWindow.debugDrag(from: spec["from"] == nil ? nil : point("from"), to: point("to"),
+                                         done: kind == "editor-end", tool: spec["tool"] as? String)
+        case "editor-close":
+            EditorWindow.debugCloseAll()
+        case "notch-info":
+            // `probe`: test a point instead of the pointer (no event is sent), then go back to the real one.
+            var probed: [[String: Any]] = []
+            if let probe = spec["probe"] as? [Double] {
+                NotchCenter.shared.pointerMoved(NSPoint(x: probe[0], y: probe[1]))
+                probed = NotchCenter.shared.debugInfo()
+                NotchCenter.shared.pointerMoved(NSEvent.mouseLocation)
+            }
+            if !probed.isEmpty, let out = spec["out"] as? String,
+               let data = try? JSONSerialization.data(withJSONObject: ["probe": probed, "after": NotchCenter.shared.debugInfo()], options: [.prettyPrinted, .sortedKeys]) {
+                try? data.write(to: URL(fileURLWithPath: out))
+            } else if let out = spec["out"] as? String,
+               let data = try? JSONSerialization.data(withJSONObject: NotchCenter.shared.debugInfo(), options: [.prettyPrinted, .sortedKeys]) {
+                try? data.write(to: URL(fileURLWithPath: out))
+            }
+        case "notch":
+            if let title = spec["title"] as? String {
+                NowPlaying.shared.debugPlaceholder(title: title, artist: spec["artist"] as? String ?? "", duration: spec["duration"] as? Double ?? 200,
+                                                   elapsed: spec["elapsed"] as? Double ?? 60, artwork: image("artwork"))
+            }
+            if let events = spec["events"] as? [[String: Any]] {
+                NotchCalendar.shared.debugPlaceholder(events.map { ($0["title"] as? String ?? "", $0["hour"] as? Int ?? 9, $0["minute"] as? Int ?? 0, $0["minutes"] as? Int ?? 30) })
+            }
+            let state = spec["state"] as? String ?? "reset"
+            // Captures never show the user's own songs or calendar: made-up ones unless the spec gives its own.
+            if state != "reset" {
+                if spec["title"] == nil {
+                    NowPlaying.shared.debugPlaceholder(title: "Night Drive", artist: "Orbit", duration: 214, elapsed: 72, artwork: WidgetContent.sampleArtwork)
+                }
+                if spec["events"] == nil {
+                    NotchCalendar.shared.debugPlaceholder([("Orbit 1.0 출시", 14, 0, 60), ("디자인 리뷰", 16, 30, 30)])
+                }
+            }
+            if state == "reset" {
+                NowPlaying.shared.debugPlaceholder(title: nil, artist: "", duration: 0, elapsed: 0, artwork: nil)
+                NotchCalendar.shared.debugPlaceholder(nil)
+            }
+            wid = NotchCenter.shared.debugState(state, speed: spec["speed"] as? Double ?? 1, percent: spec["percent"] as? Int ?? 80)
+        case "menubar-icon":
+            png(OrbitMark(size: 20, color: .white, dot: false), scale: spec["scale"] as? Double ?? 4, to: spec["out"] as? String ?? "")
+        case "keycap":
+            png(KeyCap(label: spec["label"] as? String ?? "⌘"), scale: spec["scale"] as? Double ?? 6, to: spec["out"] as? String ?? "")
+        case "symbol":
+            png(Image(systemName: spec["name"] as? String ?? "wifi").font(.system(size: spec["size"] as? Double ?? 15, weight: .medium))
+                .foregroundStyle(.white), scale: 4, to: spec["out"] as? String ?? "")
+        case "symbols":
+            // The actions' own glyphs, white, one PNG each.
+            let dir = spec["out"] as? String ?? ""
+            for action in OrbitAction.allCases {
+                png(Image(systemName: action.symbol).font(.system(size: 22, weight: .semibold)).foregroundStyle(.white),
+                    scale: 4, to: "\(dir)/\(action.rawValue).png")
+            }
+        default: break
+        }
+        if let wid, let path = spec["wid"] as? String {
+            // After two run-loop turns, when the window has drawn its new state.
+            DispatchQueue.main.async {
+                CATransaction.flush()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    try? Data("\(wid)".utf8).write(to: URL(fileURLWithPath: path))
+                }
+            }
         }
     }
 }

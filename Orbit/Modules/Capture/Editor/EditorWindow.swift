@@ -14,7 +14,73 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
         let window = EditorWindow(model: EditorModel(image: image, fileURL: fileURL))
         window.onClose = onClose
         open.insert(window)
+        watchHelpers()
         window.bringToFront()
+    }
+
+    // MARK: Always on top
+
+    /// "Always on top" in the editor's toolbar: the editor floats over other apps' windows (and
+    /// full-screen apps), like the capture thumbnail. On unless turned off.
+    static let floatingKey = "capture.editorFloating"
+    static var floats: Bool { Pref.defaults.object(forKey: floatingKey) as? Bool ?? true }
+
+    static func setFloating(_ on: Bool) {
+        Pref.defaults.set(on, forKey: floatingKey)
+        open.forEach { $0.applyFloating() }
+        raiseHelpers()
+    }
+
+    /// The editor in front: the key window, or the one a popover in front belongs to.
+    static var front: EditorWindow? {
+        if let w = NSApp.keyWindow as? EditorWindow { return w }
+        if let w = NSApp.keyWindow?.parent as? EditorWindow { return w }
+        return open.first { $0.isVisible }
+    }
+
+    private func applyFloating() {
+        if Self.floats {
+            level = .floating
+            collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
+        } else {
+            level = .normal
+            collectionBehavior = []
+        }
+    }
+
+    /// Just above a floating editor: for the colour and font panels, open/save panels that aren't
+    /// sheets, and popovers. (Menus, alerts and toasts already sit higher.)
+    private static let helperLevel = NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1)
+    private static var helperWatch: [Any] = []
+
+    private static func raiseHelpers() {
+        guard floats, open.contains(where: \.isVisible) else { return }
+        if NSColorPanel.sharedColorPanelExists { raise(NSColorPanel.shared) }
+        if NSFontPanel.sharedFontPanelExists { raise(NSFontPanel.shared) }
+    }
+
+    private static func raise(_ window: NSWindow) {
+        guard !(window is EditorWindow), window.sheetParent == nil, window.level < helperLevel else { return }
+        window.level = helperLevel
+    }
+
+    private static func watchHelpers() {
+        guard helperWatch.isEmpty else { return }
+        let center = NotificationCenter.default
+        helperWatch.append(center.addObserver(forName: NSWindow.didBecomeKeyNotification, object: nil, queue: .main) { note in
+            MainActor.assumeIsolated {
+                guard floats, open.contains(where: \.isVisible), let window = note.object as? NSWindow else { return }
+                if window is NSColorPanel || window is NSFontPanel || window is NSSavePanel { raise(window) }
+            }
+        })
+        helperWatch.append(center.addObserver(forName: NSPopover.didShowNotification, object: nil, queue: .main) { note in
+            MainActor.assumeIsolated {
+                guard floats, let popover = note.object as? NSPopover,
+                      let window = popover.contentViewController?.view.window,
+                      window.parent is EditorWindow || open.contains(where: \.isKeyWindow) else { return }
+                raise(window)
+            }
+        })
     }
 
     private init(model: EditorModel) {
@@ -31,6 +97,7 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
         isReleasedWhenClosed = false
         minSize = NSSize(width: 760, height: 420)
         delegate = self
+        applyFloating()
         contentView = FloatingPanel.container(for: Self.host(EditorView(model: model, actions: .init(
             copy: { [weak self] in self?.copyImage() },
             save: { [weak self] in self?.saveImage(ask: false) },
@@ -46,6 +113,8 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
         host.safeAreaRegions = [] // no titlebar safe-area feedback into layout (constraint-loop crash)
         return host
     }
+
+    func windowDidBecomeKey(_ notification: Notification) { Self.raiseHelpers() }
 
     func windowWillClose(_ notification: Notification) {
         monitors.forEach { NSEvent.removeMonitor($0) }
@@ -397,6 +466,7 @@ struct EditorView: View {
     private var toolbar: some View {
         HStack(spacing: Space.related) {
             Spacer().frame(width: 64) // traffic lights
+            AlwaysOnTopToggle()
 
             // Narrow windows fold the colors and then the less-used tools into menus instead of
             // spilling over the window buttons.
@@ -851,8 +921,40 @@ private struct CombinePane: View {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.image]
         panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url, let image = NSImage(contentsOf: url) else { return }
-        model.combine(with: image)
+        let model = self.model
+        // A sheet on the editor, so it can't open behind a floating editor.
+        guard let window = EditorWindow.front else {
+            guard panel.runModal() == .OK, let url = panel.url, let image = NSImage(contentsOf: url) else { return }
+            model.combine(with: image)
+            return
+        }
+        panel.beginSheetModal(for: window) { response in
+            guard response == .OK, let url = panel.url, let image = NSImage(contentsOf: url) else { return }
+            model.combine(with: image)
+        }
+    }
+}
+
+/// "Always on top": a small pin by the window buttons. Filled while the editor floats over other windows.
+private struct AlwaysOnTopToggle: View {
+    @AppStorage(EditorWindow.floatingKey) private var floating = true
+    @State private var hovering = false
+
+    var body: some View {
+        Button { EditorWindow.setFloating(!floating) } label: {
+            Image(systemName: floating ? "pin.fill" : "pin.slash")
+                .font(.system(size: 11, weight: .semibold))
+                .rotationEffect(.degrees(floating ? 45 : 0))
+                .foregroundStyle(floating ? Palette.accent : Color.white.opacity(hovering ? 0.9 : 0.55))
+                .frame(width: 24, height: 24)
+                .background(Circle().fill(Color.white.opacity(hovering ? 0.12 : 0)))
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .onHover { h in withAnimation(Motion.hover) { hovering = h } }
+        .hoverHint(floating ? "Always on top".loc : "Always on top: off".loc)
+        .accessibilityLabel("Always on top".loc)
+        .accessibilityAddTraits(floating ? .isSelected : [])
     }
 }
 
@@ -897,3 +999,26 @@ private struct ToolButton: View {
         .accessibilityAddTraits(isActive ? .isSelected : [])
     }
 }
+
+#if DEBUG
+extension EditorWindow {
+    /// Debug: draws in the open editor as a drag from `start` to `end` would (picture points), for promo
+    /// frames; `done` ends the drag. Returns the editor's window number.
+    /// `tool` switches tools first (by name); a nil `start` just clears the mark being drawn.
+    static func debugDrag(from start: CGPoint?, to end: CGPoint, done: Bool, tool: String?) -> Int? {
+        guard let window = Self.open.first(where: \.isVisible) else { return nil }
+        let model = window.model
+        if let tool = tool.flatMap(Annotation.Tool.init(rawValue:)), model.tool != tool { model.tool = tool }
+        if let start {
+            if done { model.dragEnded(at: end, start: start) } else { model.dragChanged(from: start, to: end) }
+        } else {
+            model.draft = nil
+        }
+        return window.windowNumber
+    }
+
+    static func debugCloseAll() {
+        Self.open.forEach { $0.close() }
+    }
+}
+#endif

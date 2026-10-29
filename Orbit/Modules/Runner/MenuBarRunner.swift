@@ -39,7 +39,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         }
     }
 
-    static let minFPS = 2.0, maxFPS = 20.0
+    static let minFPS = 2.0, maxFPS = 45.0
 
     /// 0…1 reading of the chosen source.
     private(set) var level: Double = 0
@@ -280,10 +280,11 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         if menuOpen { refreshStats() }
     }
 
-    /// Frames per second for the current level: idle → 2, flat out → 20 (or the other way round).
+    /// Frames per second for the current level: idle → 2, flat out → 45 (or the other way round).
+    /// The curve bends upward so a busy Mac visibly races while everyday load stays calm.
     static func pace(level: Double, invert: Bool, cap: Int) -> Double {
-        let l = invert ? 1 - level : level
-        var fps = minFPS + (maxFPS - minFPS) * l
+        let l = min(1, max(0, invert ? 1 - level : level))
+        var fps = minFPS + (maxFPS - minFPS) * pow(l, 1.4)
         if cap > 0 { fps = min(fps, Double(cap)) }
         return fps
     }

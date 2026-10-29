@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import SwiftUI
 
 /// ⌘C twice → a translation card next to the pointer. Also opens from the Ring, launcher or shortcut
-/// with whatever text is on the clipboard.
+/// with whatever text is on the clipboard. ⌘C three times (when turned on) checks spelling instead.
 @MainActor @Observable
 final class TranslateController {
     static let shared = TranslateController()
@@ -21,6 +21,16 @@ final class TranslateController {
     @ObservationIgnored private var lastPaste: (count: Int, text: String?, at: Date) = (0, nil, .distantPast)
     @ObservationIgnored private var lastTrigger = Date.distantPast
     @ObservationIgnored private var lastCopy: Date?
+    /// Presses in the current run of ⌘C, and the clipboard repeats seen in it.
+    @ObservationIgnored private var presses = 0
+    @ObservationIgnored private var repeats = 1
+    /// A double press waiting to see whether a third follows (only with ⌘C three times on).
+    @ObservationIgnored private var pendingDouble: DispatchWorkItem?
+    /// Orbit itself is copying (spell check reading a selection): not the user pressing ⌘C.
+    @ObservationIgnored private var quietUntil = Date.distantPast
+    @ObservationIgnored private var anchor: NSRect?
+    /// The selection the text was copied from, put back before 바꾸기.
+    @ObservationIgnored private var selection: SelectionAnchor?
     @ObservationIgnored private var job: Task<Void, Never>?
     @ObservationIgnored private lazy var panel: FloatingPanel = {
         let p = FloatingPanel(contentRect: .zero)
@@ -46,12 +56,22 @@ final class TranslateController {
     ///   never reach us (secure input, remote desktops, menu-bar Copy).
     func start() {
         if Self.live != nil || pasteTimer != nil { stop() }
-        guard Pref.defaults.bool(forKey: Pref.translateDoubleCopy) else { return }
+        guard Pref.defaults.bool(forKey: Pref.translateDoubleCopy) || Self.tripleCopy else { return }
         installTap()
         lastPaste = (NSPasteboard.general.changeCount, nil, .distantPast)
         pasteTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
             MainActor.assumeIsolated { TranslateController.shared.pollPasteboard() }
         }
+    }
+
+    /// ⌘C three times opens spell check (and ⌘C twice then waits a moment to see if a third comes).
+    static var tripleCopy: Bool { Pref.defaults.bool(forKey: Pref.spellTripleCopy) && SpellController.enabled }
+
+    /// Ignores the clipboard and ⌘C for a moment while Orbit copies on its own.
+    func quiet(for seconds: TimeInterval) {
+        quietUntil = max(quietUntil, Date().addingTimeInterval(seconds))
+        lastCopy = nil
+        pendingDouble?.cancel()
     }
 
     func stop() {
@@ -70,7 +90,8 @@ final class TranslateController {
             }
             let flags = event.flags.intersection([.maskCommand, .maskShift, .maskControl, .maskAlternate])
             if event.getIntegerValueField(.keyboardEventKeycode) == Int64(kVK_ANSI_C), flags == .maskCommand,
-               event.getIntegerValueField(.keyboardEventAutorepeat) == 0 {
+               event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
+               event.getIntegerValueField(.eventSourceUserData) != SelectionReader.marker {
                 DispatchQueue.main.async { MainActor.assumeIsolated { TranslateController.shared.copyPressed() } }
             }
             return Unmanaged.passUnretained(event)
@@ -84,12 +105,36 @@ final class TranslateController {
     }
 
     private func copyPressed() {
+        guard Date() > quietUntil else { return }
         let window = Pref.defaults.double(forKey: Pref.translateInterval)
         defer { lastCopy = Date() }
-        guard let last = lastCopy, Date().timeIntervalSince(last) <= window else { return }
-        lastCopy = .distantPast
-        // The app writes the pasteboard as it handles ⌘C; give it a beat.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { self.fire() }
+        guard let last = lastCopy, Date().timeIntervalSince(last) <= window else { presses = 1; return }
+        presses += 1
+        if presses >= 2 { pressed(presses) }
+        if presses >= 3 || !Self.tripleCopy { lastCopy = .distantPast; presses = 0 }
+    }
+
+    /// The second or third ⌘C of a run, from either detector.
+    private func pressed(_ count: Int) {
+        let triple = Self.tripleCopy
+        if count >= 3, triple {
+            pendingDouble?.cancel()
+            pendingDouble = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { self.fire(spelling: true) }
+            return
+        }
+        guard count == 2 else { return }
+        guard Pref.defaults.bool(forKey: Pref.translateDoubleCopy) else { return }
+        guard triple else {
+            // The app writes the pasteboard as it handles ⌘C; give it a beat.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { self.fire() }
+            return
+        }
+        // Wait out the window for a third press before translating.
+        guard pendingDouble == nil else { return }
+        let work = DispatchWorkItem { [weak self] in self?.pendingDouble = nil; self?.fire() }
+        pendingDouble = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Pref.defaults.double(forKey: Pref.translateInterval) + 0.12, execute: work)
     }
 
     /// Same text landing on the clipboard twice within the double-press window. Writes closer than
@@ -97,6 +142,8 @@ final class TranslateController {
     private func pollPasteboard() {
         let pb = NSPasteboard.general
         guard pb.changeCount != lastPaste.count else { return }
+        // Orbit borrowing the clipboard: note where it is now, count nothing.
+        if Date() <= quietUntil { lastPaste = (pb.changeCount, nil, .distantPast); repeats = 1; return }
         // Caught between the copying app clearing the clipboard and writing to it; look again next tick.
         if pb.types?.isEmpty ?? true { return }
         let text = pb.string(forType: .string)
@@ -104,16 +151,17 @@ final class TranslateController {
         let gap = now.timeIntervalSince(lastPaste.at)
         let repeated = text != nil && text == lastPaste.text
         lastPaste = (pb.changeCount, text, now)
-        guard repeated, gap >= 0.06, gap <= Pref.defaults.double(forKey: Pref.translateInterval) + 0.1 else { return }
-        lastPaste.at = .distantPast
-        fire()
+        guard repeated, gap >= 0.06, gap <= Pref.defaults.double(forKey: Pref.translateInterval) + 0.1 else { repeats = 1; return }
+        repeats += 1
+        pressed(repeats)
+        if repeats >= 3 || !Self.tripleCopy { lastPaste.at = .distantPast; repeats = 1 }
     }
 
     /// Both detectors usually see the same double press; translate once.
-    private func fire() {
+    private func fire(spelling: Bool = false) {
         guard Date().timeIntervalSince(lastTrigger) > 0.8 else { return }
         lastTrigger = Date()
-        translateClipboard()
+        if spelling { SpellController.shared.checkClipboard() } else { translateClipboard() }
     }
 
     func translateClipboard() {
@@ -121,10 +169,16 @@ final class TranslateController {
             Toast.show("Copy some text first", symbol: "character.bubble")
             return
         }
-        show(text)
+        // The text was just copied from the selection, which is still there: note where it is.
+        let front = NSWorkspace.shared.frontmostApplication
+        show(text, selection: SelectionAnchor.capture(in: front, text: text))
     }
 
-    func show(_ text: String) {
+    /// - Parameter frame: where the card goes instead of next to the pointer (the spell check card,
+    ///   when switching over from it).
+    func show(_ text: String, at frame: NSRect? = nil, selection: SelectionAnchor? = nil) {
+        anchor = frame
+        self.selection = selection
         source = String(text.prefix(5000))
         engine = TranslationEngine(rawValue: Pref.defaults.string(forKey: Pref.translateEngine) ?? "") ?? .google
         target = Self.direction(for: source)
@@ -199,11 +253,11 @@ final class TranslateController {
     /// Pastes over the selection the user copied from.
     func replaceSelection() {
         guard let output else { return }
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(output, forType: .string)
         job?.cancel()
-        panel.orderOut(nil) // no fade: the panel has to let go of the keyboard before ⌘V
-        Paster.paste()
+        panel.orderOut(nil) // no fade: the panel has to let go of the keyboard first
+        let anchor = selection
+        selection = nil
+        Task { _ = await SelectionReplacer.replace(with: output, anchor: anchor, app: Paster.lastExternal, feature: "translate") }
     }
 
     func hide() {
@@ -217,8 +271,25 @@ final class TranslateController {
 
     private static let width: CGFloat = 440
 
+    /// Over to spell check with the same text, in the same spot.
+    func switchToSpelling() {
+        let frame = panel.isVisible ? panel.frame : nil
+        let text: String = source
+        job?.cancel()
+        panel.orderOut(nil)
+        SpellController.shared.show(text, from: selection?.app ?? .current, at: frame, selection: selection)
+    }
+
     private func present() {
         let size = NSSize(width: Self.width, height: estimatedHeight(for: .working))
+        if let anchor, !panel.isVisible {
+            // Switching over: same top-left as the card it replaces, shown without a rise.
+            self.anchor = nil
+            panel.setFrame(fitted(NSRect(x: anchor.minX, y: anchor.maxY - size.height, width: size.width, height: size.height)), display: false)
+            panel.alphaValue = 1
+            panel.makeKeyAndOrderFront(nil)
+            return
+        }
         let mouse = NSEvent.mouseLocation
         let screen = NSScreen.active.visibleFrame
         var origin = NSPoint(x: mouse.x - 40, y: mouse.y - size.height - 18)
@@ -325,7 +396,7 @@ private struct TranslateCard: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Image(systemName: "character.bubble.fill").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.accent)
+            PanelModeSwitch(spelling: false, translate: {}, spell: { model.switchToSpelling() })
             HStack(spacing: 4) {
                 Text(sourceName).foregroundStyle(Palette.inkSecondary)
                     .padding(.leading, 9)
@@ -450,8 +521,8 @@ private struct TranslateCard: View {
     }
 }
 
-/// Placeholder bar while a translation is on its way.
-private struct Shimmer: View {
+/// Placeholder bar while a translation (or a spell check) is on its way.
+struct Shimmer: View {
     var body: some View {
         // Driven by a timeline, not a repeatForever animation — that one leaks into every other
         // layout change in the card (text reflowing as the window opens).

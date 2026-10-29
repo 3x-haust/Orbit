@@ -157,12 +157,19 @@ final class NotchPlayer {
     static var notchScreen: NSScreen? { NSScreen.screens.first { $0.safeAreaInsets.top > 0 && $0.auxiliaryTopLeftArea != nil } }
 
     func update() {
+        // Orbit's notch draws the music itself.
+        if NotchCenter.enabled {
+            model.wings = false
+            if model.banner == nil { close() }
+            return
+        }
         model.wings = enabled
         if enabled { open() } else if model.banner == nil { close() }
     }
 
     /// The banner, grown out of the notch. False when there's no notch to grow it from.
     func showBanner(_ content: WidgetContent) -> Bool {
+        if NotchCenter.enabled { return NotchCenter.shared.showBanner(content) }
         guard Self.notchScreen != nil else { return false }
         open()
         model.banner = content
@@ -175,6 +182,7 @@ final class NotchPlayer {
     }
 
     func refreshBanner(_ content: WidgetContent) {
+        if NotchCenter.enabled { NotchCenter.shared.refreshBanner(content); return }
         guard let banner = model.banner, banner.generation == content.generation else { return }
         withAnimation(.easeOut(duration: 0.2)) { model.banner = content }
     }

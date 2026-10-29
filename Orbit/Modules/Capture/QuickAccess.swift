@@ -259,6 +259,22 @@ final class QuickAccess {
     }
 }
 
+#if DEBUG
+extension QuickAccess {
+    /// Debug: shows one real thumbnail of `image`, kept, for promo frames. Returns its panel's window number.
+    func debugShow(_ image: NSImage, fileURL: URL) -> Int {
+        items.removeAll()
+        tucked = false
+        add(Capture(image: image, fileURL: fileURL), keep: true)
+        return panel.windowNumber
+    }
+
+    func debugClear() {
+        items.forEach(dismiss)
+    }
+}
+#endif
+
 private struct QuickAccessStack: View {
     let model: QuickAccess
 

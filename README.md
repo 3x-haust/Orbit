@@ -4,19 +4,28 @@
 
 # Orbit
 
-**Every Mac utility, in one orbit.**<br/>
-맥의 모든 유틸리티 앱을 한 번에
+**Every Mac utility, in one orbit.**
 
 [![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases/latest)
 [![macOS](https://img.shields.io/badge/macOS-26%2B-000000?style=flat-square&logo=apple&logoColor=white)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
 
-[**Download**](https://github.com/3x-haust/Orbit/releases/latest) · [Features](#features) · [Build from source](#build-from-source) · [한국어](README.ko.md)
+[**Download**](https://github.com/3x-haust/Orbit/releases/latest) · [Features](#features) · [Build from source](#build-from-source)
+
+**English** · [한국어](README.ko.md)
 
 <br/>
 
 <img src="docs/assets/hero.png" alt="Orbit" width="100%" />
+
+<br/><br/>
+
+<a href="https://github.com/3x-haust/Orbit/raw/main/docs/promo/orbit-promo-16x9-en.mp4">
+  <img src="docs/promo/orbit-promo.gif" alt="Orbit launch film" width="100%" />
+</a>
+
+<sub><a href="https://github.com/3x-haust/Orbit/raw/main/docs/promo/orbit-promo-16x9-en.mp4">▶︎ Watch the launch film (with sound)</a></sub>
 
 </div>
 
@@ -52,10 +61,11 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 | | |
 |---|---|
 | 🪐 **Orbit Ring** | Hold a shortcut or the middle mouse button — a ring of actions opens around your pointer. 3–12 slots, presets, drag-and-drop editing. |
-| 📸 **Capture** | Area, window, full screen, timed and scrolling captures. Screen recording with click highlights. An editor with arrows, text, blur, pixelate, spotlight, magnifier, ruler and color picker. Live Text and OCR. |
+| 📸 **Capture** | Area, window, full screen, timed and scrolling captures (keeps up with fast scrolls). Selection keys: ⇧ lock ratio, ⌥ from center, Space to move, Tab for presets, R for the last area, and C/S/E/P/T/V/L to pick what happens. Screen recording with click highlights. An editor with arrows, text, blur, pixelate, spotlight, magnifier, ruler and color picker. Live Text and OCR. |
 | 📋 **Clipboard** | Searchable history of text, images, files and colors. Single click pastes. |
 | 🪟 **Windows** | Halves, thirds, quarters, center and maximize from the keyboard — aware of Stage Manager and multiple displays. |
 | 🌐 **Translate** | Press ⌘C twice in any app. Google, DeepL (your key) or Apple, with automatic language detection. |
+| ✓ **Spell Check** | Select text and press ⌥⇧K. Korean spelling and spacing via the Daum and Naver checkers (opt-in) or on-device Apple Intelligence; replace the selection in place. |
 | ✍️ **Snippets** | Type an abbreviation, get the full text. |
 | 🔐 **Passwords** | An end-to-end encrypted vault (PBKDF2 + Secret Key, AES-GCM per item), Touch ID, Watchtower and browser import. |
 
@@ -64,6 +74,7 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 | | |
 |---|---|
 | 🔊 **Sound** | Per-app volume and EQ, plus a system-wide EQ. |
+| 🔳 **Notch** | A living notch: music with live artwork, calendar, timers, charging and AirPods, HUDs, and a file shelf — hover or swipe to open. |
 | 🎵 **Now Playing** | Controls in the notch with album art and a banner when the song changes; pauses music while a video plays. |
 | ⌨️ **Input** | Automatic 한/영 switching, a scroll direction for the mouse and trackpad separately, and a keyboard-cleaning lock. |
 | ☕️ **Keep Awake** | Sessions by time, until a time or while an app runs — even with the lid closed. |
@@ -86,9 +97,9 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 
 ## Install
 
-1. Download `Orbit-1.0.0.zip` from the [latest release](https://github.com/3x-haust/Orbit/releases/latest).
-2. Unzip and move **Orbit.app** to `/Applications`.
-3. Open it. Orbit lives in the menu bar; the setup page walks you through the permissions it needs.
+1. Download `Orbit-<version>.dmg` (or the `.zip`) from the [latest release](https://github.com/3x-haust/Orbit/releases/latest).
+2. Open it and drag **Orbit** into **Applications**.
+3. Launch Orbit. It lives in the menu bar; the setup page walks you through the permissions it needs.
 
 Orbit updates itself from GitHub Releases. You can turn automatic checks and installs on or off in **General › Updates**.
 
@@ -103,9 +114,10 @@ Orbit updates itself from GitHub Releases. You can turn automatic checks and ins
 | Screen Recording | Capture, recording, color picker, menu bar previews |
 | Full Disk Access | Hiding menu bar icons for real, storage analysis |
 | Camera | Face Unlock (on-device only) |
-| Calendars | Events in the menu bar calendar |
+| Calendars | Events in the menu bar calendar and the notch |
+| Bluetooth | AirPods and device notices in the notch |
 
-Everything stays on your Mac. Orbit has no account, no server and no analytics; the only network requests are the translation engine you pick and the update check.
+Everything stays on your Mac. Orbit has no account, no server and no analytics; the only network requests are the translation and spell-check engines you pick and the update check.
 
 ## Requirements
 

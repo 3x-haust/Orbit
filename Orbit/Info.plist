@@ -60,10 +60,12 @@
 	<string>Orbit uses this to switch Dark Mode and empty the Trash when you ask it to.</string>
 	<key>NSAudioCaptureUsageDescription</key>
 	<string>Orbit routes each app's sound through its volume and EQ controls. Nothing is recorded.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Orbit shows a notice in the notch when your AirPods or other Bluetooth devices connect, with their battery level.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Orbit shows your events in the menu bar calendar. They never leave this Mac.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Orbit uses the camera on this Mac to recognize your face and unlock the apps you locked. Nothing leaves your Mac.</string>
+	<string>Orbit uses the camera on this Mac to recognize your face and unlock the apps you locked, and for the notch mirror when you turn it on. Nothing leaves your Mac.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Orbit</string>
 	<key>NSMicrophoneUsageDescription</key>

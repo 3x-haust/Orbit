@@ -20,3 +20,9 @@ dist/
 # Python
 __pycache__/
 *.pyc
+
+# DMG tooling venv
+tools/dmg/.venv/
+
+# Tavi input method fetched by tools/fetch-tavi.sh
+tools/tavi-cache/

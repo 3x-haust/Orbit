@@ -182,6 +182,21 @@ struct InputPage: View {
                     }
                 }
 
+                SettingsGroup(title: "Tavi updates") {
+                    SettingsRow(title: "Tavi %@".loc(tavi.installedVersion ?? ""), subtitle: taviUpdateSummary, symbol: "arrow.down.circle") {
+                        if tavi.updateState == .checking || tavi.updateState == .downloading {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Button("Check Now") { Task { await tavi.checkForUpdate(userInitiated: true) } }
+                                .buttonStyle(PillButtonStyle(prominent: false))
+                        }
+                    }
+                    RowDivider()
+                    SettingsRow(title: "Update Tavi automatically", subtitle: "Checks Tavi’s releases a minute after launch, then daily. Each update is verified before it’s installed.", symbol: "clock.arrow.circlepath") {
+                        Toggle("", isOn: Binding(get: { tavi.autoUpdate }, set: { tavi.autoUpdate = $0 })).toggleStyle(.switch).labelsHidden()
+                    }
+                }
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         SectionLabel("My words")
@@ -235,6 +250,16 @@ struct InputPage: View {
         }
         .onAppear { tavi.refresh() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in tavi.refresh() }
+    }
+
+    private var taviUpdateSummary: String {
+        switch tavi.updateState {
+        case .checking: "Checking…".loc
+        case .downloading: "Updating Tavi…".loc
+        case .upToDate: "Tavi is up to date".loc
+        case .failed(let message): message
+        case .idle: "From Tavi’s GitHub releases".loc
+        }
     }
 
     private var shown: [TaviBridge.Word] {
@@ -297,7 +322,7 @@ private struct TaviHero: View {
         switch tavi.status {
         case .notInstalled: "Orbit includes Tavi. Installing takes a second; macOS then asks you to add it once.".loc
         case .updateAvailable(let v): "Version %@ is ready to install.".loc(v)
-        case .needsAdding: "Keyboard Settings › Text Input › Edit › + › Korean › Tavi. macOS only lets you add input methods there.".loc
+        case .needsAdding: "One step only you can do: in Keyboard Settings, Text Input › Edit… › + › Korean › Tavi › Add. Orbit switches to Tavi as soon as it’s added.".loc
         case .ready: tavi.isSelected ? "Version %@. Everything runs on this Mac.".loc(tavi.installedVersion ?? "") : "Pick Tavi from the input menu, or switch here.".loc
         case .working: "".loc
         case .failed(let message): message

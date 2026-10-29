@@ -19,7 +19,25 @@ final class CaptureService {
 
     private(set) var recent: [Capture] = []
     private(set) var isCapturing = false
-    private var lastArea: (rect: CGRect, screenID: CGDirectDisplayID)?
+
+    /// A captured area: top-left origin, points, display-local.
+    struct Area {
+        let rect: CGRect
+        let screenID: CGDirectDisplayID
+    }
+
+    /// The last area captured, kept across launches for R in the overlay and Repeat Last Capture.
+    private var lastArea: Area? {
+        get {
+            guard let v = Pref.defaults.array(forKey: Pref.captureLastArea) as? [Double], v.count == 5 else { return nil }
+            return Area(rect: CGRect(x: v[0], y: v[1], width: v[2], height: v[3]), screenID: CGDirectDisplayID(v[4]))
+        }
+        set {
+            guard let a = newValue else { Pref.defaults.removeObject(forKey: Pref.captureLastArea); return }
+            let values: [Double] = [Double(a.rect.minX), Double(a.rect.minY), Double(a.rect.width), Double(a.rect.height), Double(a.screenID)]
+            Pref.defaults.set(values, forKey: Pref.captureLastArea)
+        }
+    }
 
     private init() { loadRecent() }
 
@@ -43,18 +61,19 @@ final class CaptureService {
                 case .scrolling:
                     // Pick the area, then capture it live while it's scrolled.
                     let shots = try await snapshots()
-                    guard let result = await SelectionOverlay.run(shots: shots, windows: [], startInWindowMode: false, textMode: false),
+                    guard let result = await SelectionOverlay.run(shots: shots, windows: [], startInWindowMode: false, textMode: false,
+                                                                  lastArea: lastArea),
                           result.rect.width > 0 else { return }
                     ScrollingCapture.shared.begin(rect: result.rect, screenID: result.screenID, scale: result.scale)
                 case .area, .window, .text:
                     let shots = try await snapshots()
                     let windows = mode == .window || mode == .area ? try await windowTargets() : []
-                    guard let result = await SelectionOverlay.run(shots: shots, windows: windows, startInWindowMode: mode == .window, textMode: mode == .text) else { return }
+                    guard let result = await SelectionOverlay.run(shots: shots, windows: windows, startInWindowMode: mode == .window,
+                                                                  textMode: mode == .text, allowsActions: mode != .text,
+                                                                  lastArea: lastArea) else { return }
+                    if mode != .text, result.rect.width > 0 { lastArea = Area(rect: result.rect, screenID: result.screenID) }
                     if mode == .text { await recognizeText(result.image) }
-                    else {
-                        lastArea = (result.rect, result.screenID)
-                        finish(result.image, scale: result.scale)
-                    }
+                    else { await deliver(result) }
                 }
             } catch {
                 Toast.show("Couldn’t capture the screen", symbol: "exclamationmark.triangle.fill", detail: error.localizedDescription)
@@ -158,7 +177,51 @@ final class CaptureService {
 
     // MARK: Results
 
+    /// Hands the selection to what the key picked in the overlay, or the usual after-capture steps.
+    private func deliver(_ result: SelectionOverlay.Result) async {
+        guard let action = result.action else { finish(result.image, scale: result.scale); return }
+        switch action {
+        case .copy:
+            let capture = store(result.image, scale: result.scale)
+            copy(capture.image)
+            Toast.show("Copied", symbol: "doc.on.doc")
+        case .save:
+            let capture = store(result.image, scale: result.scale)
+            if let url = save(capture) {
+                Toast.show("Saved", symbol: "arrow.down.circle.fill", detail: url.deletingLastPathComponent().lastPathComponent)
+            } else {
+                Toast.show("Couldn’t save the screenshot", symbol: "exclamationmark.triangle.fill")
+            }
+        case .edit:
+            let capture = store(result.image, scale: result.scale)
+            EditorWindow.open(image: capture.image, fileURL: capture.fileURL) { QuickAccess.shared.add(capture, keep: true) }
+        case .pin:
+            let capture = store(result.image, scale: result.scale)
+            PinWindow.pin(capture.image, fileURL: capture.fileURL)
+        case .text:
+            await recognizeText(result.image)
+        case .record:
+            guard let screen = NSScreen.screens.first(where: { $0.displayID == result.screenID }), result.rect.width > 0 else { return }
+            let r = result.rect
+            let frame = CGRect(x: screen.frame.minX + r.minX, y: screen.frame.maxY - r.maxY, width: r.width, height: r.height)
+            Recorder.shared.start(target: RecordTarget(kind: .area, screen: screen, frame: frame))
+        case .scroll:
+            guard result.rect.width >= 40, result.rect.height >= 40 else {
+                Toast.show("Pick a larger area for a scrolling capture", symbol: "arrow.down.doc")
+                return
+            }
+            ScrollingCapture.shared.begin(rect: result.rect, screenID: result.screenID, scale: result.scale)
+        }
+    }
+
     func finish(_ cg: CGImage, scale: CGFloat) {
+        let capture = store(cg, scale: scale)
+        if Pref.defaults.bool(forKey: Pref.captureAutoCopy) { copy(capture.image) }
+        QuickAccess.shared.add(capture)
+    }
+
+    /// Writes the picture into the capture library (recent captures) with the shutter sound.
+    private func store(_ cg: CGImage, scale: CGFloat) -> Capture {
         let size = NSSize(width: CGFloat(cg.width) / scale, height: CGFloat(cg.height) / scale)
         let image = NSImage(cgImage: cg, size: size)
         let name = "Orbit \(Self.fileStamp.string(from: Date())).png"
@@ -167,12 +230,11 @@ final class CaptureService {
             try? data.write(to: url)
         }
         if Pref.defaults.bool(forKey: Pref.captureSound) { Self.shutter?.stop(); Self.shutter?.play() }
-        if Pref.defaults.bool(forKey: Pref.captureAutoCopy) { copy(image) }
 
         let capture = Capture(image: image, fileURL: url)
         recent.insert(capture, at: 0)
         if recent.count > 30 { recent.removeLast() }
-        QuickAccess.shared.add(capture)
+        return capture
     }
 
     private func recognizeText(_ cg: CGImage) async {

@@ -48,6 +48,29 @@ final class NowPlaying {
 
     var onTrackChange: ((Track) -> Void)?
 
+    #if DEBUG
+    /// Debug: a placeholder song's fixed position; while set, the real player isn't listened to.
+    var debugElapsed: Double?
+
+    /// Debug: shows a made-up song instead of what's really playing, for promo frames; nil goes back.
+    func debugPlaceholder(title: String?, artist: String, duration: Double, elapsed: Double, artwork: NSImage?) {
+        guard let title else {
+            debugElapsed = nil
+            track = nil
+            playing = false
+            setArtwork(nil)
+            update()
+            return
+        }
+        debugElapsed = elapsed
+        stop()
+        track = Track(title: title, artist: artist, album: "", duration: duration, bundle: nil, appName: nil, isMusic: true)
+        setArtwork(artwork)
+        playing = true
+        generation += 1
+    }
+    #endif
+
     private init() {
         bridge.onPayload = { [weak self] in self?.apply($0) }
         bridge.onFailure = { [weak self] message in
@@ -71,6 +94,7 @@ final class NowPlaying {
         let d = Pref.defaults
         return d.bool(forKey: NowPlayingPrefs.widget) || d.bool(forKey: NowPlayingPrefs.popup)
             || d.bool(forKey: NowPlayingPrefs.notch) || NowPlayingPrefs.autoPauseOn
+            || (NotchCenter.enabled && d.bool(forKey: NotchPrefs.liveMusic))
     }
 
     /// Starts or stops listening to match what's turned on, and the widget/notch/popup with it.
@@ -81,6 +105,9 @@ final class NowPlaying {
     }
 
     func start() {
+        #if DEBUG
+        if debugElapsed != nil { return } // a placeholder song is showing; don't listen
+        #endif
         guard !started else { return }
         started = true
         listeningSince = Date()
@@ -118,6 +145,9 @@ final class NowPlaying {
     var duration: Double { track?.duration ?? 0 }
 
     func elapsed(at date: Date = Date()) -> Double {
+        #if DEBUG
+        if let debugElapsed { return debugElapsed }
+        #endif
         let e = elapsedAnchor + (playing ? date.timeIntervalSince(anchorDate) * (rate > 0 ? rate : 1) : 0)
         return duration > 0 ? min(max(0, e), duration) : max(0, e)
     }

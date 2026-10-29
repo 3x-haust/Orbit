@@ -26,6 +26,7 @@ final class DisplayOSD {
     private init() {}
 
     func show(_ kind: Kind, value: Double, caption: String? = nil, on display: CGDirectDisplayID) {
+        if NotchCenter.shared.showHUD(kind, value: value, caption: caption, on: display) { return }
         model.kind = kind
         model.caption = caption
         withAnimation(.spring(duration: 0.18, bounce: 0)) { model.value = value }

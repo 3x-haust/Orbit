@@ -20,6 +20,7 @@ struct CapturePage: View {
     @AppStorage(Pref.recordCountdown) private var countdown = 3
     @AppStorage(Pref.recordOpen) private var openAfter = "none"
     @AppStorage(Pref.timedCaptureSeconds) private var timerSeconds = 5
+    @AppStorage(Pref.captureKeyHints) private var keyHints = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
@@ -122,13 +123,47 @@ struct CapturePage: View {
             }
 
             SettingsGroup(title: "While selecting") {
-                tip("Space", "Switch between area and window")
+                SettingsRow(title: "Show key hints", subtitle: "A strip of shortcuts at the bottom of the screen. It fades after a few seconds and comes back when you press a key.", symbol: "keyboard") {
+                    Toggle("", isOn: $keyHints).toggleStyle(.switch).labelsHidden()
+                }
                 RowDivider()
-                tip("⇧", "Hold while dragging for a perfect square")
+                tip("Space", "Switch between area and window")
                 RowDivider()
                 tip("↩", "Capture the whole display")
                 RowDivider()
                 tip("Click", "Capture the window under the pointer")
+                RowDivider()
+                tip("Tab", "Cycle the aspect ratio: free, 1:1, 4:3, 3:2, 16:9, 9:16 (⇧Tab goes back)")
+                RowDivider()
+                tip("R", "Bring back the last captured area, then ↩ to capture it")
+                RowDivider()
+                tip("⌘C", "Copy the color under the magnifier as a hex code")
+            }
+
+            SettingsGroup(title: "While you drag") {
+                tip("⇧", "Hold to lock the aspect ratio (a square unless a ratio is picked)")
+                RowDivider()
+                tip("⌥", "Hold to grow the area from where you started")
+                RowDivider()
+                tip("Space", "Hold to move the whole area")
+                RowDivider()
+                tip("←↑↓→", "Nudge the corner by 1 pt, with ⇧ by 10 pt")
+            }
+
+            SettingsGroup(title: "Then, before you let go", footer: "Press the same key again for the usual steps after capture.") {
+                tip("C", "Copy only")
+                RowDivider()
+                tip("S", "Save to file")
+                RowDivider()
+                tip("E", "Open in Editor")
+                RowDivider()
+                tip("P", "Pin on screen")
+                RowDivider()
+                tip("T", "Recognize text and copy it")
+                RowDivider()
+                tip("V", "Record this area as a video")
+                RowDivider()
+                tip("L", "Scrolling capture of this area")
             }
         }
     }
@@ -144,6 +179,8 @@ struct ClipboardPage: View {
     @AppStorage(Pref.historyLimit) private var limit = 500
     @AppStorage(Pref.pasteDirectly) private var pasteDirectly = true
     @AppStorage(Pref.shelfEdge) private var shelfEdge = true
+    @AppStorage(Pref.shelfPosition) private var shelfPosition = Shelf.Edge.right.rawValue
+    @AppStorage(NotchPrefs.enabled) private var notchOn = true
     @State private var ignored = Pref.defaults.stringArray(forKey: Pref.ignoredApps) ?? []
     private var store: ClipboardStore { .shared }
 
@@ -207,7 +244,7 @@ struct ClipboardPage: View {
                         .onChange(of: shelfEdge) { Shelf.shared.startEdgeReveal() }
                 }
                 RowDivider()
-                SettingsRow(title: "Shelf position", subtitle: "Which edge of the screen it comes out of.", symbol: "rectangle.righthalf.inset.filled") {
+                SettingsRow(title: "Shelf position", subtitle: shelfPosition == Shelf.Edge.top.rawValue && notchOn ? "Opens as the notch's Shelf tab." : "Which edge of the screen it comes out of.", symbol: "rectangle.righthalf.inset.filled") {
                     ShelfEdgePicker()
                 }
                 RowDivider()
@@ -400,7 +437,7 @@ struct ShortcutsPage: View {
             group("Capture", [OrbitAction.captureArea, .captureWindow, .captureScreen, .captureText, .captureRepeat, .recentCaptures].map { ($0.shortcutName!, $0.title, $0.symbol) })
             group("Record Video", [OrbitAction.recordArea, .recordWindow, .recordScreen, .stopRecording].map { ($0.shortcutName!, $0.title, $0.symbol) })
             group("Windows", OrbitAction.allCases.filter { $0.windowLayout != nil }.map { ($0.shortcutName!, $0.title, $0.symbol) })
-            group("Tools", [OrbitAction.translate, .colorPicker, .captureTimed, .shelf, .keepAwake, .pinLastCapture, .hideMenuBarIcons].map { ($0.shortcutName!, $0.title, $0.symbol) })
+            group("Tools", [OrbitAction.translate, .spellCheck, .colorPicker, .captureTimed, .shelf, .keepAwake, .pinLastCapture, .hideMenuBarIcons].map { ($0.shortcutName!, $0.title, $0.symbol) })
             group("Mac", OrbitAction.allCases.filter { $0.group == "System" }.map { ($0.shortcutName!, $0.title, $0.symbol) })
         }
     }
@@ -629,6 +666,13 @@ private struct UpdatesGroup: View {
             SettingsRow(title: "Install updates automatically", subtitle: "Off: Orbit asks first and shows what’s new.", symbol: "arrow.down.app") {
                 Toggle("", isOn: $updater.autoInstall).toggleStyle(.switch).labelsHidden()
                     .disabled(!updater.autoCheck)
+            }
+            if TaviBridge.shared.installedVersion != nil {
+                RowDivider()
+                SettingsRow(title: "Update Tavi too", subtitle: "Keeps automatic 한/영 on Tavi’s newest release.", symbol: "character.bubble") {
+                    Toggle("", isOn: Binding(get: { TaviBridge.shared.autoUpdate }, set: { TaviBridge.shared.autoUpdate = $0 }))
+                        .toggleStyle(.switch).labelsHidden()
+                }
             }
         }
         .animation(.spring(duration: 0.3), value: updater.status)

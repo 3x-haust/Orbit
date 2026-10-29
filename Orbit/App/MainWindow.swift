@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum Page: String, CaseIterable, Identifiable {
-    case home, ring, capture, clipboard, windows, translate, snippets, passwords, input, menubar, corners, runner, applock, sound, nowPlaying, storage, awake, battery, displays, archives, apps, system, overlaps, shortcuts, setup, general
+    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, apps, system, overlaps, shortcuts, setup, general
     var id: String { rawValue }
 
     var title: String { englishTitle.loc }
@@ -15,9 +15,11 @@ enum Page: String, CaseIterable, Identifiable {
         case .clipboard: "Clipboard"
         case .windows: "Windows"
         case .translate: "Translate"
+        case .spell: "Spelling"
         case .snippets: "Snippets"
         case .passwords: "Passwords"
         case .nowPlaying: "Now Playing"
+        case .notch: "Notch"
         case .battery: "Battery"
         case .displays: "Displays"
         case .archives: "Archives"
@@ -46,9 +48,11 @@ enum Page: String, CaseIterable, Identifiable {
         case .clipboard: "doc.on.clipboard"
         case .windows: "rectangle.split.2x1"
         case .translate: "character.bubble"
+        case .spell: "textformat.abc.dottedunderline"
         case .snippets: "text.badge.plus"
         case .passwords: "key.horizontal"
         case .nowPlaying: "music.note"
+        case .notch: "rectangle.topthird.inset.filled"
         case .battery: "battery.75percent"
         case .displays: "display.2"
         case .archives: "archivebox"
@@ -72,8 +76,8 @@ enum Page: String, CaseIterable, Identifiable {
     /// Sidebar groups; the first has no heading.
     static let sections: [(title: String?, pages: [Page])] = [
         (nil, [.home, .ring]),
-        ("Essentials", [.capture, .clipboard, .windows, .translate, .snippets, .passwords]),
-        ("Utilities", [.sound, .nowPlaying, .input, .awake, .menubar, .corners, .runner, .applock]),
+        ("Essentials", [.capture, .clipboard, .windows, .translate, .spell, .snippets, .passwords]),
+        ("Utilities", [.sound, .nowPlaying, .notch, .input, .awake, .menubar, .corners, .runner, .applock]),
         ("Mac", [.apps, .system, .displays, .battery, .storage, .archives]),
         ("Settings", [.overlaps, .shortcuts, .setup, .general]),
     ]
@@ -244,6 +248,7 @@ struct MainView: View {
         case .awake: AwakePage()
         case .system: SystemPage()
         case .translate: TranslatePage()
+        case .spell: SpellPage()
         case .input: InputPage()
         case .menubar: MenuBarPage()
         case .corners: HotCornersPage()
@@ -254,6 +259,7 @@ struct MainView: View {
         case .snippets: SnippetsPage()
         case .passwords: PasswordsPage()
         case .nowPlaying: NowPlayingPage()
+        case .notch: NotchPage()
         case .battery: BatteryPage()
         case .displays: DisplaysPage()
         case .archives: ArchivesPage()

@@ -12,10 +12,11 @@ enum Toast {
         panel?.orderOut(nil)
     }
 
-    static func show(_ message: String, symbol: String = "checkmark.circle.fill", detail: String? = nil) {
+    /// `level`: above the capture overlay (screen-saver level) when shown from it.
+    static func show(_ message: String, symbol: String = "checkmark.circle.fill", detail: String? = nil, level: NSWindow.Level = .statusBar) {
         let panel = self.panel ?? FloatingPanel(contentRect: .zero, focusable: false)
         self.panel = panel
-        panel.level = .statusBar
+        panel.level = level
         panel.ignoresMouseEvents = true
         panel.hasShadow = false
 
@@ -64,3 +65,40 @@ private struct ToastView: View {
         .padding(Space.standard)
     }
 }
+
+#if DEBUG
+extension Toast {
+    private static var stage: NSWindow?
+
+    /// Debug: the real toast in one window over `backdrop` (the stage under where it shows), so its glass
+    /// picks that up; `bottom` is its usual 64pt from the screen's foot. For promo frames. Returns the window number.
+    static func debugStage(_ message: String, symbol: String, detail: String?, backdrop: NSImage, bottom: CGFloat) -> Int {
+        let size = backdrop.size
+        let view = ZStack(alignment: .bottom) {
+            Image(nsImage: backdrop).resizable().frame(width: size.width, height: size.height)
+            if !message.isEmpty { // empty: the backdrop alone, to measure against
+                ToastView(message: message.loc, symbol: symbol, detail: detail?.loc).orbitTint()
+                    .padding(.bottom, bottom)
+            }
+        }
+        .frame(width: size.width, height: size.height)
+        let window = stage ?? NSWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: .borderless, backing: .buffered, defer: false)
+        stage = window
+        window.level = .statusBar
+        window.ignoresMouseEvents = true
+        window.hasShadow = false
+        window.animationBehavior = .none
+        let host = NSHostingView(rootView: view)
+        host.sizingOptions = []
+        host.safeAreaRegions = []
+        window.contentView = FloatingPanel.container(for: host)
+        window.setFrame(NSRect(origin: NSScreen.main?.frame.origin ?? .zero, size: size), display: true)
+        window.orderFrontRegardless()
+        return window.windowNumber
+    }
+
+    static func debugUnstage() {
+        stage?.orderOut(nil)
+    }
+}
+#endif

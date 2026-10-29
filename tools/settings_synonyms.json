@@ -466,6 +466,46 @@
       "new version",
       "release",
       "releases"
+    ],
+    [
+      "노치",
+      "notch",
+      "다이내믹 아일랜드",
+      "dynamic island",
+      "라이브 활동",
+      "live activity",
+      "live activities"
+    ],
+    [
+      "뽀모도로",
+      "pomodoro",
+      "타이머",
+      "timer",
+      "카운트다운",
+      "countdown"
+    ],
+    [
+      "거울",
+      "mirror",
+      "셀카",
+      "웹캠",
+      "webcam",
+      "카메라 미리보기"
+    ],
+    [
+      "맞춤법",
+      "맞춤법 검사",
+      "맞춤법 검사기",
+      "spelling",
+      "spell check",
+      "spellcheck",
+      "proofread",
+      "교정",
+      "오타",
+      "typo",
+      "문법",
+      "grammar",
+      "띄어쓰기"
     ]
   ],
   "apps": {
@@ -577,7 +617,19 @@
     "원패스워드": "passwords",
     "1Password": "passwords",
     "베터디스플레이": "displays",
-    "런치패드": "apps"
+    "런치패드": "apps",
+    "boring.notch": "notch",
+    "Boring Notch": "notch",
+    "NotchNook": "notch",
+    "Alcove": "notch",
+    "Mew Notch": "notch",
+    "TheBoringNotch": "notch",
+    "Grammarly": "spell",
+    "LanguageTool": "spell",
+    "그래머리": "spell",
+    "랭귀지툴": "spell",
+    "네이버 맞춤법 검사기": "spell",
+    "다음 맞춤법 검사기": "spell"
   },
   "pages": {
     "home": [
@@ -619,6 +671,34 @@
       "refresh rate",
       "HiDPI",
       "스케일"
+    ],
+    "notch": [
+      "노치 꾸미기",
+      "노치 앱",
+      "dynamic island",
+      "다이내믹 아일랜드",
+      "notch hud",
+      "노치 HUD",
+      "노치 선반"
+    ],
+    "spell": [
+      "맞춤법",
+      "맞춤법 검사",
+      "맞춤법 검사기",
+      "spell check",
+      "grammar",
+      "proofread",
+      "교정",
+      "문법 검사",
+      "띄어쓰기",
+      "오타",
+      "typo",
+      "다음",
+      "네이버",
+      "daum",
+      "naver",
+      "한스펠",
+      "hanspell"
     ]
   },
   "actions": {
@@ -676,6 +756,28 @@
     "fanBoost": [
       "팬 최대",
       "팬 부스트"
+    ],
+    "notchToggle": [
+      "노치 열기",
+      "노치 닫기",
+      "open notch"
+    ],
+    "notchShelf": [
+      "노치 선반",
+      "shelf in notch"
+    ],
+    "notchTimer": [
+      "노치 타이머",
+      "뽀모도로 시작",
+      "quick timer"
+    ],
+    "spellCheck": [
+      "맞춤법 검사",
+      "맞춤법 고치기",
+      "띄어쓰기 검사",
+      "오타 고치기",
+      "proofread",
+      "fix typos"
     ]
   },
   "noTrigger": [

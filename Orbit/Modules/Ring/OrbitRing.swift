@@ -27,6 +27,10 @@ final class OrbitRing {
     private(set) var pointerAngle: Double?
     private(set) var dwellProgress: Double = 0
     private(set) var appeared = false
+    #if DEBUG
+    /// Debug: holds the open/close animation at this progress for promo frames (see `debugPose`).
+    var debugAppear: Double?
+    #endif
 
     @ObservationIgnored private var center: CGPoint = .zero
     @ObservationIgnored private var openMouse: CGPoint = .zero
@@ -255,9 +259,9 @@ private struct RingView: View {
             ForEach(Array(ring.slots.enumerated()), id: \.offset) { index, action in
                 RingItem(action: action, scale: OrbitRing.itemScale(ring.slots.count), selected: ring.selection == index,
                          progress: ring.selection == index ? ring.dwellProgress : 0)
-                    .offset(ring.appeared ? offset(index: index) : .zero)
-                    .scaleEffect(ring.appeared ? 1 : 0.4)
-                    .opacity(ring.appeared ? 1 : 0)
+                    .offset(offset(index: index) * appear)
+                    .scaleEffect(0.4 + 0.6 * appear)
+                    .opacity(appear)
                     .onTapGesture { ring.click(index) }
             }
 
@@ -265,7 +269,15 @@ private struct RingView: View {
                 .onTapGesture { ring.click(nil) }
         }
         .frame(width: size, height: size)
-        .scaleEffect(ring.appeared ? 1 : 0.86)
+        .scaleEffect(0.86 + 0.14 * appear)
+    }
+
+    /// 0 closed, 1 open; the spring animates between them.
+    private var appear: CGFloat {
+        #if DEBUG
+        if let p = ring.debugAppear { return CGFloat(p) }
+        #endif
+        return ring.appeared ? 1 : 0
     }
 
     private func offset(index: Int) -> CGSize {
@@ -444,3 +456,37 @@ struct OrbitMark: View {
         return CGPoint(x: x * cos(tilt) - y * sin(tilt) + c.x, y: x * sin(tilt) + y * cos(tilt) + c.y)
     }
 }
+
+private extension CGSize {
+    static func * (size: CGSize, k: CGFloat) -> CGSize { CGSize(width: size.width * k, height: size.height * k) }
+}
+
+#if DEBUG
+extension OrbitRing {
+    /// Debug: holds the ring in one pose for promo frames, with the default slots and the real mouse ignored.
+    /// `appear` is the open animation's progress (past 1 for the spring's overshoot); `angle` the pointer's
+    /// direction in degrees, nil before it has moved. Returns the ring's window number.
+    func debugPose(appear: Double, angle: Double?) -> Int {
+        if !isVisible { open(hold: true) }
+        removeMonitors()
+        stopDwell()
+        var t = Transaction()
+        t.disablesAnimations = true
+        withTransaction(t) {
+            slots = Self.defaultSlots
+            debugAppear = appear
+            pointerAngle = angle.map { $0 * .pi / 180 }
+            selection = angle.map { a in
+                let step = 360 / Double(slots.count)
+                return Int((a + step / 2) / step) % slots.count
+            }
+        }
+        return panel.windowNumber
+    }
+
+    func debugClose() {
+        debugAppear = nil
+        close()
+    }
+}
+#endif

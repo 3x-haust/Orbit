@@ -19,6 +19,9 @@
     " as alias)": {
       "extractionState": "manual"
     },
+    " band too small": {
+      "extractionState": "manual"
+    },
     " in ": {
       "extractionState": "manual"
     },
@@ -28,10 +31,19 @@
     " time": {
       "extractionState": "manual"
     },
+    " | loose": {
+      "extractionState": "manual"
+    },
     "#%02X%02X%02X": {
       "extractionState": "manual"
     },
+    "#%d %@ shift %@ rows %d wheel %@ %.2f ms | %@ (quiet %d, idle %d)": {
+      "extractionState": "manual"
+    },
     "#KEY": {
+      "extractionState": "manual"
+    },
+    "#RRGGBB": {
       "extractionState": "manual"
     },
     "% CPU": {
@@ -109,6 +121,9 @@
     "%.2f W": {
       "extractionState": "manual"
     },
+    "%.2fs": {
+      "extractionState": "manual"
+    },
     "%.2g×": {
       "extractionState": "manual"
     },
@@ -128,6 +143,9 @@
       "extractionState": "manual"
     },
     "%2B": {
+      "extractionState": "manual"
+    },
+    "%7.3f ": {
       "extractionState": "manual"
     },
     "%@ Hz": {
@@ -152,6 +170,17 @@
         }
       }
     },
+    "%@ checked instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대신 %@(으)로 검사했어요."
+          }
+        }
+      }
+    },
     "%@ comes with macOS and is protected by the system.": {
       "extractionState": "manual",
       "localizations": {
@@ -164,6 +193,17 @@
       }
     },
     "%@ copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 복사됨"
+          }
+        }
+      }
+    },
+    "%@ copied to clipboard": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
@@ -240,6 +280,17 @@
         }
       }
     },
+    "%@ only checks Korean.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 검사기는 한국어만 검사해요."
+          }
+        }
+      }
+    },
     "%@ quit — sleep is back to normal": {
       "extractionState": "manual",
       "localizations": {
@@ -273,6 +324,17 @@
         }
       }
     },
+    "%@ took too long to answer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 검사기가 4초 안에 답하지 않았어요."
+          }
+        }
+      }
+    },
     "%@ waiting to be deleted": {
       "extractionState": "manual",
       "localizations": {
@@ -280,6 +342,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 삭제 대기 중"
+          }
+        }
+      }
+    },
+    "%@ · in %ld min": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %ld분 후"
           }
         }
       }
@@ -400,6 +473,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일 %ld개"
+          }
+        }
+      }
+    },
+    "%ld fixes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고친 곳 %ld개"
           }
         }
       }
@@ -734,6 +818,24 @@
         }
       }
     },
+    "&amp;": {
+      "extractionState": "manual"
+    },
+    "&apos;": {
+      "extractionState": "manual"
+    },
+    "&gt;": {
+      "extractionState": "manual"
+    },
+    "&lt;": {
+      "extractionState": "manual"
+    },
+    "&nbsp;": {
+      "extractionState": "manual"
+    },
+    "&quot;": {
+      "extractionState": "manual"
+    },
     ") (not a music app, or skipped)": {
       "extractionState": "manual"
     },
@@ -750,6 +852,9 @@
       "extractionState": "manual"
     },
     "+ Save as preset": {
+      "extractionState": "manual"
+    },
+    "+ am": {
       "extractionState": "manual"
     },
     "+%.1f": {
@@ -875,6 +980,17 @@
         }
       }
     },
+    "1 fix": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고친 곳 1개"
+          }
+        }
+      }
+    },
     "1 hour": {
       "extractionState": "manual",
       "localizations": {
@@ -893,6 +1009,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "1분"
+          }
+        }
+      }
+    },
+    "1, 5, 10 and 25 minute timers and pomodoro, counting down beside the notch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1·5·10·25분 타이머와 뽀모도로, 노치 옆에서 카운트다운해요."
           }
         }
       }
@@ -1061,8 +1188,30 @@
         }
       }
     },
+    "25 + 5 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "25 + 5분"
+          }
+        }
+      }
+    },
     "25 MB": {
       "extractionState": "manual"
+    },
+    "25 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "25분"
+          }
+        }
+      }
     },
     "2SetKorean": {
       "extractionState": "manual"
@@ -1133,6 +1282,9 @@
         }
       }
     },
+    "3:00 PM": {
+      "extractionState": "manual"
+    },
     "3s": {
       "extractionState": "manual",
       "localizations": {
@@ -1145,6 +1297,9 @@
       }
     },
     "3x-haust/Orbit": {
+      "extractionState": "manual"
+    },
+    "3x-haust/tavi": {
       "extractionState": "manual"
     },
     "4 GB": {
@@ -1190,6 +1345,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "5분"
+          }
+        }
+      }
+    },
+    "50 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "50분"
           }
         }
       }
@@ -1293,7 +1459,16 @@
     ";time": {
       "extractionState": "manual"
     },
+    "</ul>": {
+      "extractionState": "manual"
+    },
     "<?xml": {
+      "extractionState": "manual"
+    },
+    "<br/>": {
+      "extractionState": "manual"
+    },
+    "<br>": {
       "extractionState": "manual"
     },
     "A CSV, .1pux or Bitwarden .json you already have.": {
@@ -1395,6 +1570,17 @@
         }
       }
     },
+    "A cup while your Mac stays awake, with the time left.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac이 깨어 있는 동안 컵 아이콘과 남은 시간을 보여줘요."
+          }
+        }
+      }
+    },
     "A date in your own format": {
       "extractionState": "manual",
       "localizations": {
@@ -1435,6 +1621,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "새 고유 ID"
+          }
+        }
+      }
+    },
+    "A light tap on the trackpad as it opens.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열릴 때 트랙패드가 살짝 톡 울려요."
           }
         }
       }
@@ -1483,6 +1680,28 @@
         }
       }
     },
+    "A notice when Do Not Disturb turns on or off.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "방해 금지 모드가 켜지거나 꺼질 때 알려줘요."
+          }
+        }
+      }
+    },
+    "A notice when a device connects, with each AirPod's and the case's battery. macOS asks for Bluetooth access.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기기가 연결되면 알려줘요. AirPods는 양쪽과 케이스 배터리까지 보여줘요. macOS가 블루투스 권한을 물어봐요."
+          }
+        }
+      }
+    },
     "A quick click still works as usual.": {
       "extractionState": "manual",
       "localizations": {
@@ -1490,6 +1709,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "짧게 클릭하면 원래대로 동작해요."
+          }
+        }
+      }
+    },
+    "A quick look at yourself through the camera.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라로 내 모습을 잠깐 확인해요."
+          }
+        }
+      }
+    },
+    "A red dot and the time while Orbit records.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit이 녹화하는 동안 빨간 점과 시간을 보여줘요."
           }
         }
       }
@@ -1549,6 +1790,17 @@
         }
       }
     },
+    "A strip of shortcuts at the bottom of the screen. It fades after a few seconds and comes back when you press a key.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 아래에 단축키 안내가 떠요. 몇 초 뒤 사라지고 키를 누르면 다시 나타나요."
+          }
+        }
+      }
+    },
     "A web page or tab in Safari or another app's web view.": {
       "extractionState": "manual",
       "localizations": {
@@ -1591,6 +1843,17 @@
     },
     "AMPDeviceDiscoveryAgent": {
       "extractionState": "manual"
+    },
+    "API key": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 키"
+          }
+        }
+      }
     },
     "APIfmf": {
       "extractionState": "manual"
@@ -1705,6 +1968,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "계정"
+          }
+        }
+      }
+    },
+    "Action": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동작"
           }
         }
       }
@@ -1844,6 +2118,17 @@
         }
       }
     },
+    "Add a Minute": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1분 추가"
+          }
+        }
+      }
+    },
     "Add a folder": {
       "extractionState": "manual",
       "localizations": {
@@ -1873,6 +2158,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "최근 캡처 붙이기"
+          }
+        }
+      }
+    },
+    "Add a word": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "단어 추가"
           }
         }
       }
@@ -2081,6 +2377,17 @@
         }
       }
     },
+    "After replacing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바꾼 다음"
+          }
+        }
+      }
+    },
     "After setup, unlock with your fingerprint. The Secure Enclave guards the key.": {
       "extractionState": "manual",
       "localizations": {
@@ -2162,7 +2469,15 @@
       }
     },
     "AirDrop": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
     },
     "AirDrop, Handoff and the Universal Clipboard.": {
       "extractionState": "manual",
@@ -2171,6 +2486,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "AirDrop, Handoff, 공통 클립보드."
+          }
+        }
+      }
+    },
+    "AirPods and Bluetooth": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirPods 및 블루투스"
           }
         }
       }
@@ -2261,6 +2587,17 @@
         }
       }
     },
+    "All screens": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 화면"
+          }
+        }
+      }
+    },
     "All set": {
       "extractionState": "manual",
       "localizations": {
@@ -2312,6 +2649,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "바로 붙여넣으려면 손쉬운 사용을 허용하세요"
+          }
+        }
+      }
+    },
+    "Allow Bluetooth": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "블루투스 허용"
+          }
+        }
+      }
+    },
+    "Allow Calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캘린더 허용"
           }
         }
       }
@@ -2433,6 +2792,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "시스템 설정 › 개인정보 보호 및 보안 › 카메라에서 Orbit의 카메라 사용을 허용해 주세요."
+          }
+        }
+      }
+    },
+    "Allow Orbit to use the camera in System Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 설정에서 Orbit의 카메라 사용을 허용하세요."
           }
         }
       }
@@ -2568,6 +2938,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "항상 숨겨진 항목"
+          }
+        }
+      }
+    },
+    "Always on top": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "항상 위에"
+          }
+        }
+      }
+    },
+    "Always on top: off": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "항상 위에: 꺼짐"
           }
         }
       }
@@ -2900,6 +3292,42 @@
         }
       }
     },
+    "Apple Intelligence": {
+      "extractionState": "manual"
+    },
+    "Apple Intelligence couldn’t check this text. Apple Spelling checked instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence가 이 글을 검사하지 못해서 Apple 맞춤법으로 검사했어요."
+          }
+        }
+      }
+    },
+    "Apple Intelligence is still getting its model ready.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence가 아직 모델을 준비하고 있어요."
+          }
+        }
+      }
+    },
+    "Apple Intelligence isn’t available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence를 쓸 수 없어요."
+          }
+        }
+      }
+    },
     "Apple Passwords": {
       "extractionState": "manual",
       "localizations": {
@@ -2918,6 +3346,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apple 푸시 알림 서비스."
+          }
+        }
+      }
+    },
+    "Apple Spelling": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 맞춤법"
+          }
+        }
+      }
+    },
+    "Apple Spelling checked instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대신 Apple 맞춤법으로 검사했어요."
           }
         }
       }
@@ -2967,6 +3417,9 @@
       }
     },
     "AppleCLCD2": {
+      "extractionState": "manual"
+    },
+    "AppleEnabledInputSources": {
       "extractionState": "manual"
     },
     "AppleLanguages": {
@@ -3360,6 +3813,17 @@
         }
       }
     },
+    "Asks for your OK first": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "처음 한 번 동의가 필요해요"
+          }
+        }
+      }
+    },
     "Asks when it’s open.": {
       "extractionState": "manual",
       "localizations": {
@@ -3581,6 +4045,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "뒤로 버튼"
+          }
+        }
+      }
+    },
+    "Back to Focus": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 집중"
           }
         }
       }
@@ -3920,6 +4395,17 @@
     "Boston": {
       "extractionState": "manual"
     },
+    "Both check at once. Where they disagree, you pick.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "두 검사기가 함께 검사해요. 결과가 다르면 직접 골라요."
+          }
+        }
+      }
+    },
     "Both entries match": {
       "extractionState": "manual"
     },
@@ -4009,6 +4495,17 @@
     "BraveSoftware/Brave-Browser": {
       "extractionState": "manual"
     },
+    "Break": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "휴식"
+          }
+        }
+      }
+    },
     "Bright": {
       "extractionState": "manual",
       "localizations": {
@@ -4086,6 +4583,17 @@
         }
       }
     },
+    "Bring back the last captured area, then ↩ to capture it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지난번 캡처한 영역 다시 띄우기, ↩로 캡처"
+          }
+        }
+      }
+    },
     "Bring my passwords in": {
       "extractionState": "manual"
     },
@@ -4107,6 +4615,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "브라우저 자동 완성 메뉴"
+          }
+        }
+      }
+    },
+    "Built in": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본"
           }
         }
       }
@@ -4607,6 +5126,17 @@
         }
       }
     },
+    "Capture it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캡처"
+          }
+        }
+      }
+    },
     "Capture screen": {
       "extractionState": "manual",
       "localizations": {
@@ -5075,6 +5605,17 @@
         }
       }
     },
+    "Check Korean with Daum and Naver?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음·네이버 맞춤법 검사기를 쓸까요?"
+          }
+        }
+      }
+    },
     "Check Now": {
       "extractionState": "manual",
       "localizations": {
@@ -5082,6 +5623,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "지금 확인"
+          }
+        }
+      }
+    },
+    "Check Spelling": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "맞춤법 검사"
+          }
+        }
+      }
+    },
+    "Check again (⌘R)": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 검사 (⌘R)"
           }
         }
       }
@@ -5119,6 +5682,28 @@
         }
       }
     },
+    "Check spelling of this text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 글 맞춤법 검사하기"
+          }
+        }
+      }
+    },
+    "Check your hair before the call. Nothing is recorded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "통화 전에 머리 정리해요. 아무것도 녹화되지 않아요."
+          }
+        }
+      }
+    },
     "Checked %ld logins on this Mac.": {
       "extractionState": "manual",
       "localizations": {
@@ -5126,6 +5711,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 Mac에서 로그인 %ld개를 확인했어요."
+          }
+        }
+      }
+    },
+    "Checked by": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "검사 엔진"
           }
         }
       }
@@ -5163,6 +5759,17 @@
         }
       }
     },
+    "Checks Tavi’s releases a minute after launch, then daily. Each update is verified before it’s installed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실행 1분 뒤, 그다음엔 하루에 한 번 Tavi 릴리즈를 확인해요. 설치 전에 서명을 꼭 확인해요."
+          }
+        }
+      }
+    },
     "Checks certificates for secure connections.": {
       "extractionState": "manual",
       "localizations": {
@@ -5181,6 +5788,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS 업데이트를 확인하고 내려받아요."
+          }
+        }
+      }
+    },
+    "Checks the text selected in any app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어느 앱에서든 선택한 글을 검사해요."
+          }
+        }
+      }
+    },
+    "Checks whatever you just copied.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "방금 복사한 글을 검사해요."
           }
         }
       }
@@ -5713,6 +6342,17 @@
         }
       }
     },
+    "Click to apply this fix": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "클릭하면 이렇게 고쳐요"
+          }
+        }
+      }
+    },
     "Click to change": {
       "extractionState": "manual",
       "localizations": {
@@ -5753,6 +6393,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "클릭해서 편집 · 우클릭으로 더 보기"
+          }
+        }
+      }
+    },
+    "Click to keep the original": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "클릭하면 원래대로 둬요"
           }
         }
       }
@@ -5902,6 +6553,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "닫기 (Esc)"
+          }
+        }
+      }
+    },
+    "Close delay": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫히기까지 대기"
+          }
+        }
+      }
+    },
+    "Close the card after Replace": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바꾸기 후 자동 닫기"
           }
         }
       }
@@ -6094,6 +6767,17 @@
         }
       }
     },
+    "Combine Daum and Naver": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "여러 검사기 합치기"
+          }
+        }
+      }
+    },
     "Come a little closer": {
       "extractionState": "manual",
       "localizations": {
@@ -6218,6 +6902,17 @@
         }
       }
     },
+    "Connected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결됨"
+          }
+        }
+      }
+    },
     "Container": {
       "extractionState": "manual",
       "localizations": {
@@ -6233,6 +6928,9 @@
       "extractionState": "manual"
     },
     "Contents/Info.plist": {
+      "extractionState": "manual"
+    },
+    "Contents/MacOS/Tavi": {
       "extractionState": "manual"
     },
     "Continue": {
@@ -6469,6 +7167,17 @@
         }
       }
     },
+    "Copy All": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모두 복사"
+          }
+        }
+      }
+    },
     "Copy Answer": {
       "extractionState": "manual",
       "localizations": {
@@ -6557,6 +7266,17 @@
         }
       }
     },
+    "Copy color": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "색상 복사"
+          }
+        }
+      }
+    },
     "Copy info": {
       "extractionState": "manual",
       "localizations": {
@@ -6564,6 +7284,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "정보 복사"
+          }
+        }
+      }
+    },
+    "Copy only": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복사만"
           }
         }
       }
@@ -6619,6 +7350,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면 글자 복사"
+          }
+        }
+      }
+    },
+    "Copy the color under the magnifier as a hex code": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "돋보기 아래 색상을 헥스 코드로 복사"
           }
         }
       }
@@ -6680,6 +7422,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "모서리"
+          }
+        }
+      }
+    },
+    "Corrected text copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고친 글 복사됨"
           }
         }
       }
@@ -6746,6 +7499,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "보관함을 만들지 못했어요."
+          }
+        }
+      }
+    },
+    "Couldn’t download the update": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트를 받지 못했어요"
           }
         }
       }
@@ -6860,6 +7624,17 @@
         }
       }
     },
+    "Couldn’t reach %@’s spell checker.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 맞춤법 검사기에 연결할 수 없어요."
+          }
+        }
+      }
+    },
     "Couldn’t reach “%@” — macOS has tucked it behind the notch. Make room in the menu bar and try again.": {
       "extractionState": "manual",
       "localizations": {
@@ -6944,6 +7719,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "키체인에 저장하지 못했어요."
+          }
+        }
+      }
+    },
+    "Couldn’t save the screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스크린샷을 저장하지 못했어요"
           }
         }
       }
@@ -7306,6 +8092,17 @@
         }
       }
     },
+    "Cycle the aspect ratio: free, 1:1, 4:3, 3:2, 16:9, 9:16 (⇧Tab goes back)": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비율 바꾸기: 자유, 1:1, 4:3, 3:2, 16:9, 9:16 (⇧Tab은 거꾸로)"
+          }
+        }
+      }
+    },
     "CycleCount": {
       "extractionState": "manual"
     },
@@ -7319,6 +8116,9 @@
           }
         }
       }
+    },
+    "C·S·E·P·T·V·L": {
+      "extractionState": "manual"
     },
     "DCPAVServiceProxy": {
       "extractionState": "manual"
@@ -7450,6 +8250,50 @@
     },
     "Dato": {
       "extractionState": "manual"
+    },
+    "Daum": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음"
+          }
+        }
+      }
+    },
+    "Daum + Naver": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 + 네이버"
+          }
+        }
+      }
+    },
+    "Daum’s spell checker answered in a way Orbit doesn’t understand.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 맞춤법 검사기의 응답을 읽을 수 없어요."
+          }
+        }
+      }
+    },
+    "Daum’s spell checker. Explains each fix with the rule and examples; strong on spacing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 맞춤법 검사기. 고친 이유를 규칙과 예문으로 알려 주고, 띄어쓰기에 강해요."
+          }
+        }
+      }
     },
     "Day": {
       "extractionState": "manual",
@@ -7669,6 +8513,9 @@
         }
       }
     },
+    "Design review": {
+      "extractionState": "manual"
+    },
     "DesignCapacity": {
       "extractionState": "manual"
     },
@@ -7784,6 +8631,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "개발 빌드라 설치는 꺼져 있어요"
+          }
+        }
+      }
+    },
+    "Device": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기기"
           }
         }
       }
@@ -7954,6 +8812,17 @@
         }
       }
     },
+    "Disconnected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결 해제됨"
+          }
+        }
+      }
+    },
     "Disk": {
       "extractionState": "manual",
       "localizations": {
@@ -8118,6 +8987,17 @@
         }
       }
     },
+    "Don’t suggest this again": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 권하지 않기"
+          }
+        }
+      }
+    },
     "Dots": {
       "extractionState": "manual",
       "localizations": {
@@ -8184,6 +9064,17 @@
         }
       }
     },
+    "Downloaded": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 완료"
+          }
+        }
+      }
+    },
     "Downloading %ld%%": {
       "extractionState": "manual",
       "localizations": {
@@ -8196,7 +9087,15 @@
       }
     },
     "Downloads": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드"
+          }
+        }
+      }
     },
     "Downloads Apple's feature experiments and models.": {
       "extractionState": "manual",
@@ -8410,6 +9309,17 @@
         }
       }
     },
+    "Dragging a file in, or the Shelf shortcut, always opens the Shelf.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일을 끌어오거나 선반 단축키를 쓰면 항상 선반으로 열려요."
+          }
+        }
+      }
+    },
     "Draw": {
       "extractionState": "manual",
       "localizations": {
@@ -8472,6 +9382,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "여기에 파일을 놓으세요"
+          }
+        }
+      }
+    },
+    "Drop files on the notch": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치에 파일을 놓으세요"
+          }
+        }
+      }
+    },
+    "Drop files on the notch to keep them on its shelf.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치에 파일을 끌어다 놓으면 선반에 보관돼요."
           }
         }
       }
@@ -9002,6 +9934,9 @@
         }
       }
     },
+    "Esc": {
+      "extractionState": "manual"
+    },
     "Esc to cancel": {
       "extractionState": "manual",
       "localizations": {
@@ -9166,6 +10101,9 @@
           }
         }
       }
+    },
+    "Every fix made, in order. Empty when nothing is wrong.": {
+      "extractionState": "manual"
     },
     "Every item and the Secret Key are deleted from this Mac. Without a backup and the Emergency Kit, they’re gone.": {
       "extractionState": "manual",
@@ -9894,6 +10832,28 @@
         }
       }
     },
+    "Files still downloading into Downloads, and a notice when they finish.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 폴더에 받는 중인 파일과 완료 알림을 보여줘요."
+          }
+        }
+      }
+    },
+    "Files you dropped on the notch, ready to drag out, AirDrop or share.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치에 놓은 파일을 다시 끌어내거나 AirDrop·공유할 수 있어요."
+          }
+        }
+      }
+    },
     "Fill": {
       "extractionState": "manual",
       "localizations": {
@@ -10112,6 +11072,17 @@
         }
       }
     },
+    "Fixes spelling, spacing and grammar with the model on this Mac. Nothing leaves it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac에 있는 모델로 맞춤법, 띄어쓰기, 문법을 고쳐요. 글이 Mac 밖으로 나가지 않아요."
+          }
+        }
+      }
+    },
     "Flat": {
       "extractionState": "manual",
       "localizations": {
@@ -10177,6 +11148,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "집중 모드"
+          }
+        }
+      }
+    },
+    "Focus Off": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "집중 모드 끔"
+          }
+        }
+      }
+    },
+    "Focus On": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "집중 모드 켬"
           }
         }
       }
@@ -10256,6 +11249,17 @@
         }
       }
     },
+    "For English and European languages. Text is sent to LanguageTool. Korean falls back.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영어와 유럽 언어용이에요. 글을 LanguageTool로 보내요. 한국어는 다른 엔진이 맡아요."
+          }
+        }
+      }
+    },
     "For Linux and developers.": {
       "extractionState": "manual",
       "localizations": {
@@ -10278,6 +11282,17 @@
         }
       }
     },
+    "For personal use. Orbit keeps no copy of what you check.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개인 용도로만 써 주세요. Orbit은 검사한 글을 저장하지 않아요."
+          }
+        }
+      }
+    },
     "For real: hold the trigger, aim, let go": {
       "extractionState": "manual",
       "localizations": {
@@ -10285,6 +11300,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "실제로는: 트리거를 누른 채 가리키고 놓기"
+          }
+        }
+      }
+    },
+    "For the Start Notch Timer shortcut.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 타이머 시작 단축키에 쓰여요."
           }
         }
       }
@@ -10508,6 +11534,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Raycast, Alfred(JSON) 또는 TextExpander(CSV)에서."
+          }
+        }
+      }
+    },
+    "From Tavi’s GitHub releases": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi의 GitHub 릴리즈에서 받아요"
+          }
+        }
+      }
+    },
+    "From center": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가운데부터"
           }
         }
       }
@@ -10933,6 +11981,20 @@
     "Gradle": {
       "extractionState": "manual"
     },
+    "Grammar": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "문법"
+          }
+        }
+      }
+    },
+    "Grammar: subject-verb agreement": {
+      "extractionState": "manual"
+    },
     "GrandPerspective": {
       "extractionState": "manual"
     },
@@ -11000,6 +12062,17 @@
     },
     "Hanoi": {
       "extractionState": "manual"
+    },
+    "Haptic feedback": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "햅틱 피드백"
+          }
+        }
+      }
     },
     "Health": {
       "extractionState": "manual",
@@ -11213,6 +12286,17 @@
         }
       }
     },
+    "Hide in full screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전체 화면에서 숨기기"
+          }
+        }
+      }
+    },
     "Hide items": {
       "extractionState": "manual",
       "localizations": {
@@ -11253,6 +12337,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "메뉴 막대 아이콘 숨기기"
+          }
+        }
+      }
+    },
+    "Hide the explanation": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설명 숨기기"
           }
         }
       }
@@ -11377,6 +12472,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "단축키나 마우스 가운데 버튼을 누른 채 가리키고 놓으세요."
+          }
+        }
+      }
+    },
+    "Hold to grow the area from where you started": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "누르고 있으면 시작점을 가운데로 넓히기"
+          }
+        }
+      }
+    },
+    "Hold to lock the aspect ratio (a square unless a ratio is picked)": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "누르고 있으면 비율 고정 (고른 비율이 없으면 정사각형)"
+          }
+        }
+      }
+    },
+    "Hold to move the whole area": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "누르고 있으면 영역 통째로 이동"
           }
         }
       }
@@ -11507,6 +12635,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "핫 코너"
+          }
+        }
+      }
+    },
+    "Hover delay": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열리기까지 대기"
           }
         }
       }
@@ -11680,6 +12819,17 @@
         }
       }
     },
+    "If a checker doesn’t answer within 4 seconds, the next one checks: Daum → Naver → Apple Intelligence → Apple Spelling.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "검사기가 4초 안에 답하지 않으면 다음 순서로 넘어가요: 다음 → 네이버 → Apple Intelligence → Apple 맞춤법."
+          }
+        }
+      }
+    },
     "If macOS asks, choose “Allow” so history can record.": {
       "extractionState": "manual",
       "localizations": {
@@ -11723,6 +12873,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "앱 무시하기"
+          }
+        }
+      }
+    },
+    "Ignored words": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무시할 단어"
           }
         }
       }
@@ -12041,6 +13202,9 @@
         }
       }
     },
+    "Input Mode": {
+      "extractionState": "manual"
+    },
     "Insert": {
       "extractionState": "manual",
       "localizations": {
@@ -12314,6 +13478,17 @@
     },
     "Itsycal": {
       "extractionState": "manual"
+    },
+    "It’s an unofficial connection, so it may stop working if they change it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비공식 연결이라 바뀌면 안 될 수 있어요."
+          }
+        }
+      }
     },
     "It’s been two weeks — enter your Master Password so you don’t forget it.": {
       "extractionState": "manual",
@@ -12627,6 +13802,17 @@
     "KeepingYouAwake": {
       "extractionState": "manual"
     },
+    "Keeps automatic 한/영 on Tavi’s newest release.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자동 한/영을 늘 최신 Tavi로 유지해요."
+          }
+        }
+      }
+    },
     "Keeps each screen's brightness as it is now.": {
       "extractionState": "manual",
       "localizations": {
@@ -12793,6 +13979,17 @@
         }
       }
     },
+    "Korean": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한국어"
+          }
+        }
+      }
+    },
     "Korean (CP949)": {
       "extractionState": "manual",
       "localizations": {
@@ -12822,6 +14019,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "윈도우에서도 한글 이름이 안 깨지고, 윈도우가 못 쓰는 문자(: ? * | …)는 비슷한 모양으로 바꿔요."
+          }
+        }
+      }
+    },
+    "Korean web spell checkers": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한국어 웹 맞춤법 검사기"
           }
         }
       }
@@ -12874,6 +14082,97 @@
         }
       }
     },
+    "LanguageTool": {
+      "extractionState": "manual"
+    },
+    "LanguageTool API key": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool API 키"
+          }
+        }
+      }
+    },
+    "LanguageTool didn’t accept the username or API key.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool이 사용자 이름이나 API 키를 받아들이지 않았어요."
+          }
+        }
+      }
+    },
+    "LanguageTool didn’t answer. Try again in a moment.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool이 응답하지 않아요. 잠시 후 다시 해 보세요."
+          }
+        }
+      }
+    },
+    "LanguageTool doesn’t check Korean, so %@ did.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool은 한국어를 검사하지 않아서 %@(으)로 검사했어요."
+          }
+        }
+      }
+    },
+    "LanguageTool doesn’t check Korean.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool은 한국어를 검사하지 않아요."
+          }
+        }
+      }
+    },
+    "LanguageTool sent something Orbit couldn’t read.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool이 보낸 내용을 Orbit이 읽지 못했어요."
+          }
+        }
+      }
+    },
+    "LanguageTool username": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool 사용자 이름"
+          }
+        }
+      }
+    },
+    "LanguageTool’s free limit is used up for now. Try again in a minute.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool 무료 사용량을 다 썼어요. 잠시 후 다시 해 보세요."
+          }
+        }
+      }
+    },
     "Languages": {
       "extractionState": "manual",
       "localizations": {
@@ -12918,6 +14217,17 @@
         }
       }
     },
+    "Last area": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지난 영역"
+          }
+        }
+      }
+    },
     "Last checked %@": {
       "extractionState": "manual",
       "localizations": {
@@ -12947,6 +14257,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "마지막 사용 %@"
+          }
+        }
+      }
+    },
+    "Last viewed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마지막에 본 탭"
           }
         }
       }
@@ -13049,6 +14370,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "켜두기"
+          }
+        }
+      }
+    },
+    "Leave empty for the free plan. With LanguageTool Premium, add your account email and API key; they stay in your keychain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료로 쓰려면 비워 두세요. LanguageTool Premium이라면 계정 이메일과 API 키를 넣으세요. 키체인에만 저장돼요."
           }
         }
       }
@@ -13228,6 +14560,12 @@
       "extractionState": "manual"
     },
     "Library/Logs/Orbit/perf.log": {
+      "extractionState": "manual"
+    },
+    "Library/Logs/Orbit/scrolling.log": {
+      "extractionState": "manual"
+    },
+    "Library/Logs/Orbit/spell.log": {
       "extractionState": "manual"
     },
     "Library/Mail": {
@@ -13428,6 +14766,17 @@
         }
       }
     },
+    "Live activities": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이브 활동"
+          }
+        }
+      }
+    },
     "Live in the notch": {
       "extractionState": "manual",
       "localizations": {
@@ -13603,6 +14952,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "위치 고정"
+          }
+        }
+      }
+    },
+    "Lock ratio": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비율 고정"
           }
         }
       }
@@ -14511,6 +15871,17 @@
         }
       }
     },
+    "Mirror": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "거울"
+          }
+        }
+      }
+    },
     "Mission Control": {
       "extractionState": "manual",
       "localizations": {
@@ -14596,6 +15967,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "옵션 더 보기…"
+          }
+        }
+      }
+    },
+    "More accurate Korean with Daum and Naver": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음·네이버 검사기로 더 정확하게"
           }
         }
       }
@@ -14712,6 +16094,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "오른쪽 스페이스로 이동"
+          }
+        }
+      }
+    },
+    "Move selection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이동"
           }
         }
       }
@@ -14879,11 +16272,22 @@
     "Movies": {
       "extractionState": "manual"
     },
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36": {
+      "extractionState": "manual"
+    },
     "Mumbai": {
       "extractionState": "manual"
     },
     "Music": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "음악"
+          }
+        }
+      }
     },
     "Music apps like Music, Spotify, TIDAL and Podcasts. Videos in Safari, Chrome, Arc and other browsers are left out.": {
       "extractionState": "manual",
@@ -15068,6 +16472,17 @@
         }
       }
     },
+    "Names, product words and slang spell check should never change.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이름, 제품명, 줄임말처럼 맞춤법 검사가 절대 고치면 안 되는 단어예요."
+          }
+        }
+      }
+    },
     "Natural": {
       "extractionState": "manual",
       "localizations": {
@@ -15075,6 +16490,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "자연스럽게"
+          }
+        }
+      }
+    },
+    "Naver": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네이버"
+          }
+        }
+      }
+    },
+    "Naver’s spell checker answered in a way Orbit doesn’t understand.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네이버 맞춤법 검사기의 응답을 읽을 수 없어요."
+          }
+        }
+      }
+    },
+    "Naver’s spell checker didn’t check the text.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네이버 맞춤법 검사기가 글을 검사하지 않았어요."
+          }
+        }
+      }
+    },
+    "Naver’s spell checker didn’t let Orbit in.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네이버 맞춤법 검사기에 연결할 수 없어요."
+          }
+        }
+      }
+    },
+    "Naver’s spell checker. Quick, and catches what others miss.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네이버 맞춤법 검사기. 빠르고, 다른 검사기가 놓친 것도 잡아요."
           }
         }
       }
@@ -15199,6 +16669,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "바꾸지 않을 앱"
+          }
+        }
+      }
+    },
+    "Never flag": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고치지 않을 단어"
           }
         }
       }
@@ -15516,6 +16997,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "찾는 게 없어요."
+          }
+        }
+      }
+    },
+    "No more events today": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘 남은 일정 없음"
           }
         }
       }
@@ -15845,6 +17337,39 @@
         }
       }
     },
+    "Notch Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 설정"
+          }
+        }
+      }
+    },
+    "Notch Shelf": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 선반"
+          }
+        }
+      }
+    },
+    "Notch screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 화면만"
+          }
+        }
+      }
+    },
     "Notes": {
       "extractionState": "manual",
       "localizations": {
@@ -15863,6 +17388,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "없음"
+          }
+        }
+      }
+    },
+    "Nothing copied yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아직 복사한 항목 없음"
           }
         }
       }
@@ -15977,6 +17513,28 @@
         }
       }
     },
+    "Nothing playing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재생 중인 항목 없음"
+          }
+        }
+      }
+    },
+    "Nothing selected to replace — copy it instead": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바꿀 선택 영역이 없어요 — 복사해서 쓰세요"
+          }
+        }
+      }
+    },
     "Nothing to adjust for this tool.": {
       "extractionState": "manual",
       "localizations": {
@@ -16010,6 +17568,17 @@
         }
       }
     },
+    "Nothing to fix ✓": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고칠 곳이 없어요 ✓"
+          }
+        }
+      }
+    },
     "Nothing to import there.": {
       "extractionState": "manual",
       "localizations": {
@@ -16028,6 +17597,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "지금은 정리할 게 별로 없어요."
+          }
+        }
+      }
+    },
+    "Notice": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "알림"
           }
         }
       }
@@ -16112,11 +17692,44 @@
         }
       }
     },
+    "Now · until %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 · %@까지"
+          }
+        }
+      }
+    },
     "Now: Keka": {
       "extractionState": "manual"
     },
     "NowPlaying": {
       "extractionState": "manual"
+    },
+    "Nudge": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "미세 이동"
+          }
+        }
+      }
+    },
+    "Nudge the corner by 1 pt, with ⇧ by 10 pt": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모서리를 1pt씩, ⇧와 함께 10pt씩 이동"
+          }
+        }
+      }
     },
     "Number": {
       "extractionState": "manual",
@@ -16288,6 +17901,17 @@
         }
       }
     },
+    "Off: the card stays up and checks the new text again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "끄면 카드가 남아서 바뀐 글을 다시 검사해요."
+          }
+        }
+      }
+    },
     "Offline": {
       "extractionState": "manual",
       "localizations": {
@@ -16331,6 +17955,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "켬"
+          }
+        }
+      }
+    },
+    "On Battery": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배터리 사용 중"
           }
         }
       }
@@ -16412,6 +18047,17 @@
         }
       }
     },
+    "On-device": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "온디바이스"
+          }
+        }
+      }
+    },
     "On-device and private. Works offline.": {
       "extractionState": "manual",
       "localizations": {
@@ -16456,6 +18102,17 @@
         }
       }
     },
+    "One step only you can do: in Keyboard Settings, Text Input › Edit… › + › Korean › Tavi › Add. Orbit switches to Tavi as soon as it’s added.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이건 직접 한 번만 해 주세요: 키보드 설정 › 텍스트 입력 › 편집… › + › 한국어 › Tavi › 추가. 추가하는 순간 Orbit이 Tavi로 바꿔요."
+          }
+        }
+      }
+    },
     "One step to remove icons completely": {
       "extractionState": "manual",
       "localizations": {
@@ -16496,6 +18153,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "일회용 코드"
+          }
+        }
+      }
+    },
+    "Online": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "온라인"
           }
         }
       }
@@ -16599,6 +18267,17 @@
         }
       }
     },
+    "Open Card": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카드로 열기"
+          }
+        }
+      }
+    },
     "Open Folder": {
       "extractionState": "manual",
       "localizations": {
@@ -16672,6 +18351,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "링크 열기"
+          }
+        }
+      }
+    },
+    "Open Notch Shelf": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 선반 열기"
           }
         }
       }
@@ -16786,6 +18476,17 @@
         }
       }
     },
+    "Open in Editor": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "편집기로 열기"
+          }
+        }
+      }
+    },
     "Open in QuickTime": {
       "extractionState": "manual",
       "localizations": {
@@ -16804,6 +18505,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "편집기에서 열기"
+          }
+        }
+      }
+    },
+    "Open on hover": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마우스를 올리면 열기"
+          }
+        }
+      }
+    },
+    "Open or Close Notch": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 열기/닫기"
           }
         }
       }
@@ -16885,6 +18608,17 @@
         }
       }
     },
+    "Opening": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열기"
+          }
+        }
+      }
+    },
     "Opens ZIP, 7Z, RAR, TAR, GZ, BZ2, XZ, ZST, LZ, ISO, DMG, CAB, LHA, CPIO and split parts (.001).": {
       "extractionState": "manual",
       "localizations": {
@@ -16903,6 +18637,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "어디서나 열려요. Mac, Windows, 휴대폰 모두."
+          }
+        }
+      }
+    },
+    "Opens as the notch's Shelf tab.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치의 선반 탭으로 열려요"
           }
         }
       }
@@ -17000,6 +18745,9 @@
           }
         }
       }
+    },
+    "Orbit 1.0 출시": {
+      "extractionState": "manual"
     },
     "Orbit 1.1 is available": {
       "extractionState": "manual"
@@ -17492,6 +19240,9 @@
     "Orbit scrolling": {
       "extractionState": "manual"
     },
+    "Orbit scrolling capture": {
+      "extractionState": "manual"
+    },
     "Orbit scrolls the area for you until the page ends": {
       "extractionState": "manual",
       "localizations": {
@@ -17719,6 +19470,28 @@
         }
       }
     },
+    "Other languages": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 언어"
+          }
+        }
+      }
+    },
+    "Other screens get a drawn notch at the top.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 화면에는 위쪽에 노치를 그려줘요."
+          }
+        }
+      }
+    },
     "Out / s": {
       "extractionState": "manual",
       "localizations": {
@@ -17726,6 +19499,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "보내기 / 초"
+          }
+        }
+      }
+    },
+    "Out of the way of full-screen videos and games.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전체 화면 영상이나 게임을 가리지 않아요."
           }
         }
       }
@@ -18260,6 +20044,17 @@
         }
       }
     },
+    "Pick a larger area for a scrolling capture": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스크롤 캡처는 조금 더 큰 영역을 골라 주세요"
+          }
+        }
+      }
+    },
     "Pick a snippet, or make a new one.": {
       "extractionState": "manual",
       "localizations": {
@@ -18267,6 +20062,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "스니펫을 고르거나 새로 만들어 보세요."
+          }
+        }
+      }
+    },
+    "Pick again": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 고르기"
           }
         }
       }
@@ -18358,6 +20164,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "마지막 캡처 고정"
+          }
+        }
+      }
+    },
+    "Pin on screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면에 고정"
           }
         }
       }
@@ -18607,6 +20424,28 @@
         }
       }
     },
+    "Point at the notch to open it. Clicking it always works.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치를 가리키면 열려요. 클릭해도 언제나 열려요."
+          }
+        }
+      }
+    },
+    "Pomodoro": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "뽀모도로"
+          }
+        }
+      }
+    },
     "Português": {
       "extractionState": "manual"
     },
@@ -18770,6 +20609,17 @@
         }
       }
     },
+    "Press the same key again for the usual steps after capture.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "같은 키를 한 번 더 누르면 평소 캡처 후 동작으로 돌아가요."
+          }
+        }
+      }
+    },
     "Press ⌘C twice on any text to translate it in place.": {
       "extractionState": "manual",
       "localizations": {
@@ -18788,6 +20638,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "⌘N을 눌러 만들어 보세요."
+          }
+        }
+      }
+    },
+    "Press ⌘V to paste it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘V로 붙여 넣으세요"
           }
         }
       }
@@ -18924,6 +20785,17 @@
     },
     "Private": {
       "extractionState": "manual"
+    },
+    "Probably not standard Korean": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "표준어가 아닐 수 있어요"
+          }
+        }
+      }
     },
     "Process": {
       "extractionState": "manual",
@@ -19213,6 +21085,9 @@
     "R": {
       "extractionState": "manual"
     },
+    "REDUNDANCY": {
+      "extractionState": "manual"
+    },
     "RUB": {
       "extractionState": "manual"
     },
@@ -19245,6 +21120,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 기준"
+          }
+        }
+      }
+    },
+    "Ratio": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비율"
           }
         }
       }
@@ -19314,6 +21200,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "앱 설정을 읽고 써요."
+          }
+        }
+      }
+    },
+    "Reads more naturally this way": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이렇게 쓰는 게 더 자연스러워요"
           }
         }
       }
@@ -19391,6 +21288,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "최근 캡처"
+          }
+        }
+      }
+    },
+    "Recent clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최근 클립보드"
+          }
+        }
+      }
+    },
+    "Recognize text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글자 인식"
+          }
+        }
+      }
+    },
+    "Recognize text and copy it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글자 인식해서 복사"
           }
         }
       }
@@ -19479,6 +21409,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "시스템 소리 녹음"
+          }
+        }
+      }
+    },
+    "Record this area": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 영역 녹화"
+          }
+        }
+      }
+    },
+    "Record this area as a video": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 영역을 동영상으로 녹화"
           }
         }
       }
@@ -19606,6 +21558,9 @@
           }
         }
       }
+    },
+    "Referer": {
+      "extractionState": "manual"
     },
     "Refresh": {
       "extractionState": "manual",
@@ -19874,6 +21829,17 @@
         }
       }
     },
+    "Replaced — nothing left to fix ✓": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바꿨어요 — 더 고칠 곳이 없어요 ✓"
+          }
+        }
+      }
+    },
     "Reply greeting": {
       "extractionState": "manual",
       "localizations": {
@@ -20005,6 +21971,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "다시 시작"
+          }
+        }
+      }
+    },
+    "Resting": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "평소"
           }
         }
       }
@@ -20232,6 +22209,17 @@
     "Rome": {
       "extractionState": "manual"
     },
+    "Round %ld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld회차"
+          }
+        }
+      }
+    },
     "Rounded": {
       "extractionState": "manual",
       "localizations": {
@@ -20420,6 +22408,9 @@
           }
         }
       }
+    },
+    "STYLE": {
+      "extractionState": "manual"
     },
     "Safari": {
       "extractionState": "manual"
@@ -20738,6 +22729,17 @@
         }
       }
     },
+    "Save to file": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일로 저장"
+          }
+        }
+      }
+    },
     "Save · ⌘S": {
       "extractionState": "manual",
       "localizations": {
@@ -20914,6 +22916,17 @@
         }
       }
     },
+    "Screen recording": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면 녹화"
+          }
+        }
+      }
+    },
     "Screen recording.": {
       "extractionState": "manual",
       "localizations": {
@@ -20949,6 +22962,17 @@
     },
     "ScreenMirroring": {
       "extractionState": "manual"
+    },
+    "Screens": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "화면"
+          }
+        }
+      }
     },
     "Screenshot": {
       "extractionState": "manual",
@@ -21052,6 +23076,17 @@
         }
       }
     },
+    "Scroll capture": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스크롤 캡처"
+          }
+        }
+      }
+    },
     "Scroll direction": {
       "extractionState": "manual",
       "localizations": {
@@ -21103,6 +23138,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "스크롤 캡처를 취소했어요"
+          }
+        }
+      }
+    },
+    "Scrolling capture of this area": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 영역 스크롤 캡처"
           }
         }
       }
@@ -21344,6 +23390,17 @@
         }
       }
     },
+    "See today's events here": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오늘 일정을 여기서 확인하세요"
+          }
+        }
+      }
+    },
     "See what’s using space, and clean it up safely.": {
       "extractionState": "manual",
       "localizations": {
@@ -21410,6 +23467,17 @@
         }
       }
     },
+    "Select an area": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "영역 선택"
+          }
+        }
+      }
+    },
     "Select next source in Input menu": {
       "extractionState": "manual",
       "localizations": {
@@ -21417,6 +23485,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "입력 메뉴에서 다음 소스 선택"
+          }
+        }
+      }
+    },
+    "Select some text first": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "먼저 글을 선택해 주세요"
+          }
+        }
+      }
+    },
+    "Select text anywhere and press the shortcut to fix spelling, spacing and grammar in place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어디서든 글을 선택하고 단축키를 누르면 맞춤법, 띄어쓰기, 문법을 그 자리에서 고쳐요."
           }
         }
       }
@@ -21751,6 +23841,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "도형"
+          }
+        }
+      }
+    },
+    "Share": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유"
           }
         }
       }
@@ -22121,6 +24222,17 @@
         }
       }
     },
+    "Show key hints": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키 힌트 보기"
+          }
+        }
+      }
+    },
     "Show now": {
       "extractionState": "manual"
     },
@@ -22274,6 +24386,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "대신 숨긴 아이콘을 메뉴 막대 아래에 보여 줄게요"
+          }
+        }
+      }
+    },
+    "Shown beside the closed notch while they're going on. macOS's own AirPods “Connected” banner has no setting apps can change, so it still appears too — turn it off yourself if macOS offers it in Notifications.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "진행 중인 동안 닫힌 노치 양옆에 보여요. macOS 기본 AirPods “연결됨” 배너는 앱이 끌 수 있는 설정이 없어서 함께 나타나요 — 알림 설정에 항목이 있으면 직접 꺼 주세요."
           }
         }
       }
@@ -22534,6 +24657,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%ld번 칸"
+          }
+        }
+      }
+    },
+    "Slower scrolling is more accurate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "천천히 스크롤하면 더 정확해요"
           }
         }
       }
@@ -22827,6 +24961,17 @@
         }
       }
     },
+    "Spacing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "띄어쓰기"
+          }
+        }
+      }
+    },
     "Spectacle": {
       "extractionState": "manual"
     },
@@ -22837,6 +24982,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "속도"
+          }
+        }
+      }
+    },
+    "Spell check": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "맞춤법 검사"
+          }
+        }
+      }
+    },
+    "Spell check is off": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "맞춤법 검사가 꺼져 있어요"
+          }
+        }
+      }
+    },
+    "Spelling": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "맞춤법"
           }
         }
       }
@@ -22997,6 +25175,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "시작"
+          }
+        }
+      }
+    },
+    "Start Notch Timer": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 타이머 시작"
           }
         }
       }
@@ -23445,6 +25634,17 @@
         }
       }
     },
+    "Swipe down to open": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아래로 쓸어서 열기"
+          }
+        }
+      }
+    },
     "SwipeScrollDirectionDidChangeNotification": {
       "extractionState": "manual"
     },
@@ -23618,6 +25818,34 @@
     "TWD": {
       "extractionState": "manual"
     },
+    "TYPOS": {
+      "extractionState": "manual"
+    },
+    "Tab": {
+      "extractionState": "manual"
+    },
+    "Tab when it opens": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열 때 보여줄 탭"
+          }
+        }
+      }
+    },
+    "Tabs": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "탭"
+          }
+        }
+      }
+    },
     "Tags": {
       "extractionState": "manual",
       "localizations": {
@@ -23631,6 +25859,17 @@
     },
     "Taipei": {
       "extractionState": "manual"
+    },
+    "Take a Break": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "휴식 시간"
+          }
+        }
+      }
     },
     "Talk to Music and Spotify directly": {
       "extractionState": "manual",
@@ -23668,6 +25907,17 @@
     "Tavi": {
       "extractionState": "manual"
     },
+    "Tavi %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi %@"
+          }
+        }
+      }
+    },
     "Tavi is installed": {
       "extractionState": "manual",
       "localizations": {
@@ -23686,6 +25936,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tavi로 입력 중"
+          }
+        }
+      }
+    },
+    "Tavi is up to date": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi가 최신 버전이에요"
+          }
+        }
+      }
+    },
+    "Tavi updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi 업데이트"
           }
         }
       }
@@ -23806,6 +26078,28 @@
         }
       }
     },
+    "Text goes only to the engine you pick, and to the next one if it fails. Apple Intelligence and Apple Spelling never leave this Mac. Orbit keeps no copy of what you check.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글은 고른 검사기로만 보내지고, 실패하면 다음 검사기로 넘어가요. Apple Intelligence와 Apple 맞춤법은 이 Mac 밖으로 보내지 않아요. Orbit은 검사한 글을 저장하지 않아요."
+          }
+        }
+      }
+    },
+    "Text goes only to the engine you pick. Apple Intelligence and Apple Spelling never leave this Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글은 고른 엔진에만 보내요. Apple Intelligence와 Apple 맞춤법은 Mac 밖으로 내보내지 않아요."
+          }
+        }
+      }
+    },
     "Text only": {
       "extractionState": "manual",
       "localizations": {
@@ -23919,6 +26213,17 @@
         }
       }
     },
+    "That’s too much text for LanguageTool’s free plan.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LanguageTool 무료 요금제로 검사하기엔 글이 너무 길어요."
+          }
+        }
+      }
+    },
     "The Dock, Launchpad and Mission Control.": {
       "extractionState": "manual",
       "localizations": {
@@ -23937,6 +26242,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Finder와 데스크탑."
+          }
+        }
+      }
+    },
+    "The Korean web spell checkers know Korean best.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한국어는 웹 맞춤법 검사기가 가장 정확해요."
           }
         }
       }
@@ -24021,6 +26337,17 @@
         }
       }
     },
+    "The battery level when you plug in or unplug.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "충전기를 꽂거나 뺄 때 배터리 잔량을 보여줘요."
+          }
+        }
+      }
+    },
     "The battery reading is fresh again": {
       "extractionState": "manual",
       "localizations": {
@@ -24028,6 +26355,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "배터리 표시가 다시 정확해졌어요"
+          }
+        }
+      }
+    },
+    "The camera notch grows into music, timers, files and notices — and shrinks back out of the way.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라 노치가 음악, 타이머, 파일, 알림으로 커졌다가 다시 쏙 들어가요."
           }
         }
       }
@@ -24050,6 +26388,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "음악이 나오는 동안 노치 양옆에 커버와 작은 이퀄라이저가 보여요. 마우스를 올리면 재생 버튼이 나와요."
+          }
+        }
+      }
+    },
+    "The cover and moving bars while something plays.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재생 중일 때 앨범 커버와 움직이는 막대를 보여줘요."
           }
         }
       }
@@ -24087,6 +26436,17 @@
         }
       }
     },
+    "The last five things you copied. Click one to paste it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최근 복사한 5개. 클릭하면 붙여넣어요."
+          }
+        }
+      }
+    },
     "The macOS kernel. Also holds the CPU back on purpose when the Mac runs hot.": {
       "extractionState": "manual",
       "localizations": {
@@ -24094,6 +26454,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS 커널. Mac이 뜨거우면 일부러 CPU를 붙잡아 식히기도 해요."
+          }
+        }
+      }
+    },
+    "The macOS spelling and grammar checker. Instant and on-device, lighter on Korean.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS에 들어 있는 맞춤법·문법 검사기예요. 바로 되고 Mac 안에서만 돌지만, 한국어는 가볍게만 봐요."
           }
         }
       }
@@ -24116,6 +26487,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "메뉴 막대가 꽉 차서 Orbit 버튼이 그 자리에 들어가지 않아요. 숨긴 칸 끝에 그대로 있어요."
+          }
+        }
+      }
+    },
+    "The mirror turns the camera on only when you ask it to, and off as soon as the notch closes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "거울은 직접 켤 때만 카메라를 쓰고, 노치가 닫히면 바로 꺼요."
           }
         }
       }
@@ -24149,6 +26531,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "녹화가 너무 짧아요"
+          }
+        }
+      }
+    },
+    "The same setting as on the Displays page. Orbit's HUD needs Displays turned on.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디스플레이 페이지와 같은 설정이에요. Orbit HUD를 쓰려면 디스플레이를 켜 두세요."
           }
         }
       }
@@ -24197,6 +26590,17 @@
         }
       }
     },
+    "The selection was lost, so it’s copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선택이 풀려서 복사해 뒀어요"
+          }
+        }
+      }
+    },
     "The separate Tavi app isn’t needed anymore": {
       "extractionState": "manual",
       "localizations": {
@@ -24204,6 +26608,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "따로 설치한 Tavi 앱은 이제 필요 없어요"
+          }
+        }
+      }
+    },
+    "The shortcut, the Ring and the launcher check the selected text.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "단축키, 링, 런처로 선택한 글을 검사해요."
           }
         }
       }
@@ -24263,6 +26678,17 @@
         }
       }
     },
+    "The update didn’t pass its checks, so it wasn’t installed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트가 확인을 통과하지 못해서 설치하지 않았어요"
+          }
+        }
+      }
+    },
     "The wheel — press it down": {
       "extractionState": "manual",
       "localizations": {
@@ -24273,6 +26699,9 @@
           }
         }
       }
+    },
+    "The whole input text with only spelling, spacing, grammar and punctuation mistakes fixed. Everything else is copied exactly. Identical to the input when nothing is wrong.": {
+      "extractionState": "manual"
     },
     "The widget appears as soon as a music app plays.": {
       "extractionState": "manual",
@@ -24295,6 +26724,9 @@
           }
         }
       }
+    },
+    "The wrong text, copied character for character from the input.": {
+      "extractionState": "manual"
     },
     "Theine": {
       "extractionState": "manual"
@@ -24321,6 +26753,17 @@
         }
       }
     },
+    "Then, before you let go": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손을 떼기 전에"
+          }
+        }
+      }
+    },
     "Thermal state": {
       "extractionState": "manual",
       "localizations": {
@@ -24339,6 +26782,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "유출된 비밀번호 목록에 나온 비밀번호예요. 가장 먼저 바꾸세요."
+          }
+        }
+      }
+    },
+    "They wait here until you drag them somewhere.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 곳으로 끌어갈 때까지 여기서 기다려요."
           }
         }
       }
@@ -24398,6 +26852,17 @@
         }
       }
     },
+    "This Mac doesn’t support Apple Intelligence.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac은 Apple Intelligence를 지원하지 않아요."
+          }
+        }
+      }
+    },
     "This Mac has no Touch ID set up.": {
       "extractionState": "manual",
       "localizations": {
@@ -24427,6 +26892,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 Mac에는 충전만 멈추는 스위치가 없어서, 잠깐 배터리로 돌다가 다시 충전하는 식으로 한도를 지켜요."
+          }
+        }
+      }
+    },
+    "This Mac has no notch, so Orbit draws one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac에는 노치가 없어서 Orbit이 그려줘요."
           }
         }
       }
@@ -24541,6 +27017,17 @@
         }
       }
     },
+    "This text is sent to Daum’s or Naver’s spell checker.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 글이 다음/네이버 맞춤법 검사기로 보내져요."
+          }
+        }
+      }
+    },
     "Threads": {
       "extractionState": "manual",
       "localizations": {
@@ -24616,8 +27103,27 @@
         }
       }
     },
+    "Time's Up": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시간 종료"
+          }
+        }
+      }
+    },
     "Timer": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타이머"
+          }
+        }
+      }
     },
     "Timer Shot": {
       "extractionState": "manual",
@@ -24626,6 +27132,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "타이머 캡처"
+          }
+        }
+      }
+    },
+    "Timer Started": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타이머 시작"
+          }
+        }
+      }
+    },
+    "Timer countdown": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타이머 카운트다운"
+          }
+        }
+      }
+    },
+    "Timer shortcut": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타이머 단축키"
+          }
+        }
+      }
+    },
+    "Timer tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타이머 탭"
           }
         }
       }
@@ -24986,6 +27536,17 @@
         }
       }
     },
+    "Translate this text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 글 번역하기"
+          }
+        }
+      }
+    },
     "Translates whatever is on the clipboard.": {
       "extractionState": "manual",
       "localizations": {
@@ -25059,6 +27620,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "자르기·편집"
+          }
+        }
+      }
+    },
+    "Try": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "써 보기"
           }
         }
       }
@@ -25283,6 +27855,17 @@
         }
       }
     },
+    "Turn On Camera": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카메라 켜기"
+          }
+        }
+      }
+    },
     "Turn Orbit on (or drag it into the list)": {
       "extractionState": "manual",
       "localizations": {
@@ -25305,6 +27888,17 @@
         }
       }
     },
+    "Turn it on in Orbit › Spelling": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit › 맞춤법에서 켤 수 있어요"
+          }
+        }
+      }
+    },
     "Turn it on to pick a button.": {
       "extractionState": "manual",
       "localizations": {
@@ -25323,6 +27917,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "끄기"
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in System Settings to use it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 설정에서 Apple Intelligence를 켜면 쓸 수 있어요."
           }
         }
       }
@@ -25481,6 +28086,17 @@
         }
       }
     },
+    "Two fingers down on the notch open it; up closes it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 위에서 두 손가락으로 아래로 쓸면 열리고, 위로 쓸면 닫혀요."
+          }
+        }
+      }
+    },
     "Two secrets open the vault: your Master Password and a Secret Key.": {
       "extractionState": "manual",
       "localizations": {
@@ -25521,6 +28137,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "확인을 위해 한 번 더 입력해 주세요."
+          }
+        }
+      }
+    },
+    "Type something to check…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "검사할 글을 입력해 보세요…"
           }
         }
       }
@@ -25899,6 +28526,17 @@
         }
       }
     },
+    "Unofficial. Off: Korean is checked on this Mac only.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비공식 연결이에요. 끄면 한국어도 이 Mac 안에서만 검사해요."
+          }
+        }
+      }
+    },
     "Unpick": {
       "extractionState": "manual",
       "localizations": {
@@ -26070,6 +28708,28 @@
     "Update Settings": {
       "extractionState": "manual"
     },
+    "Update Tavi automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi 자동으로 업데이트"
+          }
+        }
+      }
+    },
+    "Update Tavi too": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi도 자동으로 업데이트"
+          }
+        }
+      }
+    },
     "Update available": {
       "extractionState": "manual",
       "localizations": {
@@ -26125,6 +28785,17 @@
         }
       }
     },
+    "Updating Tavi…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tavi 업데이트 중…"
+          }
+        }
+      }
+    },
     "Uptime": {
       "extractionState": "manual",
       "localizations": {
@@ -26132,6 +28803,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "가동 시간"
+          }
+        }
+      }
+    },
+    "Use Apple Spelling": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 맞춤법 쓰기"
           }
         }
       }
@@ -26379,6 +29061,9 @@
         }
       }
     },
+    "V": {
+      "extractionState": "manual"
+    },
     "VGA": {
       "extractionState": "manual"
     },
@@ -26585,6 +29270,17 @@
         }
       }
     },
+    "Volume and brightness": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "볼륨 및 밝기"
+          }
+        }
+      }
+    },
     "Volume keys control monitor speakers": {
       "extractionState": "manual",
       "localizations": {
@@ -26603,6 +29299,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "음량 키도 Orbit 표시로"
+          }
+        }
+      }
+    },
+    "Volume, brightness and keyboard light — grown out of the notch, at the bottom of the screen, or macOS's own.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "볼륨, 밝기, 키보드 조명 — 노치에서 커지거나, 화면 아래에, 또는 macOS 기본으로."
           }
         }
       }
@@ -26748,6 +29455,17 @@
         }
       }
     },
+    "Web · unofficial": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 · 비공식"
+          }
+        }
+      }
+    },
     "Website": {
       "extractionState": "manual",
       "localizations": {
@@ -26858,6 +29576,9 @@
         }
       }
     },
+    "What it was changed to.": {
+      "extractionState": "manual"
+    },
     "What shows when you click the runner in the menu bar.": {
       "extractionState": "manual",
       "localizations": {
@@ -26876,6 +29597,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "숨긴 아이콘을 볼 때 메뉴 막대에서 누르는 아이콘이에요."
+          }
+        }
+      }
+    },
+    "What's playing, with controls, and what's left on today's calendar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재생 중인 곡과 컨트롤, 오늘 남은 일정을 보여줘요."
           }
         }
       }
@@ -27078,6 +29810,28 @@
         }
       }
     },
+    "While you drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "드래그하는 동안"
+          }
+        }
+      }
+    },
+    "Why? Show the rule and examples": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왜 고쳐요? 규칙과 예문 보기"
+          }
+        }
+      }
+    },
     "Wi-Fi": {
       "extractionState": "manual"
     },
@@ -27214,6 +29968,17 @@
         }
       }
     },
+    "Wording": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "표현"
+          }
+        }
+      }
+    },
     "Words": {
       "extractionState": "manual",
       "localizations": {
@@ -27335,6 +30100,17 @@
         }
       }
     },
+    "Written apart": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "띄어 써요"
+          }
+        }
+      }
+    },
     "Written since start": {
       "extractionState": "manual",
       "localizations": {
@@ -27342,6 +30118,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "시동 후 씀"
+          }
+        }
+      }
+    },
+    "Written together": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "붙여 써요"
           }
         }
       }
@@ -27722,6 +30509,9 @@
     "\\.part\\d+\\.rar$": {
       "extractionState": "manual"
     },
+    "\\\\s+": {
+      "extractionState": "manual"
+    },
     "\\r": {
       "extractionState": "manual"
     },
@@ -27761,7 +30551,16 @@
     "_CFPreferencesSynchronizeWithContainer": {
       "extractionState": "manual"
     },
+    "_NSDoNotDisturbDisabledNotification": {
+      "extractionState": "manual"
+    },
+    "_NSDoNotDisturbEnabledNotification": {
+      "extractionState": "manual"
+    },
     "__MACOSX": {
+      "extractionState": "manual"
+    },
+    "a  b → a b": {
       "extractionState": "manual"
     },
     "about:logins": {
@@ -27792,6 +30591,12 @@
       "extractionState": "manual"
     },
     "agent: restarted": {
+      "extractionState": "manual"
+    },
+    "airpods max": {
+      "extractionState": "manual"
+    },
+    "airpods pro": {
       "extractionState": "manual"
     },
     "always hidden": {
@@ -27959,6 +30764,9 @@
     "awake.stopWhenHot": {
       "extractionState": "manual"
     },
+    "a␣␣ → a␣": {
+      "extractionState": "manual"
+    },
     "b byte bytes 바이트": {
       "extractionState": "manual"
     },
@@ -28023,6 +30831,15 @@
       "extractionState": "manual"
     },
     "capture.autoCopy": {
+      "extractionState": "manual"
+    },
+    "capture.editorFloating": {
+      "extractionState": "manual"
+    },
+    "capture.keyHints": {
+      "extractionState": "manual"
+    },
+    "capture.lastArea": {
       "extractionState": "manual"
     },
     "capture.saveFolder": {
@@ -28149,6 +30966,9 @@
     "define ": {
       "extractionState": "manual"
     },
+    "delete all, insert all": {
+      "extractionState": "manual"
+    },
     "delhi 델리 india 인도": {
       "extractionState": "manual"
     },
@@ -28165,6 +30985,9 @@
       "extractionState": "manual"
     },
     "display monitor resolution night shift 디스플레이 모니터 해상도": {
+      "extractionState": "manual"
+    },
+    "displays.hudPlace": {
       "extractionState": "manual"
     },
     "displays.keyTarget": {
@@ -28292,6 +31115,9 @@
     "global: removed": {
       "extractionState": "manual"
     },
+    "going → am going": {
+      "extractionState": "manual"
+    },
     "group:": {
       "extractionState": "manual"
     },
@@ -28308,6 +31134,12 @@
       "extractionState": "manual"
     },
     "hanoi 하노이 vietnam 베트남": {
+      "extractionState": "manual"
+    },
+    "has a": {
+      "extractionState": "manual"
+    },
+    "have an": {
       "extractionState": "manual"
     },
     "ho chi minh 호치민": {
@@ -28394,6 +31226,9 @@
       "extractionState": "manual"
     },
     "k kelvin 켈빈": {
+      "extractionState": "manual"
+    },
+    "k6crVb3PuDp1IXIJMFq7CmoR9SXKo6JaV15oivGtEOM=": {
       "extractionState": "manual"
     },
     "kb kilobyte kilobytes": {
@@ -28901,6 +31736,17 @@
     "mi mile miles 마일": {
       "extractionState": "manual"
     },
+    "min": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "분"
+          }
+        }
+      }
+    },
     "min mins minute minutes 분": {
       "extractionState": "manual"
     },
@@ -28950,6 +31796,27 @@
       "extractionState": "manual"
     },
     "not really there": {
+      "extractionState": "manual"
+    },
+    "notch dynamic island boring notch notchnook alcove shelf timer pomodoro 노치 다이내믹 아일랜드 선반 타이머 뽀모도로": {
+      "extractionState": "manual"
+    },
+    "notch.closeDelay": {
+      "extractionState": "manual"
+    },
+    "notch.hideFullScreen": {
+      "extractionState": "manual"
+    },
+    "notch.hoverOpen": {
+      "extractionState": "manual"
+    },
+    "notch.openDelay": {
+      "extractionState": "manual"
+    },
+    "notch.openTab": {
+      "extractionState": "manual"
+    },
+    "notch.timerMinutes": {
       "extractionState": "manual"
     },
     "notifications alerts 알림": {
@@ -29086,6 +31953,9 @@
     "overlaps.disabledSystemShortcuts": {
       "extractionState": "manual"
     },
+    "overlay_%04d.jpg": {
+      "extractionState": "manual"
+    },
     "oz ounce ounces 온스": {
       "extractionState": "manual"
     },
@@ -29147,6 +32017,9 @@
       "extractionState": "manual"
     },
     "pro.betterdisplay.BetterDisplay": {
+      "extractionState": "manual"
+    },
+    "promo:": {
       "extractionState": "manual"
     },
     "r\n": {
@@ -29236,6 +32109,9 @@
     "setBrightness:forKeyboard:": {
       "extractionState": "manual"
     },
+    "sha256:": {
+      "extractionState": "manual"
+    },
     "shanghai 상하이": {
       "extractionState": "manual"
     },
@@ -29286,6 +32162,18 @@
     "sound audio volume output input 사운드 소리": {
       "extractionState": "manual"
     },
+    "spell spelling check grammar proofread typo spacing languagetool grammarly 맞춤법 검사 띄어쓰기 문법 교정 오타 맞춤법 검사기": {
+      "extractionState": "manual"
+    },
+    "spell.closeAfterReplace": {
+      "extractionState": "manual"
+    },
+    "spell.tripleCopy": {
+      "extractionState": "manual"
+    },
+    "spell.web.offerDismissed": {
+      "extractionState": "manual"
+    },
     "stacked away": {
       "extractionState": "manual"
     },
@@ -29304,6 +32192,12 @@
       "extractionState": "manual"
     },
     "storage to clean": {
+      "extractionState": "manual"
+    },
+    "store tomorow,": {
+      "extractionState": "manual"
+    },
+    "store,": {
       "extractionState": "manual"
     },
     "sydney 시드니 호주": {
@@ -29347,7 +32241,13 @@
     "tap skipped: no Accessibility": {
       "extractionState": "manual"
     },
+    "tavi.autoUpdate": {
+      "extractionState": "manual"
+    },
     "tb terabyte terabytes 테라": {
+      "extractionState": "manual"
+    },
+    "teh → the: spacing": {
       "extractionState": "manual"
     },
     "tell application \"Finder\" to empty trash": {
@@ -29360,6 +32260,9 @@
       "extractionState": "manual"
     },
     "the app before Orbit": {
+      "extractionState": "manual"
+    },
+    "the the": {
       "extractionState": "manual"
     },
     "this is the same face": {
@@ -29408,6 +32311,12 @@
       "extractionState": "manual"
     },
     "type:": {
+      "extractionState": "manual"
+    },
+    "t~~eh~~he": {
+      "extractionState": "manual"
+    },
+    "t~~e~~h+e+": {
       "extractionState": "manual"
     },
     "ui8 ": {
@@ -29592,6 +32501,17 @@
         }
       }
     },
+    "· %ld kept": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %ld개 적용"
+          }
+        }
+      }
+    },
     "“%@” needs a password": {
       "extractionState": "manual",
       "localizations": {
@@ -29656,6 +32576,20 @@
     "⌃⌥Space": {
       "extractionState": "manual"
     },
+    "⌘C": {
+      "extractionState": "manual"
+    },
+    "⌘C three times": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘C 세 번"
+          }
+        }
+      }
+    },
     "⌘C twice": {
       "extractionState": "manual",
       "localizations": {
@@ -29663,6 +32597,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "⌘C 두 번"
+          }
+        }
+      }
+    },
+    "⌘C twice still translates; a third press checks spelling instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘C 두 번은 그대로 번역이고, 한 번 더 누르면 맞춤법을 검사해요."
           }
         }
       }

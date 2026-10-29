@@ -37,6 +37,10 @@ enum Pref {
     static let captureThumbnailSeconds = "capture.thumbnailSeconds"
     /// Which screen corner screenshot previews appear in: bottomLeft, bottomRight, topLeft, topRight.
     static let captureThumbnailCorner = "capture.thumbnailCorner"
+    /// The key-hint strip at the bottom of the screen while selecting an area.
+    static let captureKeyHints = "capture.keyHints"
+    /// The last captured area, [x, y, width, height, displayID] (top-left origin, points), for R and Repeat.
+    static let captureLastArea = "capture.lastArea"
     static let windowGap = "window.gap"
     static let windowStageManager = "window.stageManagerAware"
     static let windowStageWidth = "window.stageStripWidth"
@@ -58,6 +62,21 @@ enum Pref {
     static let translateFontSize = "translate.fontSize"
     static let translateShowSource = "translate.showSource"
     static let translateCloseOnBlur = "translate.closeOnBlur"
+    static let spellEnabled = "spell.enabled"
+    /// SpellEngine raw value; unset means Apple Intelligence when it's available.
+    static let spellEngine = "spell.engine"
+    /// The engine for Korean text (the other key is for everything else).
+    static let spellKoreanEngine = "spell.engine.ko"
+    /// The user agreed to send Korean text to the Daum and Naver web checkers.
+    static let spellWebConsent = "spell.web.consent"
+    /// Daum and Naver together, fixes merged.
+    static let spellCombine = "spell.combine"
+    /// The card's offer of the web checkers was dismissed.
+    static let spellWebOfferDismissed = "spell.web.offerDismissed"
+    static let spellTripleCopy = "spell.tripleCopy"
+    static let spellCloseAfterReplace = "spell.closeAfterReplace"
+    /// Words spell check never changes.
+    static let spellIgnored = "spell.ignored"
     static let calendarEnabled = "menubar.calendar"
     /// The planet (SwiftUI MenuBarExtra). Off by default: the ✦, the ring and shortcuts reach Orbit.
     static let showOrbitIcon = "menubar.showOrbitIcon"
@@ -88,6 +107,7 @@ enum Pref {
             captureAutoCopy: true,
             captureSound: true,
             captureThumbnailSeconds: 8.0,
+            captureKeyHints: true,
             windowGap: 0.0,
             windowStageManager: true,
             windowStageWidth: 190.0,
@@ -106,6 +126,11 @@ enum Pref {
             translateFontSize: 16.0,
             translateShowSource: true,
             translateCloseOnBlur: true,
+            spellEnabled: true,
+            spellTripleCopy: false,
+            spellWebConsent: false,
+            spellCombine: false,
+            spellCloseAfterReplace: true,
             calendarEnabled: true,
             calendarStyle: "date",
             calendarIcon: "none",

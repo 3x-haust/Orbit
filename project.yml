@@ -12,8 +12,8 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "2"
     DEVELOPMENT_TEAM: UM52UU4B7L
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: 7CBA1EA9C27F25912D4A2774F0D1B98B6C5A7BF5
@@ -63,7 +63,8 @@ targets:
         NSAppleEventsUsageDescription: Orbit uses this to switch Dark Mode and empty the Trash when you ask it to.
         NSCalendarsFullAccessUsageDescription: Orbit shows your events in the menu bar calendar. They never leave this Mac.
         NSAudioCaptureUsageDescription: Orbit routes each app's sound through its volume and EQ controls. Nothing is recorded.
-        NSCameraUsageDescription: Orbit uses the camera on this Mac to recognize your face and unlock the apps you locked. Nothing leaves your Mac.
+        NSCameraUsageDescription: Orbit uses the camera on this Mac to recognize your face and unlock the apps you locked, and for the notch mirror when you turn it on. Nothing leaves your Mac.
+        NSBluetoothAlwaysUsageDescription: Orbit shows a notice in the notch when your AirPods or other Bluetooth devices connect, with their battery level.
         NSMicrophoneUsageDescription: Orbit records your microphone only while you're making a screen recording with it turned on.
         # Archives: Orbit can be the app that opens these (Archives page › "Open archives with Orbit").
         CFBundleDocumentTypes:
@@ -141,13 +142,28 @@ targets:
         basedOnDependencyAnalysis: false
         script: |
           # Tavi (automatic 한/영) must live in its own input-method bundle; Orbit carries it and installs it.
-          src="${PROJECT_DIR}/../tavi/dist/Tavi.app/Contents/Helpers/TaviInputMethod.app"
+          # Newest of: a local Tavi build next to Orbit, or the verified release from tools/fetch-tavi.sh.
           dst="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers"
-          if [ ! -d "$src" ]; then echo "warning: Tavi not built (run ../tavi/scripts/build.sh); skipping"; exit 0; fi
+          src=""; best=0
+          for c in "${PROJECT_DIR}/../tavi/dist/Tavi.app/Contents/Helpers/TaviInputMethod.app" "${PROJECT_DIR}/tools/tavi-cache/TaviInputMethod.app"; do
+            [ -d "$c" ] || continue
+            v=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$c/Contents/Info.plist" 2>/dev/null || echo 0)
+            if [ "$v" -gt "$best" ] 2>/dev/null; then best=$v; src=$c; fi
+          done
+          if [ -z "$src" ]; then
+            if [ "$CONFIGURATION" = "Release" ]; then echo "error: Tavi missing — run tools/fetch-tavi.sh (or build ../tavi) before a Release build"; exit 1; fi
+            echo "warning: Tavi not found (run tools/fetch-tavi.sh); skipping"; exit 0
+          fi
+          echo "Embedding Tavi $(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$src/Contents/Info.plist") from $src"
+          identity="${EXPANDED_CODE_SIGN_IDENTITY:-$CODE_SIGN_IDENTITY}"
+          if [ -z "$identity" ] || [ "$identity" = "-" ]; then
+            if [ "$CONFIGURATION" = "Release" ]; then echo "error: no signing identity for the Tavi helper"; exit 1; fi
+            identity="-"
+          fi
           mkdir -p "$dst"
           rm -rf "$dst/TaviInputMethod.app"
           ditto "$src" "$dst/TaviInputMethod.app"
-          codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:--}" --timestamp=none "$dst/TaviInputMethod.app"
+          codesign --force --sign "$identity" --timestamp=none "$dst/TaviInputMethod.app"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lyu.orbit

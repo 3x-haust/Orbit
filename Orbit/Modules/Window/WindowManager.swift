@@ -126,6 +126,17 @@ final class WindowManager {
     /// Usable area in AX coordinates: below the menu bar, beside the Dock, and clear of the Stage Manager strip.
     private func axVisibleFrame(_ screen: NSScreen) -> CGRect {
         var v = screen.visibleFrame
+        let full = axFullFrame(screen)
+        // macOS's reserve for the Dock stops a few points short of its rounded background, so
+        // windows laid against that edge tuck under it. Clear the Dock as it's actually drawn.
+        if let dock = Self.dockFrame(), full.intersects(dock) {
+            let d = CGRect(x: dock.minX, y: mainHeight - dock.maxY, width: dock.width, height: dock.height) // AppKit coords
+            switch Self.dockEdge() {
+            case "left": v = CGRect(x: max(v.minX, d.maxX), y: v.minY, width: v.maxX - max(v.minX, d.maxX), height: v.height)
+            case "right": v.size.width = min(v.maxX, d.minX) - v.minX
+            default: v = CGRect(x: v.minX, y: max(v.minY, d.maxY), width: v.width, height: v.maxY - max(v.minY, d.maxY))
+            }
+        }
         if let strip = Self.stageStrip(on: screen) {
             v.size.width -= strip.width
             if strip.onLeft { v.origin.x += strip.width }
@@ -147,6 +158,38 @@ final class WindowManager {
 
     private static func close(_ a: CGRect, _ b: CGRect) -> Bool {
         abs(a.minX - b.minX) <= 8 && abs(a.minY - b.minY) <= 8 && abs(a.width - b.width) <= 8 && abs(a.height - b.height) <= 8
+    }
+
+    /// Where the Dock is pinned: "bottom", "left" or "right".
+    static func dockEdge() -> String {
+        CFPreferencesAppSynchronize("com.apple.dock" as CFString)
+        return CFPreferencesCopyAppValue("orientation" as CFString, "com.apple.dock" as CFString) as? String ?? "bottom"
+    }
+
+    /// The Dock's drawn frame in AX coordinates (its icon list plus the background around it), or
+    /// nil while it auto-hides — then it only covers windows for a moment, like macOS intends.
+    static func dockFrame() -> CGRect? {
+        CFPreferencesAppSynchronize("com.apple.dock" as CFString)
+        if CFPreferencesCopyAppValue("autohide" as CFString, "com.apple.dock" as CFString) as? Bool == true { return nil }
+        guard let pid = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first?.processIdentifier else { return nil }
+        let app = AXUIElementCreateApplication(pid)
+        var kids: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, kAXChildrenAttribute as CFString, &kids) == .success,
+              let list = (kids as? [AXUIElement])?.first(where: { el in
+                  var role: CFTypeRef?
+                  AXUIElementCopyAttributeValue(el, kAXRoleAttribute as CFString, &role)
+                  return role as? String == kAXListRole
+              }) else { return nil }
+        var p: CFTypeRef?, sz: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(list, kAXPositionAttribute as CFString, &p) == .success,
+              AXUIElementCopyAttributeValue(list, kAXSizeAttribute as CFString, &sz) == .success,
+              let p, let sz, CFGetTypeID(p) == AXValueGetTypeID(), CFGetTypeID(sz) == AXValueGetTypeID() else { return nil }
+        var origin = CGPoint.zero, size = CGSize.zero
+        AXValueGetValue(p as! AXValue, .cgPoint, &origin)
+        AXValueGetValue(sz as! AXValue, .cgSize, &size)
+        guard size.width > 10, size.height > 10 else { return nil }
+        // The icon list sits inside the Dock's background; 8pt covers the background and its shadow edge.
+        return CGRect(origin: origin, size: size).insetBy(dx: -8, dy: -8)
     }
 
     /// Width and side of the Stage Manager recent-apps strip, when it's on screen.

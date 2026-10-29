@@ -123,9 +123,23 @@ final class Shelf {
         }
     }
 
-    func toggle() { isVisible ? hide() : show() }
+    /// At the top with Orbit's notch on, the shelf is the notch's Shelf tab: one shape grows out of
+    /// the camera, never two. Its own top window then never shows.
+    static var inNotch: Bool { edge == .top && NotchCenter.enabled }
+
+    func toggle() {
+        if Self.inNotch { NotchCenter.shared.toggleShelf(); return }
+        isVisible ? hide() : show()
+    }
 
     func show(on target: NSScreen? = nil) {
+        if Self.inNotch {
+            if isVisible { panel.orderOut(nil) }
+            NotchCenter.shared.open(on: target?.displayID, tab: .shelf)
+            return
+        }
+        // Only one thing comes out of the notch at a time.
+        if Self.edge == .top { NotchCenter.shared.close() }
         hideWork?.cancel()
         hideWork = nil
         let screen = target ?? NSScreen.active
@@ -277,6 +291,10 @@ final class Shelf {
         case .bottom: atEdge = p.y <= f.minY + 2 && p.x > f.minX + corner && p.x < f.maxX - corner
         }
         guard atEdge else { edgeSince = nil; return }
+        if Self.inNotch {
+            NotchCenter.shared.openForDrag(on: screen.displayID)
+            return
+        }
         // The Dock lives at the bottom too: there, hold the drag at the edge a moment first.
         if Self.edge == .bottom {
             if edgeSince == nil { edgeSince = Date() }
@@ -331,9 +349,9 @@ private struct ShelfView: View {
                 .padding(.horizontal, wide / 2)
                 .padding(bleedInsets(.top))
                 .overlay { dropTarget(.top) }
-                // Shows once the shape is most of the way grown; goes first on the way back.
-                .opacity(layout.out ? 1 : 0)
-                .animation(layout.out ? .easeOut(duration: 0.2).delay(0.24) : .easeIn(duration: 0.1), value: layout.out)
+                // Fades with the morph itself, clipped by the shape as it grows: never an empty black
+                // box on the way out, and gone before the shape is most of the way back.
+                .modifier(NotchReveal(progress: layout.out ? 1 : 0))
                 .mask(alignment: .top) { shape.frame(width: now.width, height: now.height) }
         }
     }
