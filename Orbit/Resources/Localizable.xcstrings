@@ -6580,6 +6580,17 @@
         }
       }
     },
+    "Close Window": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "창 닫기"
+          }
+        }
+      }
+    },
     "Close delay": {
       "extractionState": "manual",
       "localizations": {
@@ -15905,6 +15916,17 @@
         }
       }
     },
+    "Minimized": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최소화됨"
+          }
+        }
+      }
+    },
     "Minutes without touching the Mac. It also locks when Orbit quits.": {
       "extractionState": "manual",
       "localizations": {
@@ -18473,6 +18495,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "날씨 앱 열기"
+          }
+        }
+      }
+    },
+    "Open Windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열린 창"
           }
         }
       }
@@ -21068,6 +21101,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "실행 중인 앱 모두 종료"
+          }
+        }
+      }
+    },
+    "Quit App": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 종료"
           }
         }
       }
@@ -25725,6 +25769,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "데스크탑 %ld로 전환"
+          }
+        }
+      }
+    },
+    "Switch to Window": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "창으로 전환"
           }
         }
       }
