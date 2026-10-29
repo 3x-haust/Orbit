@@ -9098,6 +9098,17 @@
         }
       }
     },
+    "Download %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 다운로드"
+          }
+        }
+      }
+    },
     "Downloaded": {
       "extractionState": "manual",
       "localizations": {
@@ -18842,6 +18853,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Orbit %@ 사용 가능"
+          }
+        }
+      }
+    },
+    "Orbit %@ is out. This is a development build, so get it from the release page.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit %@이 나왔어요. 개발 빌드라서 릴리즈 페이지에서 받아 주세요."
           }
         }
       }

@@ -32,5 +32,7 @@
   "You’re offline": "인터넷에 연결되어 있지 않아요",
   "Update didn’t install": "업데이트를 설치하지 못했어요",
   "Drag the new Orbit into Applications": "새 Orbit을 응용 프로그램 폴더로 옮겨 주세요",
-  "Orbit can’t write to its folder, so the update is open in Finder": "Orbit 폴더에 쓸 수 없어서 새 버전을 Finder에 열어뒀어요"
+  "Orbit can’t write to its folder, so the update is open in Finder": "Orbit 폴더에 쓸 수 없어서 새 버전을 Finder에 열어뒀어요",
+  "Download %@": "%@ 다운로드",
+  "Orbit %@ is out. This is a development build, so get it from the release page.": "Orbit %@이 나왔어요. 개발 빌드라서 릴리즈 페이지에서 받아 주세요."
 }

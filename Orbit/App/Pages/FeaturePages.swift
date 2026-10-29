@@ -643,12 +643,15 @@ private struct UpdatesGroup: View {
     var body: some View {
         SettingsGroup(title: "Updates", footer: updater.isDevBuild ? "Development build — installing is off" : nil) {
             SettingsRow(title: "Version %@".loc(updater.currentVersion), subtitle: summary, symbol: "arrow.down.circle") {
-                if case .available(let release) = updater.status {
+                if case .available(let release) = updater.status, updater.isDevBuild {
+                    // A development build can't replace itself; a greyed-out Install read as broken.
+                    Button("Download %@".loc(release.version)) { NSWorkspace.shared.open(release.page) }
+                        .buttonStyle(PillButtonStyle())
+                } else if case .available(let release) = updater.status {
                     Button("Release Notes") { NSWorkspace.shared.open(release.page) }
                         .buttonStyle(PillButtonStyle(prominent: false))
                     Button("Install %@".loc(release.version)) { updater.install(release) }
                         .buttonStyle(PillButtonStyle())
-                        .disabled(updater.isDevBuild)
                 } else {
                     Button("Check Now") { updater.checkNow(userInitiated: true) }
                         .buttonStyle(PillButtonStyle(prominent: false))
@@ -683,6 +686,7 @@ private struct UpdatesGroup: View {
         case .checking: "Checking…".loc
         case .upToDate: "Orbit is up to date".loc
         case .noReleases: "No releases yet".loc
+        case .available(let r) where updater.isDevBuild: "Orbit %@ is out. This is a development build, so get it from the release page.".loc(r.version)
         case .available(let r): "Orbit %@ is available".loc(r.version)
         case .downloading(let f): "Downloading %ld%%".loc(Int(f * 100))
         case .installing: "Installing…".loc
