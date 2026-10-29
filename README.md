@@ -61,6 +61,7 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 | | |
 |---|---|
 | 🪐 **Orbit Ring** | Hold a shortcut or the middle mouse button — a ring of actions opens around your pointer. 3–12 slots, presets, drag-and-drop editing. |
+| 🔍 **Launcher** | ⌥Space. Apps, Orbit commands, open windows, the front app's menu commands, files, calculator, units, currency, clipboard and snippets — all from one search field. |
 | 📸 **Capture** | Area, window, full screen, timed and scrolling captures (keeps up with fast scrolls). Selection keys: ⇧ lock ratio, ⌥ from center, Space to move, Tab for presets, R for the last area, and C/S/E/P/T/V/L to pick what happens. Screen recording with click highlights. An editor with arrows, text, blur, pixelate, spotlight, magnifier, ruler and color picker. Live Text and OCR. |
 | 📋 **Clipboard** | Searchable history of text, images, files and colors. Single click pastes. |
 | 🪟 **Windows** | Halves, thirds, quarters, center and maximize from the keyboard — aware of Stage Manager and multiple displays. |
