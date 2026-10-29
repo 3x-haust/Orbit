@@ -123,6 +123,7 @@
 		97CBDE27A63895F86FE78813 /* BatteryPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9171DD5AC3FD8F7372B764 /* BatteryPage.swift */; };
 		984D3AA3F912342A57E8C610 /* RecordPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E202285F2A53FBC6DB8C7743 /* RecordPicker.swift */; };
 		99521B499048728273B7E99F /* AppsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AF473498FAA90059FE74B6 /* AppsPanel.swift */; };
+		99E61AE282CA542BB13A9F7D /* MenuCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051B3849AFE7B68FBB770536 /* MenuCommands.swift */; };
 		9B920CE216E9796BF2ED4582 /* MenuBarCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840129039E3BCBDF10883756 /* MenuBarCalendar.swift */; };
 		9D47D1C129E210954E010BF0 /* PermissionPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */; };
 		9F2728A0FC19E7AA803CF6D5 /* FaceUnlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4AA143231EE285383B831E /* FaceUnlock.swift */; };
@@ -285,6 +286,7 @@
 		0298EB6B0E9F6C4EDEE0E364 /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
 		02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPrompt.swift; sourceTree = "<group>"; };
 		0489E383085140B8C153BB99 /* AuthPromptUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthPromptUnlock.swift; sourceTree = "<group>"; };
+		051B3849AFE7B68FBB770536 /* MenuCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuCommands.swift; sourceTree = "<group>"; };
 		05EABB958605751517434087 /* HomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePage.swift; sourceTree = "<group>"; };
 		0729D6EBC389EC7C64A4424A /* PageShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageShortcuts.swift; sourceTree = "<group>"; };
 		0828531D6A12CF39075F3E03 /* OrbitQuickLook.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OrbitQuickLook.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1000,6 +1002,7 @@
 				6425C398F27D814B72602854 /* LauncherModel.swift */,
 				46A8ED97B013D95859769F92 /* LauncherPanel.swift */,
 				67F2C7D6D02F4FF3D2ADF535 /* LauncherView.swift */,
+				051B3849AFE7B68FBB770536 /* MenuCommands.swift */,
 				E3942721151051DAD9121083 /* OpenWindows.swift */,
 				79A6C1AA941972C6FCD6198C /* SmartAnswers.swift */,
 			);
@@ -1343,6 +1346,7 @@
 				200156BADC0A815191A295AF /* MenuBarRemoval.swift in Sources */,
 				FE032D92E7E52E6543BDA6CA /* MenuBarRunner.swift in Sources */,
 				8377DB4B5497BDAA16CD907C /* MenuBarSystemSwitches.swift in Sources */,
+				99E61AE282CA542BB13A9F7D /* MenuCommands.swift in Sources */,
 				8C272F523E642B35F8D11943 /* MouseTrigger.swift in Sources */,
 				81D3657D49116E00460CC860 /* NotchActivities.swift in Sources */,
 				1F6ADA95864EF03FDC1A0F86 /* NotchCenter.swift in Sources */,

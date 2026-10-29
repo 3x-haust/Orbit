@@ -110,8 +110,11 @@ final class LauncherModel {
             guard let score = [byTitle, byApp].compactMap({ $0 }).max() else { return nil }
             return (w, score)
         }
+        let menuScores: [(MenuCommands.Command, Int)] = MenuCommands.shared.commands.compactMap { c in
+            Fuzzy.score(q, c.title, keywords: c.path.joined(separator: " ")).map { (c, $0) }
+        }
         let scores: [Int] = pageScores.map(\.1) + commandScores.map(\.1) + appScores.map(\.1)
-        let best = (scores + windowScores.map(\.1)).max() ?? 0
+        let best = (scores + windowScores.map(\.1) + menuScores.map(\.1)).max() ?? 0
         let floor = best >= Fuzzy.substring ? Fuzzy.substring - 100 : best >= Fuzzy.keyword ? Fuzzy.keyword : 0
 
         // Orbit's own pages ("사운드", "storage", "번역"…) open the app window there.
@@ -148,6 +151,14 @@ final class LauncherModel {
             .sorted { $0.1 > $1.1 }
             .prefix(5)
             .map { window($0.0) }
+
+        // Scattered-letter hits are left out here: a big app has a thousand menu items and half of them would match.
+        result += menuScores
+            .filter { $0.1 >= max(floor, Fuzzy.keyword) }
+            .map { ($0.0, $0.1 + Frecency.boost(menuID($0.0))) }
+            .sorted { $0.1 > $1.1 }
+            .prefix(5)
+            .map { menu($0.0) }
 
         result += SnippetStore.shared.launcherItems(for: q)
         result += ClipboardStore.shared.search(q).prefix(best >= Fuzzy.substring ? 3 : 5).map(clip)
@@ -205,6 +216,19 @@ final class LauncherModel {
             LauncherAction(title: "Switch to Window", symbol: "macwindow") { OpenWindows.shared.focus(w) },
             LauncherAction(title: "Close Window", symbol: "xmark.square") { OpenWindows.shared.close(w) },
             LauncherAction(title: "Quit App", symbol: "power") { NSRunningApplication(processIdentifier: w.pid)?.terminate() },
+        ])
+    }
+
+    private func menuID(_ c: MenuCommands.Command) -> String {
+        "menu.\(MenuCommands.shared.appName).\((c.path + [c.title]).joined(separator: "/"))"
+    }
+
+    private func menu(_ c: MenuCommands.Command) -> LauncherItem {
+        let menus = MenuCommands.shared
+        return LauncherItem(id: menuID(c), title: c.title, subtitle: c.path.joined(separator: " › "),
+                            icon: menus.appPath.map { .file($0) } ?? .symbol("filemenu.and.selection", Tint.launcher),
+                            accessory: c.shortcut ?? "Menu", section: "Menu Commands", actions: [
+            LauncherAction(title: "Run Menu Command", symbol: "return") { menus.run(c) },
         ])
     }
 

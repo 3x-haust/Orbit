@@ -15763,6 +15763,17 @@
         }
       }
     },
+    "Menu": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴"
+          }
+        }
+      }
+    },
     "Menu Bar": {
       "extractionState": "manual",
       "localizations": {
@@ -15792,6 +15803,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "메뉴 막대 설정…"
+          }
+        }
+      }
+    },
+    "Menu Commands": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 명령"
           }
         }
       }
@@ -22338,6 +22360,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "명령 실행"
+          }
+        }
+      }
+    },
+    "Run Menu Command": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 실행"
           }
         }
       }

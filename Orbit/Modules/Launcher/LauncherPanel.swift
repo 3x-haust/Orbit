@@ -29,6 +29,7 @@ final class LauncherPanel {
 
     func show() {
         // Read before the panel opens; it doesn't activate Orbit, so this is still the user's app.
+        MenuCommands.shared.reload(for: NSWorkspace.shared.frontmostApplication)
         OpenWindows.shared.reload()
         model.query = ""
         model.refresh()
