@@ -9,7 +9,10 @@ final class Permissions {
 
     private(set) var screenCapture = false
     private(set) var accessibility = false
-    private(set) var pasteboard: NSPasteboard.AccessBehavior = .default
+    private(set) var pasteboard: PasteAccess = .ask
+
+    /// Whether other apps' copies reach Orbit. macOS 15.4 started asking; before it every app could read.
+    enum PasteAccess { case allowed, denied, ask }
 
     private var timer: Timer?
 
@@ -23,7 +26,15 @@ final class Permissions {
     func refresh() {
         screenCapture = CGPreflightScreenCaptureAccess()
         accessibility = AXIsProcessTrusted()
-        pasteboard = NSPasteboard.general.accessBehavior
+        if #available(macOS 15.4, *) {
+            switch NSPasteboard.general.accessBehavior {
+            case .alwaysAllow: pasteboard = .allowed
+            case .alwaysDeny: pasteboard = .denied
+            default: pasteboard = .ask
+            }
+        } else {
+            pasteboard = .allowed
+        }
     }
 
     /// Polls briefly while a settings pane is open so the UI flips to "Granted" without relaunching.

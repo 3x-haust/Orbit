@@ -8,6 +8,12 @@ enum TranslationEngine: String, CaseIterable, Identifiable {
     case google, deepl, apple
     var id: String { rawValue }
 
+    /// Apple's engine can only be called outside a SwiftUI view from macOS 26 on.
+    static var available: [TranslationEngine] {
+        if #available(macOS 26, *) { return allCases }
+        return [.google, .deepl]
+    }
+
     var title: String {
         switch self {
         case .google: "Google"
@@ -184,6 +190,7 @@ enum Translator {
 
     private static func apple(_ text: String, to target: String, from source: String?) async throws -> TranslationResult {
         #if canImport(Translation)
+        guard #available(macOS 26, *) else { throw TranslationError.unsupported }
         let src = Locale.Language(identifier: source ?? guessLanguage(text) ?? "en")
         let dst = Locale.Language(identifier: target)
         let availability = LanguageAvailability()

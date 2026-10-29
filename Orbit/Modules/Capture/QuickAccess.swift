@@ -473,7 +473,7 @@ private struct GlassButton: View {
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: Capsule())
+        .orbitGlass(interactive: true, in: Capsule())
         .help(help.loc)
     }
 }
@@ -492,7 +492,7 @@ private struct GlassIcon: View {
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: Circle())
+        .orbitGlass(interactive: true, in: Circle())
         .help(help.loc)
         .accessibilityLabel(help)
     }

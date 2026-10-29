@@ -105,14 +105,14 @@ private struct PinView: View {
                             Image(systemName: "pin.slash.fill").font(.system(size: 10, weight: .bold)).frame(width: 22, height: 22)
                         }
                         .buttonStyle(.plain)
-                        .glassEffect(.regular.interactive(), in: Circle())
+                        .orbitGlass(interactive: true, in: Circle())
                         .hoverHint("Unpin — back to the previews".loc, below: true)
                         .accessibilityLabel("Unpin".loc)
                         Button(action: close) {
                             Image(systemName: "xmark").font(.system(size: 10, weight: .bold)).frame(width: 22, height: 22)
                         }
                         .buttonStyle(.plain)
-                        .glassEffect(.regular.interactive(), in: Circle())
+                        .orbitGlass(interactive: true, in: Circle())
                         .hoverHint("Close (Esc)".loc, below: true)
                         .accessibilityLabel("Close".loc)
                     }

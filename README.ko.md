@@ -7,7 +7,7 @@
 **맥의 모든 유틸리티 앱을 한 번에**
 
 [![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases/latest)
-[![macOS](https://img.shields.io/badge/macOS-26%2B-000000?style=flat-square&logo=apple&logoColor=white)](#요구-사항)
+[![macOS](https://img.shields.io/badge/macOS-15%2B-000000?style=flat-square&logo=apple&logoColor=white)](#요구-사항)
 [![Swift](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
 
@@ -121,7 +121,7 @@ Orbit은 GitHub 릴리즈에서 스스로 업데이트해요. **일반 › 업�
 
 ## 요구 사항
 
-- macOS 26 이상
+- macOS 15 Sequoia 이상 (Liquid Glass, Apple 번역, Apple Intelligence 맞춤법은 macOS 26 이상)
 - Apple silicon (M 시리즈 맥북에서 테스트)
 
 ## 직접 빌드

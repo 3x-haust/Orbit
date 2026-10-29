@@ -3,7 +3,7 @@ options:
   bundleIdPrefix: com.lyu
   developmentLanguage: en
   deploymentTarget:
-    macOS: "26.0"
+    macOS: "15.0"
   createIntermediateGroups: true
 packages:
   KeyboardShortcuts:
@@ -18,7 +18,7 @@ settings:
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: 7CBA1EA9C27F25912D4A2774F0D1B98B6C5A7BF5
     ENABLE_HARDENED_RUNTIME: YES
-    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
 targets:
   Orbit:
     type: application

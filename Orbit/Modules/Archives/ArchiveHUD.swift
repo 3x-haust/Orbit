@@ -53,7 +53,7 @@ private struct ArchiveHUDView: View {
         }
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .orbitGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .environment(\.colorScheme, .dark)
     }
 }

@@ -180,7 +180,8 @@ final class TranslateController {
         anchor = frame
         self.selection = selection
         source = String(text.prefix(5000))
-        engine = TranslationEngine(rawValue: Pref.defaults.string(forKey: Pref.translateEngine) ?? "") ?? .google
+        engine = TranslationEngine(rawValue: Pref.defaults.string(forKey: Pref.translateEngine) ?? "")
+            .flatMap { TranslationEngine.available.contains($0) ? $0 : nil } ?? .google
         target = Self.direction(for: source)
         present()
         run()
@@ -430,7 +431,7 @@ private struct TranslateCard: View {
             .background(Capsule().fill(Palette.raised))
             Spacer()
             Menu {
-                ForEach(TranslationEngine.allCases) { e in
+                ForEach(TranslationEngine.available) { e in
                     Button { model.use(e) } label: {
                         if e == model.engine { Label(e.title, systemImage: "checkmark") } else { Text(e.title) }
                     }

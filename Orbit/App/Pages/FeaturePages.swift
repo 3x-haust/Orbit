@@ -501,16 +501,16 @@ struct PermissionList: View {
                            detail: "Window snapping, direct paste and the mouse-button Ring.",
                            granted: p.accessibility, request: p.requestAccessibility)
             PermissionCard(symbol: "doc.on.clipboard", title: "Paste from other apps",
-                           detail: pasteboardText, granted: p.pasteboard == .alwaysAllow,
+                           detail: pasteboardText, granted: p.pasteboard == .allowed,
                            actionTitle: "Open Settings", request: { p.open(.pasteboard) })
         }
     }
 
     private var pasteboardText: String {
         switch p.pasteboard {
-        case .alwaysAllow: "Allowed — clipboard history is recording."
-        case .alwaysDeny: "Denied — clipboard history can’t see new copies."
-        default: "If macOS asks, choose “Allow” so history can record."
+        case .allowed: "Allowed — clipboard history is recording."
+        case .denied: "Denied — clipboard history can’t see new copies."
+        case .ask: "If macOS asks, choose “Allow” so history can record."
         }
     }
 }
