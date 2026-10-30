@@ -106,6 +106,9 @@ struct AppsView: View {
                                     let sel = AppsModel.Selection(section: section.id, path: app.path)
                                     AppCell(app: app, size: size, cell: cell, selected: model.selection == sel,
                                             running: catalog.running.contains(app.path), pinnedRow: section.pinned)
+                                        // A fixed size, set out here: the grid then knows each row's height
+                                        // without building every cell to measure it.
+                                        .frame(width: cell, height: AppCell.height(iconSize: size))
                                         .id(sel)
                                         // Icons cascade in on open.
                                         .scaleEffect(model.shown ? 1 : 0.82)
@@ -169,26 +172,17 @@ private struct AppCell: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Image(nsImage: catalog.icon(app))
-                .resizable()
-                .interpolation(.high)
-                .frame(width: size, height: size)
+            GridIcon(app: app, size: size)
                 .shadow(color: .black.opacity(0.28), radius: 6, y: 3)
                 .scaleEffect(hovering ? 1.05 : 1)
                 .animation(.spring(duration: 0.22, bounce: 0.35), value: hovering)
-            Text(app.name)
-                .font(.system(size: size < 64 ? 11 : 12, weight: .medium))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .frame(maxWidth: cell - 8)
-                .shadow(color: .black.opacity(0.45), radius: 2, y: 1)
+            GridLabel(app: app, iconSize: size)
             // Running, like the Dock's dot.
             Circle().fill(.white.opacity(running ? 0.85 : 0)).frame(width: 4, height: 4)
         }
         .padding(.top, 10)
         .padding(.bottom, 6)
-        .frame(width: cell)
+        .frame(width: cell, height: Self.height(iconSize: size), alignment: .top)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white.opacity(selected ? 0.13 : (hovering ? 0.05 : 0))))
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(selected ? Palette.accent.opacity(0.9) : .clear, lineWidth: 1.5))
         .overlay(alignment: .topTrailing) {
@@ -197,7 +191,6 @@ private struct AppCell: View {
                     .padding(8)
             }
         }
-        .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .onTapGesture {
@@ -209,6 +202,12 @@ private struct AppCell: View {
         .help(app.name)
     }
 
+    /// Top 10, the icon, 6, a line of the name, 6, the running dot (4), bottom 6.
+    static func height(iconSize: Double) -> Double {
+        10 + iconSize + 6 + TileLabel.lineHeight(iconSize: iconSize) + 6 + 4 + 6
+    }
+
+    // Built along with the cell, so it only asks about the running app once an item is chosen.
     @ViewBuilder private var menu: some View {
         Button("Open") { AppsPanel.shared.open(app) }
         Button("Show in Finder") { AppsPanel.shared.reveal(app) }
@@ -216,10 +215,10 @@ private struct AppCell: View {
             withAnimation(.spring(duration: 0.3)) { catalog.togglePin(app) }
         }
         Button("Get Info") { withAnimation(.spring(duration: 0.25)) { AppsPanel.shared.model.info = app } }
-        if let runningApp = catalog.runningApp(app) {
+        if running {
             Divider()
-            Button("Hide") { runningApp.hide() }
-            Button("Quit") { runningApp.terminate() }
+            Button("Hide") { catalog.runningApp(app)?.hide() }
+            Button("Quit") { catalog.runningApp(app)?.terminate() }
         }
         Divider()
         Button("Uninstall…") { AppsPanel.shared.uninstall(app) }
@@ -291,7 +290,7 @@ private struct AppInfoCard: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Image(nsImage: catalog.icon(app)).resizable().frame(width: 72, height: 72)
+            GridIcon(app: app, size: 72)
             VStack(spacing: 3) {
                 Text(app.name).font(.orbitTitle)
                 if app.bundleName != app.name { Text(app.bundleName).font(.orbitCaption).foregroundStyle(.secondary) }
@@ -344,6 +343,86 @@ private struct AppInfoCard: View {
     }
 }
 
+/// An app's icon from the catalog's drawn bitmaps; a faint tile until it's drawn.
+struct GridIcon: View {
+    let app: AppsCatalog.App
+    let size: Double
+
+    var body: some View {
+        if let image = AppsCatalog.shared.icon(app) {
+            Image(decorative: image, scale: 1).resizable().interpolation(.high).frame(width: size, height: size)
+        } else {
+            RoundedRectangle(cornerRadius: size * 0.22, style: .continuous).fill(.white.opacity(0.06))
+                .frame(width: size * 0.8, height: size * 0.8)
+                .frame(width: size, height: size)
+        }
+    }
+}
+
+/// An app's name under its icon, from the catalog's drawn bitmaps (see `TileLabel`).
+struct GridLabel: View {
+    let app: AppsCatalog.App
+    let iconSize: Double
+
+    var body: some View {
+        let width = TileLabel.width(iconSize: iconSize), height = TileLabel.lineHeight(iconSize: iconSize)
+        Group {
+            if let image = AppsCatalog.shared.label(app) {
+                Image(decorative: image, scale: 1).resizable()
+                    .frame(width: width + 2 * TileLabel.pad, height: height + 2 * TileLabel.pad)
+                    .padding(-TileLabel.pad)
+            } else {
+                Color.clear
+            }
+        }
+        .frame(width: width, height: height)
+        .accessibilityLabel(app.name)
+    }
+}
+
+/// App names drawn once into bitmaps, off the main thread: white, medium weight, one line cut in
+/// the middle, with a soft shadow. As SwiftUI Text, every label in the grid was drawn again on the
+/// main thread each time the panel opened, each waiting on the window server: the grid froze for
+/// most of a second and the opening cascade never played.
+enum TileLabel {
+    /// Room around the line for the shadow.
+    static let pad = 4.0
+
+    nonisolated static func textSize(iconSize: Double) -> Double { iconSize < 64 ? 11 : 12 }
+    nonisolated static func width(iconSize: Double) -> Double { iconSize + 44 - 8 }
+
+    nonisolated static func lineHeight(iconSize: Double) -> Double {
+        let font = NSFont.systemFont(ofSize: textSize(iconSize: iconSize), weight: .medium)
+        return ceil(font.ascender - font.descender + font.leading)
+    }
+
+    nonisolated static func render(_ name: String, iconSize: Double, scale: CGFloat) -> CGImage? {
+        let width = Self.width(iconSize: iconSize), height = lineHeight(iconSize: iconSize)
+        let pixelsWide = Int(((width + 2 * pad) * scale).rounded()), pixelsHigh = Int(((height + 2 * pad) * scale).rounded())
+        guard let context = CGContext(data: nil, width: pixelsWide, height: pixelsHigh, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        context.scaleBy(x: scale, y: scale)
+        let font = NSFont.systemFont(ofSize: textSize(iconSize: iconSize), weight: .medium)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            NSAttributedString.Key(kCTForegroundColorAttributeName as String): CGColor(gray: 1, alpha: 1),
+        ]
+        var line = CTLineCreateWithAttributedString(NSAttributedString(string: name, attributes: attributes))
+        if CTLineGetTypographicBounds(line, nil, nil, nil) > width {
+            let ellipsis = CTLineCreateWithAttributedString(NSAttributedString(string: "…", attributes: attributes))
+            line = CTLineCreateTruncatedLine(line, width, .middle, ellipsis) ?? line
+        }
+        let lineWidth = CTLineGetTypographicBounds(line, nil, nil, nil)
+        // The shadow of `.shadow(color: .black.opacity(0.45), radius: 2, y: 1)`.
+        context.setShadow(offset: CGSize(width: 0, height: -1), blur: 4, color: CGColor(gray: 0, alpha: 0.45))
+        context.textPosition = CGPoint(x: pad + ((width - lineWidth) / 2).rounded(),
+                                       y: pad + height - ceil(font.ascender) - floor(font.leading / 2))
+        CTLineDraw(line, context)
+        return context.makeImage()
+    }
+}
+
 /// The desktop, blurred, behind the panel.
 struct BehindWindowBlur: NSViewRepresentable {
     func makeNSView(context: Context) -> NSVisualEffectView {
@@ -356,3 +435,4 @@ struct BehindWindowBlur: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
 }
+

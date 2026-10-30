@@ -86,7 +86,7 @@ private struct AppsPreview: View {
                 HStack(spacing: 14) {
                     ForEach(picks) { app in
                         VStack(spacing: 4) {
-                            Image(nsImage: catalog.icon(app)).resizable().interpolation(.high).frame(width: 40, height: 40)
+                            GridIcon(app: app, size: 40)
                             Text(app.name).font(.system(size: 9, weight: .medium)).foregroundStyle(.white.opacity(0.85))
                                 .lineLimit(1).frame(width: 52)
                         }

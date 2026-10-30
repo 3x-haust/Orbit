@@ -131,7 +131,7 @@ final class AppsCatalog {
 
     var iconSize: Double {
         get { _ = settingsVersion; return Pref.defaults.object(forKey: "apps.iconSize") as? Double ?? 72 }
-        set { Pref.defaults.set(newValue, forKey: "apps.iconSize"); settingsVersion += 1 }
+        set { Pref.defaults.set(newValue, forKey: "apps.iconSize"); settingsVersion += 1; warmTiles() }
     }
 
     var showCategories: Bool {
@@ -184,7 +184,11 @@ final class AppsCatalog {
         watch(roots)
         Task.detached(priority: .utility) {
             let found = Self.scan(roots)
-            await MainActor.run { AppsCatalog.shared.apps = found }
+            await MainActor.run {
+                let catalog = AppsCatalog.shared
+                if catalog.apps != found { catalog.apps = found }
+                catalog.warmTiles()
+            }
         }
     }
 
@@ -256,7 +260,9 @@ final class AppsCatalog {
     }
 
     func refreshRunning() {
-        running = Set(NSWorkspace.shared.runningApplications.compactMap { $0.activationPolicy == .regular ? $0.bundleURL?.path : nil })
+        let now = Set(NSWorkspace.shared.runningApplications.compactMap { $0.activationPolicy == .regular ? $0.bundleURL?.path : nil })
+        // Setting it, even unchanged, re-lays out the whole grid.
+        if now != running { running = now }
     }
 
     func runningApp(_ app: App) -> NSRunningApplication? {
@@ -345,14 +351,73 @@ final class AppsCatalog {
 
     // MARK: Icons
 
-    @ObservationIgnored private var icons: [String: NSImage] = [:]
+    /// Icons and names drawn once into bitmaps at the grid's size, off the main thread. A workspace
+    /// icon is drawn afresh by IconServices at every size it's shown at, and as SwiftUI Text every
+    /// name was drawn again each time the grid opened: dozens of them on the main thread, and the
+    /// grid froze instead of cascading in.
+    @ObservationIgnored private var icons: [String: CGImage] = [:]
+    @ObservationIgnored private var labels: [String: CGImage] = [:]
+    /// The icon size and screen scale the cache is drawn for; a new icon size redraws it all
+    /// (keeping the old ones on screen until then).
+    @ObservationIgnored private var drawn: (size: Double, scale: CGFloat)?
+    @ObservationIgnored private var tilesLoading = false
+    /// Bumped when a batch is ready, so the grid picks it up.
+    private(set) var tilesVersion = 0
 
-    func icon(_ app: App) -> NSImage {
-        if let cached = icons[app.path] { return cached }
-        let image = NSWorkspace.shared.icon(forFile: app.path)
-        image.size = NSSize(width: 128, height: 128)
-        icons[app.path] = image
-        return image
+    func icon(_ app: App) -> CGImage? { tile(app, in: icons) }
+    func label(_ app: App) -> CGImage? { tile(app, in: labels) }
+
+    private func tile(_ app: App, in cache: [String: CGImage]) -> CGImage? {
+        _ = tilesVersion
+        if let cached = cache[app.path] { return cached }
+        DispatchQueue.main.async { AppsCatalog.shared.warmTiles() } // not while a view is being drawn
+        return nil
+    }
+
+    /// Draws every icon and name not drawn yet, at the current icon size on the sharpest screen.
+    func warmTiles() {
+        guard !tilesLoading else { return }
+        let size = iconSize, scale = NSScreen.screens.map(\.backingScaleFactor).max() ?? 2
+        let resize = drawn.map { $0.size != size || $0.scale != scale } ?? true
+        let missing = apps.filter { resize || icons[$0.path] == nil || labels[$0.path] == nil }.map { ($0.path, $0.name) }
+        guard !missing.isEmpty else { return }
+        tilesLoading = true
+        Task.detached(priority: .userInitiated) {
+            var madeIcons: [String: CGImage] = [:], madeLabels: [String: CGImage] = [:]
+            let pixels = Int((size * scale).rounded())
+            for (path, name) in missing {
+                madeIcons[path] = Self.render(path, pixels: pixels)
+                madeLabels[path] = TileLabel.render(name, iconSize: size, scale: scale)
+            }
+            let newIcons = madeIcons, newLabels = madeLabels
+            await MainActor.run {
+                let catalog = AppsCatalog.shared
+                catalog.tilesLoading = false
+                if resize {
+                    catalog.icons = newIcons
+                    catalog.labels = newLabels
+                    catalog.drawn = (size, scale)
+                } else {
+                    catalog.icons.merge(newIcons) { old, _ in old }
+                    catalog.labels.merge(newLabels) { old, _ in old }
+                }
+                catalog.tilesVersion += 1
+                catalog.warmTiles() // anything that changed while this batch was drawing
+            }
+        }
+    }
+
+    nonisolated private static func render(_ path: String, pixels: Int) -> CGImage? {
+        guard let context = CGContext(data: nil, width: pixels, height: pixels, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        context.interpolationQuality = .high
+        let rect = NSRect(x: 0, y: 0, width: pixels, height: pixels)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: false)
+        NSWorkspace.shared.icon(forFile: path).draw(in: rect, from: .zero, operation: .copy, fraction: 1)
+        NSGraphicsContext.restoreGraphicsState()
+        return context.makeImage()
     }
 }
 
