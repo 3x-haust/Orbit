@@ -106,6 +106,7 @@
 		753F83BFE85FD0C3D3F0DF23 /* SpellEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC28E2CD58F6F1663A652EFF /* SpellEngine.swift */; };
 		77D14F468CF1D188A3B4D839 /* SettingsSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB296C01B0F49C0CB6DE86C /* SettingsSearch.swift */; };
 		7A8254F89DB2A43CC76F7AB8 /* AudioTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D7698EED3CA3B3BAA122017 /* AudioTap.swift */; };
+		7BE4EFEDA294C01CF2780BC5 /* ReleaseNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228EE6A65671BC430F63BB2B /* ReleaseNotes.swift */; };
 		7D22FE22A7532828B966BB49 /* ClipboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E839E2F9F574D8C21AFBD9 /* ClipboardView.swift */; };
 		7DCA74B903CB1862522D4EAC /* SelectionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2DBC0F65980C634B54E95D /* SelectionOverlay.swift */; };
 		7DD15184B6AD1E1D678B8CD3 /* VideoTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FF71FC5CFA2AF112F84D35 /* VideoTools.swift */; };
@@ -315,6 +316,7 @@
 		1D747643D5A4C654CFCD42BC /* VideoEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoEditor.swift; sourceTree = "<group>"; };
 		1F820A85B704894C5D7DF9FE /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
 		20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotCornersPage.swift; sourceTree = "<group>"; };
+		228EE6A65671BC430F63BB2B /* ReleaseNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseNotes.swift; sourceTree = "<group>"; };
 		24317635CFAD20822BC74B32 /* SnippetCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetCore.swift; sourceTree = "<group>"; };
 		250F55936A172DB6E457AA78 /* SnippetsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsPage.swift; sourceTree = "<group>"; };
 		2722008A2650F4A9031E56E4 /* ScrollingCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingCapture.swift; sourceTree = "<group>"; };
@@ -582,6 +584,7 @@
 				B73C3BCF97DE156FD2CF44E4 /* Paster.swift */,
 				02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */,
 				FC6AF77BAB454B1CD81EB5D8 /* Permissions.swift */,
+				228EE6A65671BC430F63BB2B /* ReleaseNotes.swift */,
 				69EB112FB65E54BDA33FFAF0 /* Shortcuts.swift */,
 				5856BECD064BD355DDDA988F /* Storage.swift */,
 				71539221734394D3454580FD /* SystemInfo.swift */,
@@ -1416,6 +1419,7 @@
 				31BD82152248EC1F2BE63031 /* Recorder.swift in Sources */,
 				15A744D5F2D8FFFDAE20B735 /* RecordingChrome.swift in Sources */,
 				2557C472D9AB181EA23DCDD1 /* RecordingWriter.swift in Sources */,
+				7BE4EFEDA294C01CF2780BC5 /* ReleaseNotes.swift in Sources */,
 				44909E37CCAC6C4E25FDA754 /* RingPage.swift in Sources */,
 				AD6706275736A8D8C2890078 /* RunnerArt.swift in Sources */,
 				1F52EB42C52EFDB3A4CA4DB5 /* RunnerPage.swift in Sources */,

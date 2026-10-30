@@ -87,6 +87,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NowPlaying.shared.update() // listens only if a Now Playing feature is on
         NotchCenter.shared.apply()
         Updater.shared.start() // first look 30s in, then every 6 hours
+        ReleaseNotes.shared.launched() // what's new, once after an update
         TaviBridge.shared.startUpdates() // Tavi too: a minute in, then daily
         // The Storage page opens with last time's breakdown; refresh it quietly once Orbit has settled in.
         DispatchQueue.main.asyncAfter(deadline: .now() + 45) { StorageModel.shared.refreshInBackground() }
