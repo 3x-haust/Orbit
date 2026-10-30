@@ -194,7 +194,7 @@ private struct AddRow: View {
                 .menuIndicator(.hidden)
                 .fixedSize()
             }
-            Button(recording ? "Cancel" : "Record") { gestures.record(recording ? nil : kind) }
+            Button(recording ? "Cancel" : "Try It") { gestures.record(recording ? nil : kind) }
                 .buttonStyle(PillButtonStyle(prominent: !recording && empty))
                 .disabled(kind == .trackpad && !gestures.trackpadAvailable)
         }

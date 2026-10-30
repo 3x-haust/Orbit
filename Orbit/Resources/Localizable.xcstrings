@@ -28939,6 +28939,17 @@
         }
       }
     },
+    "Try It": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직접 하기"
+          }
+        }
+      }
+    },
     "Try a different word, or press ↓ to change the filter.": {
       "extractionState": "manual",
       "localizations": {
