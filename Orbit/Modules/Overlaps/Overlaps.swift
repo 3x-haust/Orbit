@@ -21,7 +21,8 @@ final class Overlaps {
         var id: String { known.bundleID }
     }
 
-    /// The tools Orbit replaces, by category. Tavi here is only its settings app; the input method lives elsewhere.
+    /// The tools Orbit replaces, by category. Not Tavi: Orbit's automatic 한/영 is Tavi, and the Tavi
+    /// app shares its input method and word list — removing it would take 한/영 away from Orbit too.
     /// Matched by bundle ID first, then by name in the Applications folders (IDs change between versions).
     static let known: [KnownApp] = {
         let menuBar = "Menu bar icons".loc, audio = "App audio".loc
@@ -95,8 +96,6 @@ final class Overlaps {
             .init(bundleID: "io.sipapp.Sip-paddle", name: "Sip", replacedBy: .system),
             .init(bundleID: "me.damir.dropover-mac", name: "Dropover", replacedBy: .system),
             .init(bundleID: "at.EternalStorms.Yoink", name: "Yoink", replacedBy: .system),
-            // Korean input
-            .init(bundleID: "dev.3xhaust.tavi", name: "Tavi", replacedBy: .input),
             // Now playing
             .init(bundleID: "com.replay.sleeve", name: "Sleeve", replacedBy: .nowPlaying),
             // Battery
