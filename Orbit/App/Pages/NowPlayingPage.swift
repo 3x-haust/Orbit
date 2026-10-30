@@ -12,6 +12,8 @@ struct NowPlayingPage: View {
     @AppStorage(NowPlayingPrefs.popupPlace) private var popupPlace = TrackPopup.Place.notch.rawValue
     @AppStorage(NowPlayingPrefs.popupOnlyHidden) private var popupOnlyHidden = true
     @AppStorage(NowPlayingPrefs.notch) private var notch = false
+    @AppStorage(NotchPrefs.enabled) private var orbitNotch = true
+    @AppStorage(NotchPrefs.liveMusic) private var notchMusic = true
     @AppStorage(NowPlayingPrefs.directControl) private var direct = false
 
     var body: some View {
@@ -150,10 +152,16 @@ struct NowPlayingPage: View {
 
             AutoPauseSection()
 
-            SettingsGroup(title: "Notch", footer: NotchPlayer.notchScreen == nil ? "Needs a display with a notch." : nil) {
+            SettingsGroup(title: "Notch", footer: orbitNotch ? nil : NotchPlayer.notchScreen == nil ? "Needs a display with a notch." : nil) {
                 SettingsRow(title: "Live in the notch", subtitle: "The cover and a little equalizer either side of the notch while music plays. Point at it for the controls.", symbol: "rectangle.topthird.inset.filled") {
-                    Toggle("", isOn: feature(NowPlayingPrefs.notch, $notch)).toggleStyle(.switch).labelsHidden()
-                        .disabled(NotchPlayer.notchScreen == nil)
+                    // With Orbit's notch on, the music there is its Music live activity: the same switch.
+                    if orbitNotch {
+                        Toggle("", isOn: Binding(get: { notchMusic }, set: { notchMusic = $0; NotchCenter.shared.apply() }))
+                            .toggleStyle(.switch).labelsHidden()
+                    } else {
+                        Toggle("", isOn: feature(NowPlayingPrefs.notch, $notch)).toggleStyle(.switch).labelsHidden()
+                            .disabled(NotchPlayer.notchScreen == nil)
+                    }
                 }
             }
 
