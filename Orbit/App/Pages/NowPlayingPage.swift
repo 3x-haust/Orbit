@@ -331,7 +331,7 @@ private struct ThemeCard: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(LinearGradient(colors: [Color(red: 0.2, green: 0.22, blue: 0.34), Color(red: 0.3, green: 0.18, blue: 0.26)], startPoint: .top, endPoint: .bottom))
-                    NowPlayingWidgetView(style: theme.style, content: .sample)
+                    NowPlayingWidgetView(style: theme.style, content: .still)
                         .fixedSize()
                         .scaleEffect(thumbScale)
                         .allowsHitTesting(false)
@@ -343,6 +343,7 @@ private struct ThemeCard: View {
                     .foregroundStyle(selected ? Palette.ink : Palette.inkSecondary)
                     .lineLimit(1)
             }
+            .contentShape(Rectangle())
             .scaleEffect(hover ? 1.03 : 1)
             .animation(.spring(duration: 0.25, bounce: 0.3), value: hover)
         }

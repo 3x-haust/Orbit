@@ -34,6 +34,14 @@ struct WidgetContent {
                              appIcon: nil, appName: "Music", generation: 0, live: false)
     }()
 
+    /// The sample standing still, for thumbnails: nothing on it ticks, so a row of them costs nothing.
+    @MainActor static let still: WidgetContent = {
+        var c = sample
+        c.elapsed = { _ in 62 }
+        c.playing = false
+        return c
+    }()
+
     @MainActor static let sampleArtwork: NSImage = NSImage(size: NSSize(width: 300, height: 300), flipped: false) { r in
         let g = NSGradient(colors: [NSColor(srgbRed: 1, green: 0.45, blue: 0.22, alpha: 1),
                                     NSColor(srgbRed: 0.55, green: 0.12, blue: 0.42, alpha: 1),
