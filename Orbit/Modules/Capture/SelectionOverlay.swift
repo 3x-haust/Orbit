@@ -206,7 +206,9 @@ final class SelectionOverlay {
     }
 
     private func close() {
-        windows.forEach { $0.orderOut(nil) }
+        // The views only borrow this overlay (unowned). A window can outlive it by a display
+        // pass, and drawing then crashed, so the views come out of the windows with it.
+        windows.forEach { $0.orderOut(nil); $0.contentView = nil }
         windows.removeAll()
         NSCursor.arrow.set()
     }
