@@ -473,7 +473,7 @@ private struct SourcesSection: View {
     @State private var excluded = Pref.defaults.stringArray(forKey: NowPlayingPrefs.excluded) ?? []
 
     var body: some View {
-        SettingsGroup(title: "Show from", footer: sources == "music" ? "Music apps like Music, Spotify, TIDAL and Podcasts. Videos in Safari, Chrome, Arc and other browsers are left out." : nil) {
+        SettingsGroup(title: "Show from", footer: sources == "music" ? "Music apps like Music, Spotify, TIDAL and Podcasts, and music in a browser such as YouTube Music. Other videos in browsers are left out: choose All for YouTube videos too." : nil) {
             SettingsRow(title: "Show from", symbol: "music.note.house") {
                 ChipPicker(selection: Binding(get: { sources }, set: { sources = $0; NowPlaying.shared.sourcesChanged() }),
                            options: [("music", "Music apps only"), ("all", "Everything")])

@@ -271,13 +271,11 @@ final class MediaDucker {
 
     private static var musicApps: Set<String> { NowPlaying.musicApps }
 
-    private static func isBrowser(_ bundle: String) -> Bool {
-        NowPlaying.browsers.contains(bundle) || bundle.hasPrefix("com.apple.WebKit")
-            || bundle.hasPrefix("com.apple.Safari.WebApp") || bundle.hasPrefix("com.google.Chrome.app.")
-    }
+    private static func isBrowser(_ bundle: String) -> Bool { NowPlaying.isBrowser(bundle) }
 
+    /// `isMusicApp` also covers music in a browser (NowPlaying.isWebMusic); a browser's own flag doesn't.
     private static func isMusic(_ bundle: String, isMusicApp: Bool) -> Bool {
-        !isBrowser(bundle) && (musicApps.contains(bundle) || isMusicApp)
+        musicApps.contains(bundle) || isMusicApp
     }
 
     private func log(_ message: String) { NowPlayingLog.write("auto-pause: \(message)") }

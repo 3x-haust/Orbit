@@ -273,6 +273,7 @@ enum DebugHook {
         case let c where c.hasPrefix("editor:"):
             if let image = NSImage(contentsOfFile: String(c.dropFirst(7))) { EditorWindow.open(image: image, fileURL: nil) }
         case "apps": AppsPanel.shared.show()
+        case "playpause": NowPlaying.shared.togglePlayPause(heard: true)
         case "bench-apps":
             // Opens the Apps grid five times and logs how its first two seconds play: main-thread
             // frame gaps are what reads as lag.

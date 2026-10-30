@@ -16389,6 +16389,17 @@
         }
       }
     },
+    "Music apps like Music, Spotify, TIDAL and Podcasts, and music in a browser such as YouTube Music. Other videos in browsers are left out: choose All for YouTube videos too.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music, Spotify, TIDAL, 팟캐스트 같은 음악 앱과 YouTube Music처럼 브라우저에서 듣는 음악이 보여요. 브라우저의 다른 영상은 빼요. YouTube 영상까지 보려면 전부를 고르세요."
+          }
+        }
+      }
+    },
     "Music apps like Music, Spotify, TIDAL and Podcasts. Videos in Safari, Chrome, Arc and other browsers are left out.": {
       "extractionState": "manual",
       "localizations": {
