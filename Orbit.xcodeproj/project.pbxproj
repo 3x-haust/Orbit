@@ -92,6 +92,7 @@
 		5FBE6821F001E597500A8532 /* VaultFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A92F8F9A0FDCF554D17DDE /* VaultFile.swift */; };
 		60BB09FB88D605C22FEF9501 /* EventTapThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100562B2BFDE6A3F1F3F12DD /* EventTapThread.swift */; };
 		6339D24B7B984D8BAE708AEA /* DisplaysPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEE39A2682ACF0BD98A8F66 /* DisplaysPanel.swift */; };
+		6352C3FF45A46BA080AED7F8 /* GestureMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5C5424D1CCB724381C14EC /* GestureMouse.swift */; };
 		63AF6BF81544D6DA96CB37E8 /* OrbitMediaRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A25CDF0D7D20613499AA310 /* OrbitMediaRemote.m */; };
 		669777EE41AFADE9B83DDA9E /* ClickHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49A6B3E839498EF44BEDD9C /* ClickHighlighter.swift */; };
 		66EA38F2C542350A3055C759 /* KeyboardCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD0259AC1B07A7061CEDCAE /* KeyboardCleaner.swift */; };
@@ -355,6 +356,7 @@
 		46AD126FFA18662AD065C1A0 /* DisplaysPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaysPage.swift; sourceTree = "<group>"; };
 		472157B9EF67D8CC446A6B25 /* SoundPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPage.swift; sourceTree = "<group>"; };
 		49862B624EB337A69185BEFA /* SystemPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPage.swift; sourceTree = "<group>"; };
+		4A5C5424D1CCB724381C14EC /* GestureMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureMouse.swift; sourceTree = "<group>"; };
 		4AB296C01B0F49C0CB6DE86C /* SettingsSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSearch.swift; sourceTree = "<group>"; };
 		4AE2B752518BB5AD3A119C82 /* DDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDC.swift; sourceTree = "<group>"; };
 		4D420498634E50180A130C12 /* NotchHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHUD.swift; sourceTree = "<group>"; };
@@ -1026,6 +1028,7 @@
 			children = (
 				C4C559796E9A3AABB5C34C71 /* GestureAction.swift */,
 				7C883467C07829DCE4B08924 /* GestureLog.swift */,
+				4A5C5424D1CCB724381C14EC /* GestureMouse.swift */,
 				F8AD238E44A5B6D1C237A85C /* Gestures.swift */,
 				3620456C9CB32A0D0E67155C /* MultitouchSource.swift */,
 				96EC5F7809FAC28EDAB5C718 /* TouchRecognizer.swift */,
@@ -1367,6 +1370,7 @@
 				10E9CFCF5A6EB36C411D54D1 /* Forms.swift in Sources */,
 				99F84C492430D96BBB32A8BD /* GestureAction.swift in Sources */,
 				2A7A28288351F1A542C0E245 /* GestureLog.swift in Sources */,
+				6352C3FF45A46BA080AED7F8 /* GestureMouse.swift in Sources */,
 				6D494064EF184AAE767553B4 /* Gestures.swift in Sources */,
 				E3E705AAC1D281BBDA3DD3A1 /* HiddenBar.swift in Sources */,
 				2AB5F48CC911005715AEAA13 /* HomePage.swift in Sources */,

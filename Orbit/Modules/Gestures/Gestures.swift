@@ -145,7 +145,9 @@ final class Gestures {
     private(set) var recording: GestureTrigger.Kind?
     private(set) var recorded: UUID?
 
-    let table = GestureTable()
+    /// Shared with the event threads, so not tied to the main actor.
+    nonisolated static let table = GestureTable()
+    var table: GestureTable { Self.table }
     private var frontObserver: Any?
     private var frameStamp = 0.0
 
@@ -163,11 +165,11 @@ final class Gestures {
     func start() {
         frontObserver = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in
             let id = (note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.bundleIdentifier
-            MainActor.assumeIsolated { Gestures.shared.table.setFront(id) }
+            Gestures.table.setFront(id)
         }
         table.setFront(NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
         MultitouchSource.shared.onGesture = { g in
-            guard let m = Gestures.shared.table.match(.trackpad(g)) else { Gestures.shared.noticeUnbound(g); return }
+            guard let m = Gestures.table.match(.trackpad(g)) else { Gestures.noticeUnbound(g); return }
             DispatchQueue.main.async { MainActor.assumeIsolated { Gestures.shared.handle(.trackpad(g), m) } }
         }
         apply()
@@ -250,6 +252,7 @@ final class Gestures {
             MultitouchSource.shared.onFrame = nil
         }
         if !metering { fingers = [] }
+        GestureMouse.shared.update(wanted: table.wants(.mouse))
     }
 
     private func show(_ points: [CGPoint]) {
@@ -261,7 +264,7 @@ final class Gestures {
     }
 
     /// A trackpad gesture nothing is set for: the page still shows it.
-    private nonisolated func noticeUnbound(_ g: TrackpadGesture) {
+    private nonisolated static func noticeUnbound(_ g: TrackpadGesture) {
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
                 let s = Gestures.shared
