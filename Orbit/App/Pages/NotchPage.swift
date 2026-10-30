@@ -33,6 +33,8 @@ struct NotchPage: View {
     @AppStorage(NotchPrefs.openTab) private var openTab = "home"
 
     private var hasNotch: Bool { NSScreen.screens.contains(where: \.hasCameraHousing) }
+    /// Checked again whenever Orbit comes back, from System Settings say.
+    @State private var focusReadable = NotchFocus.readable
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
@@ -110,8 +112,16 @@ struct NotchPage: View {
                         Toggle("", isOn: applied($liveAwake)).toggleStyle(.switch).labelsHidden()
                     }
                     RowDivider()
-                    SettingsRow(title: "Focus", subtitle: "A notice when Do Not Disturb turns on or off.", symbol: "moon") {
-                        Toggle("", isOn: applied($liveFocus)).toggleStyle(.switch).labelsHidden()
+                    SettingsRow(title: "Focus", subtitle: !liveFocus || focusReadable ? "A notice when Do Not Disturb or another Focus turns on or off." : "macOS keeps which Focus is on in a protected folder: Orbit needs Full Disk Access to see it.", symbol: "moon") {
+                        HStack(spacing: 10) {
+                            if liveFocus, !focusReadable {
+                                Button("Allow Full Disk Access") {
+                                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
+                                }
+                                .buttonStyle(PillButtonStyle(prominent: true))
+                            }
+                            Toggle("", isOn: applied($liveFocus)).toggleStyle(.switch).labelsHidden()
+                        }
                     }
                     RowDivider()
                     SettingsRow(title: "Downloads", subtitle: "Files still downloading into Downloads, and a notice when they finish.", symbol: "arrow.down.circle") {
@@ -161,6 +171,9 @@ struct NotchPage: View {
             }
             .opacity(enabled ? 1 : 0.55)
             .disabled(!enabled)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            focusReadable = NotchFocus.readable
         }
     }
 

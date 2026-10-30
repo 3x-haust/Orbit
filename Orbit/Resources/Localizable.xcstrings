@@ -1725,6 +1725,17 @@
         }
       }
     },
+    "A notice when Do Not Disturb or another Focus turns on or off.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "방해 금지 모드나 다른 집중 모드가 켜지거나 꺼질 때 알려줘요."
+          }
+        }
+      }
+    },
     "A notice when Do Not Disturb turns on or off.": {
       "extractionState": "manual",
       "localizations": {
@@ -2815,6 +2826,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라 허용"
+          }
+        }
+      }
+    },
+    "Allow Full Disk Access": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전체 디스크 접근 허용"
           }
         }
       }
@@ -32890,6 +32912,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS가 충전을 멈춰뒀어요"
+          }
+        }
+      }
+    },
+    "macOS keeps which Focus is on in a protected folder: Orbit needs Full Disk Access to see it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "켜진 집중 모드는 macOS가 보호된 폴더에 둬서, Orbit이 보려면 전체 디스크 접근 권한이 필요해요."
           }
         }
       }
