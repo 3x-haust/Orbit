@@ -132,6 +132,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
             if let item { NSStatusBar.system.removeStatusItem(item) }
             item = nil
             shownTitle = nil; shownAccent = nil; lengthKey = nil
+            frameLayer = nil; blank = nil; glyph = nil; appearanceWatch = nil
         }
     }
 
@@ -330,9 +331,102 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         drawFrame()
     }
 
+    /// The frames play on a layer over a blank image of the same size, not as the button's image.
+    /// Every image change made macOS re-snapshot the item for each menu bar it shows in, on the
+    /// main thread: up to a third of Orbit's main thread, and a stutter in everything Orbit opened.
+    /// A layer change takes no snapshot; menu bars elsewhere keep the frame of the last one.
     private func drawFrame() {
         guard let button = item?.button, !frames.isEmpty else { return }
-        button.image = frames[min(frameIndex, frames.count - 1)]
+        let frame = frames[min(frameIndex, frames.count - 1)]
+        if blank == nil { makeBlank() }
+        if button.image !== blank { button.image = blank }
+        let layer = stage(in: button)
+        let rect = imageRect(for: frame.size, in: button)
+        let scale = button.window?.backingScaleFactor ?? 2
+        let image = frame.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        let color = frame.isTemplate ? glyphColor(in: button) : nil
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        // Only what changed: setting even the same geometry each frame had MenuBarAgent report a
+        // new layout, and Orbit's menu bar watcher re-read the whole bar.
+        if layer.frame != rect { layer.frame = rect }
+        if layer.contentsScale != scale { layer.contentsScale = scale }
+        if let color {
+            // One-color frames take the color macOS gives template images in the menu bar.
+            let mask = layer.mask ?? CALayer()
+            if mask.frame != layer.bounds { mask.frame = layer.bounds }
+            if mask.contentsScale != scale { mask.contentsScale = scale }
+            mask.contents = image
+            if layer.mask !== mask { layer.mask = mask }
+            if layer.contents != nil { layer.contents = nil }
+            if layer.backgroundColor != color { layer.backgroundColor = color }
+        } else {
+            if layer.mask != nil { layer.mask = nil }
+            if layer.backgroundColor != nil { layer.backgroundColor = nil }
+            layer.contents = image
+        }
+        CATransaction.commit()
+    }
+
+    @ObservationIgnored private var frameLayer: CALayer?
+    /// Clear, the size of the widest frame: keeps the item's width and layout as they were.
+    @ObservationIgnored private var blank: NSImage?
+    @ObservationIgnored private var glyph: (appearance: NSAppearance.Name, color: CGColor)?
+    @ObservationIgnored private var appearanceWatch: NSKeyValueObservation?
+
+    private func stage(in button: NSStatusBarButton) -> CALayer {
+        button.wantsLayer = true
+        if let frameLayer, frameLayer.superlayer === button.layer { return frameLayer }
+        let layer = CALayer()
+        layer.contentsGravity = .resize
+        button.layer?.addSublayer(layer)
+        frameLayer = layer
+        appearanceWatch = button.observe(\.effectiveAppearance) { _, _ in
+            MainActor.assumeIsolated { MenuBarRunner.shared.glyph = nil; MenuBarRunner.shared.drawFrame() }
+        }
+        return layer
+    }
+
+    private func makeBlank() {
+        let widest = frames.map(\.size).max { $0.width < $1.width } ?? .zero
+        blank = NSImage(size: widest)
+    }
+
+    /// Where the button would have drawn the frame: the blank's spot, scaled down to fit.
+    private func imageRect(for size: NSSize, in button: NSStatusBarButton) -> CGRect {
+        let slot = button.cell?.imageRect(forBounds: button.bounds) ?? button.bounds
+        let scale = min(1, slot.width / max(1, size.width), slot.height / max(1, size.height))
+        let w = size.width * scale, h = size.height * scale
+        return CGRect(x: (slot.midX - w / 2).rounded(), y: (slot.midY - h / 2).rounded(), width: w, height: h)
+    }
+
+    /// Draws a solid template square the way the button draws its image and reads the color back:
+    /// the menu bar's own glyph color for this appearance (or the accent, when that's on).
+    private func glyphColor(in button: NSStatusBarButton) -> CGColor {
+        let name = button.effectiveAppearance.name
+        if let glyph, glyph.appearance == name { return glyph.color }
+        let probe = NSImage(size: NSSize(width: 8, height: 8), flipped: false) { rect in
+            NSColor.black.setFill()
+            rect.fill()
+            return true
+        }
+        probe.isTemplate = true
+        let (image, position, title) = (button.image, button.imagePosition, button.attributedTitle)
+        frameLayer?.isHidden = true
+        button.image = probe
+        button.imagePosition = .imageOnly
+        button.title = ""
+        var color = NSColor.white.cgColor
+        if let rep = button.bitmapImageRepForCachingDisplay(in: button.bounds) {
+            button.cacheDisplay(in: button.bounds, to: rep)
+            if let c = rep.colorAt(x: rep.pixelsWide / 2, y: rep.pixelsHigh / 2), c.alphaComponent > 0 { color = c.cgColor }
+        }
+        button.image = image
+        button.imagePosition = position
+        button.attributedTitle = title
+        frameLayer?.isHidden = false
+        glyph = (name, color)
+        return color
     }
 
     /// Everything about the item other than the frame, set only when it changes: each change makes
@@ -348,6 +442,8 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         shownAccent = accent
         // Tints one-color frames only; colored ones draw as they are.
         button.contentTintColor = accent ? .controlAccentColor : nil
+        glyph = nil
+        drawFrame()
     }
 
     /// A fixed width (the widest frame, plus room for "100%"), so stepping frames or a changing
@@ -360,15 +456,15 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         guard lengthKey != key else { return }
         lengthKey = key
         let title = button.attributedTitle
-        let image = button.image
+        makeBlank()
         item.length = NSStatusItem.variableLength
-        button.image = frames.max { $0.size.width < $1.size.width }
+        button.image = blank
         if percent { button.attributedTitle = Self.percentTitle(100) }
         button.layoutSubtreeIfNeeded()
         let width = ceil(button.fittingSize.width)
         button.attributedTitle = title
-        button.image = image
         if width > 0 { item.length = width }
+        drawFrame()
     }
 
     private static func percentTitle(_ value: Int) -> NSAttributedString {
