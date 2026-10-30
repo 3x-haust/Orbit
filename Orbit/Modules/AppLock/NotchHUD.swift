@@ -338,6 +338,16 @@ final class NotchHUD {
         }
     }
 
+    /// Over the lock screen too, until it folds away or the Mac unlocks.
+    func liftOverLockScreen() {
+        panel.canBecomeVisibleWithoutLogin = true
+        LockScreenLayer.shared?.lift(panel)
+    }
+
+    func lowerFromLockScreen() {
+        LockScreenLayer.shared?.lower(panel)
+    }
+
     func setProgress(_ value: Double) {
         guard model.phase == .scanning else { return }
         model.progress = value
@@ -384,6 +394,7 @@ final class NotchHUD {
             withAnimation(Motion.adaptive(.spring(duration: 0.38, bounce: 0))) { self.model.expanded = false }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                 guard token == self.generation, !self.model.expanded else { return }
+                self.lowerFromLockScreen()
                 self.panel.orderOut(nil)
                 self.model.session = nil
             }

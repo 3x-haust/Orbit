@@ -42,9 +42,21 @@ final class MacUnlock {
         observers.append(center.addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main) { _ in
             MainActor.assumeIsolated { MacUnlock.shared.didUnlock() }
         })
-        observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main) { _ in
-            MainActor.assumeIsolated { MacUnlock.shared.reached() }
+        // The screen coming back on — from sleep, display sleep or the screen saver — is someone
+        // reaching for the Mac; keys and the trackpad are caught by checkInput.
+        for name in [NSWorkspace.screensDidWakeNotification, NSWorkspace.didWakeNotification] {
+            observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated { MacUnlock.shared.woke() }
+            })
+        }
+        observers.append(center.addObserver(forName: .init("com.apple.screensaver.didstop"), object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { MacUnlock.shared.woke() }
         })
+        // Read the face now, while the Mac is unlocked: its file may not open once it's locked.
+        if enabled {
+            let faces = FaceStore.load().count
+            AppLockLog.write("lock screen unlock: \(notReadyReason ?? "ready"), \(faces) face samples read")
+        }
         AuthPromptUnlock.shared.start()
     }
 
@@ -55,24 +67,38 @@ final class MacUnlock {
 
     // MARK: Setup
 
-    /// Checks the password against your account, then saves it. Returns an error to show, or nil.
-    func turnOn(password: String) async -> String? {
-        guard await Self.confirmOwner("Turn on face unlock for your Mac".loc) else { return "Cancelled".loc }
+    /// The lock screen and macOS's password prompts each use the face only if switched on; they
+    /// share the saved login password, which stays only while one of them is on.
+    enum Use { case lockScreen, prompts }
+
+    /// Checks the password against your account and saves it, then switches `use` on (none: just a
+    /// new password). Returns an error to show, or nil.
+    func save(password: String, turningOn use: Use?) async -> String? {
+        guard await Self.confirmOwner("Use your face in place of your password".loc) else { return "Cancelled".loc }
         guard Self.isLoginPassword(password) else { return "That isn’t your login password.".loc }
         guard PasswordVault.save(password) else { return "Couldn’t save it to the Keychain.".loc }
         hasPassword = true
-        enabled = true
-        Pref.defaults.set(true, forKey: Pref.macUnlockEnabled)
+        if let use { setUse(use, on: true) }
         return nil
     }
 
-    func turnOff() {
+    /// Switches one use on or off. On needs the saved password; off forgets the password once
+    /// neither uses it.
+    func setUse(_ use: Use, on: Bool) {
+        switch use {
+        case .lockScreen:
+            enabled = on && hasPassword
+            Pref.defaults.set(enabled, forKey: Pref.macUnlockEnabled)
+            if enabled { _ = FaceStore.load() } else { stopWatching() }
+        case .prompts:
+            AuthPromptUnlock.shared.setEnabled(on && hasPassword)
+        }
+        if !enabled, !AuthPromptUnlock.shared.enabled { forgetPassword() }
+    }
+
+    private func forgetPassword() {
         PasswordVault.delete()
-        if AuthPromptUnlock.shared.enabled { AuthPromptUnlock.shared.setEnabled(false) }
         hasPassword = false
-        enabled = false
-        Pref.defaults.set(false, forKey: Pref.macUnlockEnabled)
-        stopWatching()
     }
 
     // MARK: At the lock screen
@@ -82,9 +108,19 @@ final class MacUnlock {
         return (session["CGSSessionScreenIsLocked"] as? Bool) == true
     }
 
-    private func didLock() {
-        guard ready else { return }
-        lockedAt = Date()
+    /// Why it isn't ready, for the log.
+    private var notReadyReason: String? {
+        if !enabled { return "switched off" }
+        if !hasPassword { return "no saved password" }
+        if !FaceStore.isEnrolled { return "no face set up" }
+        if !AXIsProcessTrusted() { return "no Accessibility permission" }
+        return nil
+    }
+
+    private func didLock(at time: Date = Date()) {
+        guard ready else { AppLockLog.write("lock screen: locked, not watching (\(notReadyReason ?? "?"))"); return }
+        AppLockLog.write("lock screen: locked, watching for you")
+        lockedAt = time
         misses = 0
         unlockedByFace = false
         lastIdle = .infinity
@@ -102,24 +138,59 @@ final class MacUnlock {
         if idle < 0.5, lastIdle > idle { reached() }
     }
 
+    /// Right after a wake the session can still report "unlocked" for a moment (and a lock done
+    /// while asleep is only noticed now), so look again shortly after.
+    private func woke() {
+        AppLockLog.write("lock screen: woke (locked: \(Self.screenLocked))")
+        reached()
+        for delay in [0.4, 1.2] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                let unlock = MacUnlock.shared
+                guard !unlock.unlockedByFace else { return }
+                if unlock.poll == nil, Self.screenLocked, unlock.ready { unlock.didLock(at: unlock.lockedAt) }
+                unlock.reached()
+            }
+        }
+    }
+
     /// Someone pressed a key, touched the trackpad or woke the display at the lock screen.
     private func reached() {
-        guard ready, Self.screenLocked, matcher == nil else { return }
+        // Once the face matched, the lock screen takes a moment to go: that's not a new try.
+        guard Self.screenLocked, matcher == nil, !unlockedByFace else { return }
+        guard ready else { AppLockLog.write("lock screen: woken, not looking (\(notReadyReason ?? "?"))"); return }
         // Locking on purpose sticks: ignore the first few seconds, and the input that did the locking.
         guard Date().timeIntervalSince(lockedAt) > 4 else { return }
         // After two misses in a row, wait a bit before the camera comes on again.
         guard misses < 2 || Date().timeIntervalSince(lastScanEnded) > 10 else { return }
         if misses >= 2 { misses = 0 }
         let m = FaceMatcher { event in MainActor.assumeIsolated { MacUnlock.shared.handle(event) } }
-        guard m.start(timeout: 6) else { return }
+        guard m.start(timeout: 6) else { AppLockLog.write("lock screen: the face check didn't start"); return }
         matcher = m
+        // The scan shows in the notch over the lock screen, the way Face ID shows it on an iPhone.
+        let hud = NotchHUD.shared
+        hud.show(on: Self.notchScreen, label: "Look at the camera".loc, compact: true)
+        hud.liftOverLockScreen()
+        AppLockLog.write("lock screen: looking for your face")
     }
 
+    private static var notchScreen: NSScreen? { NSScreen.screens.first { $0.safeAreaInsets.top > 0 } ?? NSScreen.main }
+
     private func handle(_ event: FaceMatcher.Event) {
+        let hud = NotchHUD.shared
         switch event {
+        case .progress(let p): hud.setProgress(p)
+        case .noFace: hud.setProgress(0)
+        case .blink: hud.setLabel("Blink once".loc)
+        case .tooFar: break
         case .matched:
             end()
-            guard Self.screenLocked, let password = PasswordVault.read() else { return }
+            guard Self.screenLocked, let password = PasswordVault.read() else {
+                hud.failed(label: "Use your password".loc, buttons: false)
+                hud.collapse(after: 1.4)
+                AppLockLog.write("lock screen: face matched, but the saved password couldn't be read")
+                return
+            }
+            hud.matched(label: "Unlocking…".loc, collapseAfter: 1.5)
             unlockedByFace = true
             let delay = KeyTyper.type(password, thenReturn: true)
             AppLockLog.write("lock screen: face matched, typed the password and pressed Return")
@@ -132,6 +203,8 @@ final class MacUnlock {
         case .failed:
             end()
             misses += 1
+            hud.failed(label: "Face not recognized".loc, buttons: false)
+            hud.collapse(after: 1.2)
             let retry = Pref.defaults.object(forKey: Pref.appLockAutoRetry) as? Bool ?? true
             if retry, misses == 1 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
@@ -140,8 +213,6 @@ final class MacUnlock {
                     unlock.reached()
                 }
             }
-        default:
-            break
         }
     }
 
@@ -153,7 +224,12 @@ final class MacUnlock {
 
     private func didUnlock() {
         let byFace = unlockedByFace
+        let scanning = matcher != nil
+        AppLockLog.write("lock screen: unlocked (\(byFace ? "by face" : "another way"))")
         stopWatching()
+        NotchHUD.shared.lowerFromLockScreen()
+        // Unlocked some other way mid-scan: fold the scan away.
+        if scanning || NotchHUD.shared.isShowing, !byFace { NotchHUD.shared.collapse() }
         if byFace {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 NotchHUD.shared.message("Unlocked with your face".loc, on: NSScreen.main)
@@ -274,7 +350,8 @@ private enum KeyTyper {
 /// The "Unlock your Mac" group on the Face Unlock page.
 struct MacUnlockSection: View {
     private var unlock: MacUnlock { .shared }
-    @State private var asking = false
+    /// Which switch the password field is for (nil: changing the password).
+    @State private var asking: MacUnlock.Use??
     @State private var password = ""
     @State private var error: String?
     @State private var working = false
@@ -282,12 +359,10 @@ struct MacUnlockSection: View {
     var body: some View {
         SettingsGroup(title: "Unlock your Mac", footer: "When your face matches at the lock screen, Orbit types your login password for you. It only looks when you press a key, touch the trackpad or wake the screen — never right as you lock it.") {
             SettingsRow(title: "Face unlock for the lock screen", subtitle: status, symbol: "lock.open.display") {
-                Toggle("", isOn: Binding(get: { unlock.enabled }, set: { on in
-                    if on { withAnimation(.spring(duration: 0.3)) { asking = true } } else { unlock.turnOff(); asking = false }
-                }))
+                Toggle("", isOn: Binding(get: { unlock.enabled }, set: { switchUse(.lockScreen, on: $0) }))
                 .toggleStyle(.switch).labelsHidden()
             }
-            if asking && !unlock.enabled {
+            if asking != nil {
                 RowDivider()
                 HStack(spacing: 10) {
                     SecureField("Mac login password".loc, text: $password)
@@ -297,7 +372,7 @@ struct MacUnlockSection: View {
                     Button("Save", action: save)
                         .buttonStyle(PillButtonStyle(prominent: true))
                         .disabled(password.isEmpty || working)
-                    Button("Cancel") { asking = false; password = ""; error = nil }
+                    Button("Cancel") { asking = nil; password = ""; error = nil }
                         .buttonStyle(PillButtonStyle(prominent: false))
                     if working { ProgressView().controlSize(.small) }
                     Spacer()
@@ -308,26 +383,21 @@ struct MacUnlockSection: View {
                         .padding(.horizontal, 16).padding(.bottom, 10)
                 }
             }
-            if unlock.enabled {
+            if unlock.hasPassword, asking == nil {
                 RowDivider()
                 SettingsRow(title: "Login password", subtitle: "Saved in this Mac’s Keychain only.", symbol: "key") {
-                    Button("Change…") { unlock.turnOff(); asking = true }
+                    Button("Change…") { withAnimation(.spring(duration: 0.3)) { asking = .some(nil) } }
                         .buttonStyle(PillButtonStyle(prominent: false))
                 }
             }
         }
-        .animation(.spring(duration: 0.3), value: asking)
+        .animation(.spring(duration: 0.3), value: asking != nil)
         .animation(.spring(duration: 0.3), value: unlock.enabled)
 
         SettingsGroup(footer: "When macOS asks for Touch ID or your password — System Settings, installers, apps — Orbit checks your face in the notch and fills the password in for you. Only Apple’s own password prompts, one try each; Touch ID and typing still work.") {
             SettingsRow(title: "Face for password prompts", subtitle: promptStatus, symbol: "touchid") {
-                if !unlock.hasPassword {
-                    Button("Set Up") { withAnimation(.spring(duration: 0.3)) { asking = true } }
-                        .buttonStyle(PillButtonStyle(prominent: false))
-                }
-                Toggle("", isOn: Binding(get: { prompts.enabled }, set: { prompts.setEnabled($0) }))
+                Toggle("", isOn: Binding(get: { prompts.enabled }, set: { switchUse(.prompts, on: $0) }))
                     .toggleStyle(.switch).labelsHidden()
-                    .disabled(!unlock.hasPassword)
             }
         }
 
@@ -342,7 +412,6 @@ struct MacUnlockSection: View {
     private var prompts: AuthPromptUnlock { .shared }
 
     private var promptStatus: String {
-        if !unlock.hasPassword { return "Needs your login password — turn on face unlock for the lock screen first.".loc }
         if !prompts.enabled { return "Off".loc }
         if !FaceStore.isEnrolled { return "Set up your face above first.".loc }
         if !AXIsProcessTrusted() { return "Needs Accessibility to type the password.".loc }
@@ -356,15 +425,26 @@ struct MacUnlockSection: View {
         return "On — look at the camera at the lock screen.".loc
     }
 
+    /// Off is immediate; on asks for the login password first if none is saved.
+    private func switchUse(_ use: MacUnlock.Use, on: Bool) {
+        error = nil
+        if on, !unlock.hasPassword {
+            withAnimation(.spring(duration: 0.3)) { asking = .some(use) }
+        } else {
+            unlock.setUse(use, on: on)
+            if !on, asking == .some(use) { asking = nil }
+        }
+    }
+
     private func save() {
         guard !password.isEmpty, !working else { return }
         working = true
         error = nil
         Task {
-            let problem = await unlock.turnOn(password: password)
+            let problem = await unlock.save(password: password, turningOn: asking ?? nil)
             working = false
             password = ""
-            if let problem { error = problem } else { asking = false }
+            if let problem { error = problem } else { asking = nil }
         }
     }
 }
