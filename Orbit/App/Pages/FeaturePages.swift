@@ -639,6 +639,7 @@ struct GeneralPage: View {
 
 private struct UpdatesGroup: View {
     @Bindable private var updater = Updater.shared
+    @Bindable private var notesSheet = ReleaseNotesSheet.shared
 
     var body: some View {
         SettingsGroup(title: "Updates", footer: updater.isDevBuild ? "Development build — installing is off" : nil) {
@@ -648,7 +649,7 @@ private struct UpdatesGroup: View {
                     Button("Download %@".loc(release.version)) { NSWorkspace.shared.open(release.page) }
                         .buttonStyle(PillButtonStyle())
                 } else if case .available(let release) = updater.status {
-                    Button("Release Notes") { NSWorkspace.shared.open(release.page) }
+                    Button("Release Notes") { ReleaseNotesSheet.open(focus: release.version) }
                         .buttonStyle(PillButtonStyle(prominent: false))
                     Button("Install %@".loc(release.version)) { updater.install(release) }
                         .buttonStyle(PillButtonStyle())
@@ -660,6 +661,11 @@ private struct UpdatesGroup: View {
             }
             if case .downloading = updater.status {
                 UpdateStatusLine().padding(.horizontal, 16).padding(.bottom, 10)
+            }
+            RowDivider()
+            SettingsRow(title: "Release notes", subtitle: "What changed in each version.", symbol: "doc.text") {
+                Button("Show") { ReleaseNotesSheet.open(focus: updater.currentVersion) }
+                    .buttonStyle(PillButtonStyle(prominent: false))
             }
             RowDivider()
             SettingsRow(title: "Check for updates automatically", subtitle: "Looks at GitHub Releases at launch and every 6 hours.", symbol: "clock.arrow.circlepath") {
@@ -679,6 +685,7 @@ private struct UpdatesGroup: View {
             }
         }
         .animation(.spring(duration: 0.3), value: updater.status)
+        .sheet(isPresented: $notesSheet.presented) { ReleaseNotesView(focus: notesSheet.focus) }
     }
 
     private var summary: String {

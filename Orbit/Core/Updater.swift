@@ -170,7 +170,7 @@ final class Updater {
 
     private nonisolated static var cacheURL: URL { Storage.dir("Updates").appendingPathComponent("latest.json") }
 
-    private nonisolated static func request(_ url: URL) -> URLRequest {
+    nonisolated static func request(_ url: URL) -> URLRequest {
         var r = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
         r.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         r.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
@@ -447,7 +447,7 @@ private struct UpdatePromptView: View {
             }
             if !release.notes.isEmpty {
                 ScrollView {
-                    Text(Self.notes(release.notes))
+                    Text(ReleaseNotesText.attributed(release.notes))
                         .font(.system(size: 12)).foregroundStyle(Palette.ink)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .textSelection(.enabled)
@@ -457,8 +457,11 @@ private struct UpdatePromptView: View {
             }
             UpdateStatusLine()
             HStack(spacing: 8) {
-                Button("Release Notes") { NSWorkspace.shared.open(release.page) }
-                    .buttonStyle(PillButtonStyle(prominent: false))
+                Button("Release Notes") {
+                    MainWindow.show(.general)
+                    ReleaseNotesSheet.open(focus: release.version)
+                }
+                .buttonStyle(PillButtonStyle(prominent: false))
                 Spacer()
                 Button("Later") { updater.dismiss(release) }
                     .buttonStyle(PillButtonStyle(prominent: false))
@@ -473,29 +476,6 @@ private struct UpdatePromptView: View {
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.hairline, lineWidth: 1))
     }
 
-    static func notes(_ markdown: String) -> AttributedString {
-        let text = section(markdown)
-        return (try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
-            ?? AttributedString(text)
-    }
-
-    /// Release notes are English, `---`, then Korean, then the install table. The card shows only the
-    /// part in Orbit's language (in a card this small the Korean sat below the fold), with headings
-    /// as bold lines, since inline Markdown leaves "### " as it is.
-    static func section(_ markdown: String) -> String {
-        let parts = markdown.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n---\n")
-        let korean = Bundle.main.preferredLocalizations.first == "ko"
-        var text = parts.count > 1 && korean ? parts[1] : parts[0]
-        if let install = text.range(of: "### Install") { text = String(text[..<install.lowerBound]) }
-        return text.components(separatedBy: "\n")
-            .map { line in
-                if line.hasPrefix("#") { return "**" + line.drop { $0 == "#" }.trimmingCharacters(in: .whitespaces) + "**" }
-                if line.hasPrefix("- ") { return "• " + line.dropFirst(2) }
-                return line
-            }
-            .joined(separator: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
 }
 
 /// One line of what the updater is doing; empty when there's nothing to say.

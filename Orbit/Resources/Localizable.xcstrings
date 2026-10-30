@@ -2577,6 +2577,17 @@
         }
       }
     },
+    "All Release Notes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 릴리즈 노트"
+          }
+        }
+      }
+    },
     "All Sound": {
       "extractionState": "manual",
       "localizations": {
@@ -7599,6 +7610,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "잠자기 방지를 켜지 못했어요"
+          }
+        }
+      }
+    },
+    "Couldn’t load the release notes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "릴리즈 노트를 불러오지 못했어요"
           }
         }
       }
@@ -17871,7 +17893,15 @@
       "extractionState": "manual"
     },
     "OK": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "확인"
+          }
+        }
+      }
     },
     "OPEN THE RING": {
       "extractionState": "manual",
@@ -18857,6 +18887,17 @@
         }
       }
     },
+    "Orbit %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit %@"
+          }
+        }
+      }
+    },
     "Orbit %@ is available": {
       "extractionState": "manual",
       "localizations": {
@@ -19441,6 +19482,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Orbit이 덮개를 닫으면 잠자도록 되돌리려고 해요."
+          }
+        }
+      }
+    },
+    "Orbit was updated": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit이 업데이트됐어요"
           }
         }
       }
@@ -21762,6 +21814,17 @@
       }
     },
     "Release Notes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "릴리즈 노트"
+          }
+        }
+      }
+    },
+    "Release notes": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
@@ -27194,6 +27257,17 @@
         }
       }
     },
+    "This version": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 버전"
+          }
+        }
+      }
+    },
     "Threads": {
       "extractionState": "manual",
       "localizations": {
@@ -29720,6 +29794,17 @@
         }
       }
     },
+    "What changed in each version.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "버전마다 바뀐 점을 볼 수 있어요."
+          }
+        }
+      }
+    },
     "What each app — and every helper behind it — is using right now.": {
       "extractionState": "manual",
       "localizations": {
@@ -29774,6 +29859,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "재생 중인 곡과 컨트롤, 오늘 남은 일정을 보여줘요."
+          }
+        }
+      }
+    },
+    "What’s new in Orbit %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit %@의 새로운 점"
           }
         }
       }
