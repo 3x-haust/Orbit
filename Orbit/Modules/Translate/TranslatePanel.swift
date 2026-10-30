@@ -501,7 +501,7 @@ private struct TranslateCard: View {
             }
             Spacer()
             footerButton("Replace", keys: "⌘↩") { model.replaceSelection() }
-            footerButton("Copy", keys: "↩", prominent: true) { model.copyResult() }
+            footerButton("Copy", keys: "↩ C", prominent: true) { model.copyResult() }
         }
         .disabled(model.output == nil)
         .padding(.horizontal, 14).frame(height: 44)
@@ -536,7 +536,9 @@ struct Shimmer: View {
     }
 }
 
-/// ↩ copy, ⌘↩ replace, ⌘⇧S swap — handled while the card has focus.
+/// ↩ or C copy, ⌘↩ replace, ⌘⇧S swap, esc close — handled while the card has focus. Esc is
+/// caught here too: once the result text is clicked into, it takes the key and the panel's own
+/// cancel never comes.
 private struct KeyCatcher: NSViewRepresentable {
     let model: TranslateController
 
@@ -546,7 +548,8 @@ private struct KeyCatcher: NSViewRepresentable {
             guard event.window === view.window else { return event }
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             switch (Int(event.keyCode), flags) {
-            case (kVK_Return, []): MainActor.assumeIsolated { model.copyResult() }; return nil
+            case (kVK_Return, []), (kVK_ANSI_C, []): MainActor.assumeIsolated { model.copyResult() }; return nil
+            case (kVK_Escape, []): MainActor.assumeIsolated { model.hide() }; return nil
             case (kVK_Return, .command): MainActor.assumeIsolated { model.replaceSelection() }; return nil
             case (kVK_ANSI_S, [.command, .shift]): MainActor.assumeIsolated { model.swapDirection() }; return nil
             default: return event

@@ -51,9 +51,7 @@ final class MediaKeyTap {
             let code = event.getIntegerValueField(.keyboardEventKeycode)
             guard code == 144 || code == 145 else { return pass }
         } else if type.rawValue == 14 {
-            guard let ns = NSEvent(cgEvent: event), ns.subtype.rawValue == 8 else { return pass }
-            let code = (ns.data1 & 0xFFFF_0000) >> 16
-            guard [0, 1, 2, 3, 7, 21, 22, 23].contains(code) else { return pass }
+            guard let code = mediaKey(event)?.code, [0, 1, 2, 3, 7, 21, 22, 23].contains(code) else { return pass }
         } else {
             return pass
         }
@@ -75,11 +73,9 @@ final class MediaKeyTap {
             default: return pass
             }
         } else if type.rawValue == 14 {
-            guard let ns = NSEvent(cgEvent: event), ns.subtype.rawValue == 8 else { return pass }
-            let code = (ns.data1 & 0xFFFF_0000) >> 16
-            let state = (ns.data1 & 0xFF00) >> 8
-            isDown = state == 0x0A
-            switch code {
+            guard let key = Self.mediaKey(event) else { return pass }
+            isDown = key.down
+            switch key.code {
             case 2: action = .brightnessUp
             case 3: action = .brightnessDown
             case 0: action = .volumeUp
@@ -101,6 +97,16 @@ final class MediaKeyTap {
         guard DisplayManager.shared.handle(action, fine: fine) else { return pass }
         lastKey = (action, now)
         return nil
+    }
+
+    /// The media key in an NX_SYSDEFINED event, read off the CGEvent itself. `NSEvent(cgEvent:)` would
+    /// do, but off the main thread it crashes Orbit: for Caps Lock (the 한/영 key) it asks the input
+    /// sources, which only the main thread may. Fields 99 and 149 are the event's subtype and data1.
+    private nonisolated static func mediaKey(_ event: CGEvent) -> (code: Int, down: Bool)? {
+        guard let subtype = CGEventField(rawValue: 99), let data1Field = CGEventField(rawValue: 149),
+              event.getIntegerValueField(subtype) == 8 else { return nil } // NX_SUBTYPE_AUX_CONTROL_BUTTONS
+        let data1 = Int(event.getIntegerValueField(data1Field))
+        return ((data1 & 0xFFFF_0000) >> 16, (data1 & 0xFF00) >> 8 == 0x0A)
     }
 
     private func handledRecently(_ action: DisplayManager.KeyAction) -> Bool {

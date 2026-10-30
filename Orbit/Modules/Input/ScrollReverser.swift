@@ -173,7 +173,9 @@ private enum ScrollTap {
         guard let hid, let device = device(sender: hid.sender) else { return event }
         note(device)
 
-        let natural = NSEvent(cgEvent: event)?.isDirectionInvertedFromDevice ?? config.systemNatural
+        // NSEvent's isDirectionInvertedFromDevice, read off the CGEvent (field 137): making an NSEvent
+        // off the main thread can crash Orbit when Caps Lock (the 한/영 key) is involved.
+        let natural = CGEventField(rawValue: 137).map { event.getIntegerValueField($0) != 0 } ?? config.systemNatural
         let reverseVertical = (device == .mouse ? config.mouseNatural : config.trackpadNatural) != natural
         let reverseHorizontal = config.horizontal && reverseVertical
         let continuous = event.getIntegerValueField(.scrollWheelEventIsContinuous) != 0

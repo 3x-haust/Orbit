@@ -35,8 +35,7 @@ final class AppsPanel {
     func toggle() { isVisible ? hide() : show() }
 
     func show() {
-        AppsCatalog.shared.start()
-        AppsCatalog.shared.refreshRunning()
+        AppsCatalog.shared.start() // keeps what's running current from launch and quit notices
         model.reset()
         closing = false
         panel.setFrame(NSScreen.active.frame, display: false)
@@ -152,12 +151,13 @@ final class AppsModel {
 
     private var catalog: AppsCatalog { .shared }
 
+    /// Only what changed: every assignment, even of the same value, re-lays out the grid.
     func reset() {
-        query = ""
-        category = nil
-        selection = nil
-        info = nil
-        shown = false
+        if !query.isEmpty { query = "" }
+        if category != nil { category = nil }
+        if selection != nil { selection = nil }
+        if info != nil { info = nil }
+        if shown { shown = false }
     }
 
     var sections: [Section] {

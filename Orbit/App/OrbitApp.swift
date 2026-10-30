@@ -273,6 +273,10 @@ enum DebugHook {
         case let c where c.hasPrefix("editor:"):
             if let image = NSImage(contentsOfFile: String(c.dropFirst(7))) { EditorWindow.open(image: image, fileURL: nil) }
         case "apps": AppsPanel.shared.show()
+        case "bench-apps":
+            // Opens the Apps grid five times and logs how its first two seconds play: main-thread
+            // frame gaps are what reads as lag.
+            FrameMeter.bench(label: "apps", runs: 5, open: { AppsPanel.shared.show() }, close: { AppsPanel.shared.hide() })
         case let c where c.hasPrefix("movable:"):
             NSApp.windows.first { $0.title == "Orbit" }?.isMovableByWindowBackground = c.hasSuffix("1")
         case "bench-layout":
@@ -313,6 +317,13 @@ enum DebugHook {
             }
         default: break
         }
+    }
+
+    @MainActor static func perfLog(_ line: String) {
+        let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Orbit/perf.log")
+        let line = "\(Date()) \(line)\n"
+        if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
+        else { try? Data(line.utf8).write(to: url) }
     }
 
     /// Promo frames from Orbit's real components. The JSON spec names a `kind` and its state; window
@@ -434,5 +445,57 @@ enum DebugHook {
             }
         }
     }
+}
+#endif
+
+#if DEBUG
+/// Times a surface's opening the way a person feels it: how long `open` blocks, then every
+/// display-link tick for the next two seconds. A tick that comes late is a dropped frame.
+@MainActor
+final class FrameMeter: NSObject {
+    private static var current: FrameMeter?
+    private var ticks: [CFTimeInterval] = []
+    private var link: CADisplayLink?
+    private var results: [String] = []
+
+    static func bench(label: String, runs: Int, open: @escaping () -> Void, close: @escaping () -> Void) {
+        let meter = FrameMeter()
+        current = meter
+        meter.run(label: label, left: runs, total: runs, open: open, close: close)
+    }
+
+    private func run(label: String, left: Int, total: Int, open: @escaping () -> Void, close: @escaping () -> Void) {
+        guard left > 0 else {
+            DebugHook.perfLog("bench \(label):\n" + results.joined(separator: "\n"))
+            FrameMeter.current = nil
+            return
+        }
+        ticks = []
+        let link = NSScreen.main!.displayLink(target: self, selector: #selector(tick(_:)))
+        let fps = Float(NSScreen.main?.maximumFramesPerSecond ?? 120)
+        link.preferredFrameRateRange = CAFrameRateRange(minimum: fps, maximum: fps, preferred: fps)
+        link.add(to: .main, forMode: .common)
+        self.link = link
+        let started = CACurrentMediaTime()
+        open()
+        let blocked = (CACurrentMediaTime() - started) * 1000
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [self] in
+            link.invalidate()
+            let frame = 1000 / Double(NSScreen.main?.maximumFramesPerSecond ?? 120)
+            let gaps = zip(ticks.dropFirst(), ticks).map { ($0 - $1) * 1000 }
+            let first = ((ticks.first ?? started) - started) * 1000
+            let dropped = gaps.reduce(0) { $0 + max(0, Int(($1 / frame).rounded()) - 1) }
+            // Frames shown per quarter second: when the dropping happens.
+            let quarters = (0..<8).map { q in ticks.filter { ($0 - started) >= Double(q) * 0.25 && ($0 - started) < Double(q + 1) * 0.25 }.count }
+            results.append(String(format: "  run %d: open() %.1fms, first tick %.1fms, worst gap %.1fms, dropped %d of %d frames, per ¼s %@",
+                                  total - left + 1, blocked, first, gaps.max() ?? 0, dropped, Int(2000 / frame), quarters.map(String.init).joined(separator: " ")))
+            close()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                self.run(label: label, left: left - 1, total: total, open: open, close: close)
+            }
+        }
+    }
+
+    @objc private func tick(_ link: CADisplayLink) { ticks.append(CACurrentMediaTime()) }
 }
 #endif

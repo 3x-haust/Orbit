@@ -21,10 +21,10 @@ final class AuthPromptUnlock {
     private(set) var enabled = Pref.defaults.bool(forKey: Pref.authPromptFace)
 
     /// Process names in the window list, and the code identities they must have.
-    private static let owners: Set<String> = ["SecurityAgent", "coreautha"]
+    nonisolated private static let owners: Set<String> = ["SecurityAgent", "coreautha"]
     private static let requirement = "anchor apple and (identifier \"com.apple.SecurityAgent\" or identifier \"com.apple.LocalAuthentication.UIAgent\")"
 
-    private struct Prompt {
+    private struct Prompt: Sendable {
         let pid: pid_t
         let window: CGWindowID
         let bounds: CGRect
@@ -69,25 +69,49 @@ final class AuthPromptUnlock {
 
     // MARK: Finding prompts
 
+    @ObservationIgnored private var looking = false
+    private static let lookQueue = DispatchQueue(label: "com.lyu.orbit.auth-prompts", qos: .utility)
+
+    /// The window list and session lookups run off the main thread: with LocalAuthentication's
+    /// agent kept running they ran every second, and each was a hitch in whatever Orbit animated.
     private func look() {
+        guard !looking, ready else { return }
+        looking = true
+        let watching = current != nil
+        Self.lookQueue.async {
+            let windows = Self.promptWindows(watching: watching)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    let me = AuthPromptUnlock.shared
+                    me.looking = false
+                    if let windows, me.ready { me.consider(windows) }
+                }
+            }
+        }
+    }
+
+    /// Prompt windows on screen now; nil when there's nothing to look at.
+    nonisolated private static func promptWindows(watching: Bool) -> [Prompt]? {
         // Nothing to look at unless one of the prompt processes is running (they start on demand);
         // checking names is a fraction of what the window list and session lookups cost.
-        guard current != nil || Self.promptProcessRunning() else { return }
-        guard ready, !Self.screenLocked,
+        guard watching || promptProcessRunning() else { return nil }
+        guard !screenLocked,
               let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]]
-        else { return }
-        var live: Set<CGWindowID> = []
-        var next: Prompt?
-        for info in list {
-            guard let owner = info[kCGWindowOwnerName as String] as? String, Self.owners.contains(owner),
+        else { return nil }
+        return list.compactMap { info in
+            guard let owner = info[kCGWindowOwnerName as String] as? String, owners.contains(owner),
                   let id = info[kCGWindowNumber as String] as? CGWindowID,
                   let pid = info[kCGWindowOwnerPID as String] as? pid_t,
                   ((info[kCGWindowAlpha as String] as? Double) ?? 1) > 0.01,
                   let b = info[kCGWindowBounds as String] as? NSDictionary,
-                  let bounds = CGRect(dictionaryRepresentation: b), bounds.width > 160, bounds.height > 80 else { continue }
-            live.insert(id)
-            if next == nil, !tried.contains(id) { next = Prompt(pid: pid, window: id, bounds: bounds) }
+                  let bounds = CGRect(dictionaryRepresentation: b), bounds.width > 160, bounds.height > 80 else { return nil }
+            return Prompt(pid: pid, window: id, bounds: bounds)
         }
+    }
+
+    private func consider(_ windows: [Prompt]) {
+        let live = Set(windows.map(\.window))
+        let next = windows.first { !tried.contains($0.window) }
         tried.formIntersection(live)
         // The prompt went away (Touch ID used, typed, cancelled): stop looking.
         if let c = current, !live.contains(c.window) {
@@ -269,7 +293,7 @@ final class AuthPromptUnlock {
 
     // MARK: Checks
 
-    private static func promptProcessRunning() -> Bool {
+    nonisolated private static func promptProcessRunning() -> Bool {
         var pids = [pid_t](repeating: 0, count: 4096)
         let n = Int(proc_listallpids(&pids, Int32(pids.count * MemoryLayout<pid_t>.size)))
         var name = [CChar](repeating: 0, count: 64)
@@ -280,7 +304,7 @@ final class AuthPromptUnlock {
         return false
     }
 
-    private static var screenLocked: Bool {
+    nonisolated private static var screenLocked: Bool {
         guard let session = CGSessionCopyCurrentDictionary() as? [String: Any] else { return false }
         return (session["CGSSessionScreenIsLocked"] as? Bool) == true
     }

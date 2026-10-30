@@ -605,7 +605,7 @@ struct SpellCard: View {
                     .disabled(!model.canReplace)
                     .opacity(model.canReplace ? 1 : 0.4)
                     .help(model.canReplace ? "" : "Nothing selected to replace — copy it instead".loc)
-                CardFooterButton(title: "Copy", keys: "↩", prominent: true) { model.copyResult() }
+                CardFooterButton(title: "Copy", keys: "↩ C", prominent: true) { model.copyResult() }
             }
             .disabled(model.output == nil)
         }
@@ -974,7 +974,9 @@ struct CardFooterButton: View {
     }
 }
 
-/// ↩ copy, ⌘↩ replace, ⌘R check again, ⌘T translate instead — while the card has focus.
+/// ↩ or C copy, ⌘↩ replace, ⌘R check again, ⌘T translate instead, esc close — while the card
+/// has focus. Esc is caught here too: once the text is clicked into, it takes the key and the
+/// panel's own cancel never comes.
 private struct SpellKeys: NSViewRepresentable {
     let model: SpellController
 
@@ -984,7 +986,8 @@ private struct SpellKeys: NSViewRepresentable {
             guard event.window === view.window else { return event }
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             switch (Int(event.keyCode), flags) {
-            case (kVK_Return, []): MainActor.assumeIsolated { model.copyResult() }; return nil
+            case (kVK_Return, []), (kVK_ANSI_C, []): MainActor.assumeIsolated { model.copyResult() }; return nil
+            case (kVK_Escape, []): MainActor.assumeIsolated { model.hide() }; return nil
             case (kVK_Return, .command): MainActor.assumeIsolated { model.replaceSelection() }; return nil
             case (kVK_ANSI_R, .command): MainActor.assumeIsolated { model.run() }; return nil
             case (kVK_ANSI_T, .command): MainActor.assumeIsolated { model.switchToTranslate() }; return nil

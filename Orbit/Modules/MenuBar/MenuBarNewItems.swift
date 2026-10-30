@@ -210,8 +210,16 @@ final class MenuBarNewItems {
         if axObserver != nil, agent.processIdentifier == agentPID { return }
         unobserveBar()
         var observer: AXObserver?
-        let callback: AXObserverCallback = { _, _, _, _ in
-            MainActor.assumeIsolated { MenuBarNewItems.shared.barChanged() }
+        let callback: AXObserverCallback = { _, element, _, _ in
+            // The observer also hears about other apps' windows changing (a Terminal pane, a list
+            // in Music…), dozens a second at times; each look at the bar costs the main thread
+            // ~40ms, a hitch in whatever Orbit is animating. Only the bar's own changes count.
+            var pid: pid_t = 0
+            AXUIElementGetPid(element, &pid)
+            MainActor.assumeIsolated {
+                guard pid == MenuBarNewItems.shared.agentPID else { return }
+                MenuBarNewItems.shared.barChanged()
+            }
         }
         guard AXObserverCreate(agent.processIdentifier, callback, &observer) == .success, let observer else { return }
         let root = AXUIElementCreateApplication(agent.processIdentifier)
