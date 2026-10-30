@@ -44,6 +44,8 @@ final class Knock {
     private var sensor: KnockSensor?
     private var monitors: [Any] = []
     private var wakeObserver: Any?
+    /// Knocks are ignored until then: just after a wake or an unlock, the Mac was being handled.
+    private var quietUntil = Date.distantPast
 
     private init() {
         let d = Pref.defaults
@@ -109,8 +111,12 @@ final class Knock {
         if wakeObserver == nil {
             // The hub forgets it was asked to report while the Mac sleeps.
             wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
-                MainActor.assumeIsolated { Knock.shared.restart() }
+                MainActor.assumeIsolated { Knock.shared.quietUntil = Date() + 3; Knock.shared.restart() }
             }
+            // Opening the lid and getting past the lock screen shake the Mac like a knock does.
+            let settle: (Notification) -> Void = { _ in MainActor.assumeIsolated { Knock.shared.quietUntil = Date() + 3 } }
+            NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main, using: settle)
+            DistributedNotificationCenter.default().addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main, using: settle)
         }
         KnockLog.write("listening (\(sensitivity))")
     }
@@ -126,6 +132,7 @@ final class Knock {
         KnockLog.write("\(p.count) knocks, softest \(String(format: "%.3f", p.strength))g → \(t.raw.isEmpty ? "nothing" : t.raw)")
         lastPattern = (p.count, Date())
         guard t != .none, !Self.screenAsleepOrLocked else { return }
+        guard Date() >= quietUntil else { KnockLog.write("ignored: the Mac just woke or unlocked"); return }
         HotCorners.shared.run(t)
         if showWhatRan { Toast.show(t.title, symbol: "hand.tap", detail: p.count == 2 ? "Two knocks".loc : "Three knocks".loc) }
     }
