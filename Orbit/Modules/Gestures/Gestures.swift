@@ -253,6 +253,7 @@ final class Gestures {
         }
         if !metering { fingers = [] }
         GestureMouse.shared.update(wanted: table.wants(.mouse))
+        GestureKeys.shared.update(wanted: table.wants(.keyboard))
     }
 
     private func show(_ points: [CGPoint]) {
