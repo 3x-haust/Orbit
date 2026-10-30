@@ -99,6 +99,7 @@
 		69E5A12DE541E968DFBEC534 /* SpellWeb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BF84965A38EF3EED02946E /* SpellWeb.swift */; };
 		6A31018BA5BFD4612B063A32 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A534DCE8F45657937DA3680 /* Theme.swift */; };
 		6B204D4609E7BAFE786CAF09 /* MultitouchSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3620456C9CB32A0D0E67155C /* MultitouchSource.swift */; };
+		6D494064EF184AAE767553B4 /* Gestures.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8AD238E44A5B6D1C237A85C /* Gestures.swift */; };
 		6DCD1A400A6B63A88B79ADE7 /* LauncherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F2C7D6D02F4FF3D2ADF535 /* LauncherView.swift */; };
 		6EB01FB988D760FDDC9937C1 /* ScrollingCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2722008A2650F4A9031E56E4 /* ScrollingCapture.swift */; };
 		6F5538342B74964A881E3495 /* PinWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3953E9216C01A0A7B10855DA /* PinWindow.swift */; };
@@ -502,6 +503,7 @@
 		F5563CD182334D6F4BE12138 /* OverflowCover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverflowCover.swift; sourceTree = "<group>"; };
 		F5ED06819EFF01301FC370E3 /* RecordingWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingWriter.swift; sourceTree = "<group>"; };
 		F79982F0B4FCF8B83F953FF5 /* MenuBarNewItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarNewItems.swift; sourceTree = "<group>"; };
+		F8AD238E44A5B6D1C237A85C /* Gestures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gestures.swift; sourceTree = "<group>"; };
 		F9027B4AE57ED596F13D57E0 /* MediaKeyTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaKeyTap.swift; sourceTree = "<group>"; };
 		F99A4EC59D644F89EEACFBAF /* FaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceStore.swift; sourceTree = "<group>"; };
 		FC6AF77BAB454B1CD81EB5D8 /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
@@ -1024,6 +1026,7 @@
 			children = (
 				C4C559796E9A3AABB5C34C71 /* GestureAction.swift */,
 				7C883467C07829DCE4B08924 /* GestureLog.swift */,
+				F8AD238E44A5B6D1C237A85C /* Gestures.swift */,
 				3620456C9CB32A0D0E67155C /* MultitouchSource.swift */,
 				96EC5F7809FAC28EDAB5C718 /* TouchRecognizer.swift */,
 			);
@@ -1364,6 +1367,7 @@
 				10E9CFCF5A6EB36C411D54D1 /* Forms.swift in Sources */,
 				99F84C492430D96BBB32A8BD /* GestureAction.swift in Sources */,
 				2A7A28288351F1A542C0E245 /* GestureLog.swift in Sources */,
+				6D494064EF184AAE767553B4 /* Gestures.swift in Sources */,
 				E3E705AAC1D281BBDA3DD3A1 /* HiddenBar.swift in Sources */,
 				2AB5F48CC911005715AEAA13 /* HomePage.swift in Sources */,
 				D264531884B9D26CC1AAA4D8 /* HotCorners.swift in Sources */,
