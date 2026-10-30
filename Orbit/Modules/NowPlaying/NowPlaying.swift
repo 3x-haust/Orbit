@@ -254,7 +254,8 @@ final class NowPlaying {
         let source = p.parentBundle ?? p.bundle
         let webMusic = source.map { Self.isWebMusic($0, album: p.album) } ?? false
         systemSource = source.map { ($0, p.title != nil && (p.playing ?? ((p.rate ?? 0) > 0))) }
-        let musicFlag = source.map(Self.isBrowser) == true ? webMusic : (p.isMusicApp ?? false)
+        let musicFlag = source.map { Self.isMusicService($0, appName: p.appName) } == true
+            || (source.map(Self.isBrowser) == true ? webMusic : (p.isMusicApp ?? false))
         MediaDucker.shared.observe(bundle: p.title == nil ? nil : source, isMusicApp: musicFlag,
                                    key: p.title.map { "\($0)\u{1}\(p.artist ?? "")\u{1}\(p.album ?? "")" },
                                    playing: p.playing ?? ((p.rate ?? 0) > 0))
@@ -265,14 +266,15 @@ final class NowPlaying {
         }
         let bundle = source ?? "pid.\(p.pid ?? 0)"
         lastSource = source.map { ($0, p.appName ?? Self.appName(for: $0) ?? $0) }
-        let allowed = Self.allowed(bundle, isMusicApp: p.isMusicApp ?? false, album: p.album)
+        let allowed = Self.allowed(bundle, isMusicApp: p.isMusicApp ?? false, album: p.album, appName: p.appName)
         if !allowed, lastSkipped != bundle {
             lastSkipped = bundle
             NowPlayingLog.write("not showing \(bundle) (not a music app, or skipped)")
         }
         let new = Track(title: title, artist: p.artist ?? "", album: p.album ?? "", duration: p.duration ?? 0,
                         bundle: bundle, appName: p.appName ?? Self.appName(for: bundle),
-                        isMusic: (p.isMusicApp ?? Self.musicApps.contains(bundle)) || webMusic)
+                        isMusic: (p.isMusicApp ?? Self.musicApps.contains(bundle)) || webMusic
+                            || Self.isMusicService(bundle, appName: p.appName))
         let playing = p.playing ?? ((p.rate ?? 0) > 0)
         var report = Report(track: new, rate: p.rate ?? (playing ? 1 : 0), elapsed: p.elapsed, anchor: Date())
         if p.elapsed != nil {
@@ -455,13 +457,41 @@ final class NowPlaying {
     ]
 
     /// Whether this source shows, by "Show from" and the skipped apps.
-    static func allowed(_ bundle: String, isMusicApp: Bool, album: String? = nil) -> Bool {
+    static func allowed(_ bundle: String, isMusicApp: Bool, album: String? = nil, appName: String? = nil) -> Bool {
         let d = Pref.defaults
         if (d.stringArray(forKey: NowPlayingPrefs.excluded) ?? []).contains(bundle) { return false }
         guard (d.string(forKey: NowPlayingPrefs.sources) ?? "music") == "music" else { return true }
+        if isMusicService(bundle, appName: appName) { return true }
         if isBrowser(bundle) { return isWebMusic(bundle, album: album) }
         return musicApps.contains(bundle) || isMusicApp
     }
+
+    /// A music service by its name: YouTube Music saved as an app from Chrome or Safari, or a player
+    /// that isn't on the list. Short names only count whole, so "Flow" or "Vibes" isn't FLO or VIBE.
+    static func isMusicService(_ bundle: String, appName: String?) -> Bool {
+        let key = bundle + "\u{1}" + (appName ?? "")
+        if let known = serviceVerdicts[key] { return known }
+        let verdict = matchesMusicService(bundle, appName: appName)
+        serviceVerdicts[key] = verdict
+        return verdict
+    }
+
+    /// Looking an app up by bundle ID asks Launch Services, and Now Playing reports many times a song.
+    private static var serviceVerdicts: [String: Bool] = [:]
+
+    private static func matchesMusicService(_ bundle: String, appName: String?) -> Bool {
+        let names = [appName, Self.appName(for: bundle)].compactMap { $0?.lowercased().trimmingCharacters(in: .whitespaces) }
+        return names.contains { name in
+            musicServiceNames.contains { k in
+                k.count >= 5 ? name.contains(k) : name == k || name.hasPrefix(k + " ") || name.hasSuffix(" " + k)
+            }
+        }
+    }
+
+    static let musicServiceNames = [
+        "youtube music", "spotify", "apple music", "soundcloud", "tidal", "deezer", "amazon music", "pandora", "qobuz",
+        "bandcamp", "plexamp", "pear", "melon", "멜론", "genie", "지니", "flo", "플로", "bugs", "벅스", "vibe", "바이브",
+    ]
 
     /// A browser, or a site saved as an app from one.
     static func isBrowser(_ bundle: String) -> Bool {
