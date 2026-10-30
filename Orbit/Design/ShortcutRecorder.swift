@@ -66,7 +66,7 @@ struct ShortcutRecorder: View {
                     .padding(.horizontal, 4).frame(height: 14)
                     .background(RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(Palette.hairline, lineWidth: 1))
             } else if let shortcut {
-                ShortcutKeys(text: shortcut.description)
+                ShortcutKeys(text: shortcut.label)
             } else {
                 Image(systemName: "plus").font(.system(size: 9, weight: .bold)).foregroundStyle(Palette.inkSecondary)
                 Text("Set shortcut".loc).font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.inkSecondary)
@@ -126,7 +126,7 @@ struct ShortcutRecorder: View {
                 return nil
             }
             if let system = SystemHotKey.enabled().first(where: { $0.shortcut == s }) {
-                reject("macOS uses %@ for “%@”. Turn it off under Overlapping Apps, or pick other keys.".loc(s.description, system.title))
+                reject("macOS uses %@ for “%@”. Turn it off under Overlapping Apps, or pick other keys.".loc(s.label, system.title))
                 return nil
             }
             set(s)
@@ -148,7 +148,7 @@ struct ShortcutRecorder: View {
             // Whichever Orbit shortcut had these keys gives them up.
             for other in Self.allNames where other != name && KeyboardShortcuts.getShortcut(for: other) == s {
                 KeyboardShortcuts.setShortcut(nil, for: other)
-                Toast.show("Moved from another action".loc, symbol: "keyboard", detail: s.description)
+                Toast.show("Moved from another action".loc, symbol: "keyboard", detail: s.label)
             }
         }
         KeyboardShortcuts.setShortcut(s, for: name)

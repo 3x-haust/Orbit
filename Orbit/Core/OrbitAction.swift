@@ -301,7 +301,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
     }
 
     @MainActor var shortcutLabel: String? {
-        shortcutName.flatMap { KeyboardShortcuts.getShortcut(for: $0)?.description }
+        shortcutName.flatMap { KeyboardShortcuts.getShortcut(for: $0)?.label }
     }
 
     var windowLayout: WindowManager.Layout? {
@@ -372,9 +372,9 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .emptyTrash: SystemActions.emptyTrash()
         case .ejectAll: SystemActions.ejectAll()
         case .fanBoost: FanControl.shared.toggleFullSpeed()
-        case .mediaPlayPause: NowPlaying.shared.togglePlayPause()
-        case .mediaNext: NowPlaying.shared.next()
-        case .mediaPrevious: NowPlaying.shared.previous()
+        case .mediaPlayPause: NowPlaying.shared.togglePlayPause(heard: true)
+        case .mediaNext: NowPlaying.shared.next(heard: true)
+        case .mediaPrevious: NowPlaying.shared.previous(heard: true)
         case .mediaLike: NowPlaying.shared.toggleLike()
         case .cleanKeyboard: KeyboardCleaner.shared.start()
         case .batteryTopUp: BatteryManager.shared.toppingUp ? BatteryManager.shared.cancelTopUp() : BatteryManager.shared.topUp()

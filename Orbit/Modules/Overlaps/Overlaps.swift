@@ -206,7 +206,7 @@ struct ShortcutClash: Identifiable {
             guard let s = KeyboardShortcuts.getShortcut(for: name) else { return [] }
             let mods = SystemHotKey.mask(UInt(s.modifiers.rawValue))
             return system.filter { $0.keyCode == s.carbonKeyCode && $0.modifiers == mods }
-                .map { ShortcutClash(orbit: name, orbitTitle: title, keys: s.description, system: $0) }
+                .map { ShortcutClash(orbit: name, orbitTitle: title, keys: s.label, system: $0) }
         }
     }
 }

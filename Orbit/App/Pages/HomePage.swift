@@ -147,7 +147,7 @@ private struct RingHero: View {
                     .font(.system(size: 13)).foregroundStyle(Palette.inkSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 8) {
-                    ShortcutKeys(text: KeyboardShortcuts.getShortcut(for: .ring)?.description)
+                    ShortcutKeys(text: KeyboardShortcuts.getShortcut(for: .ring)?.label)
                     Text("or").font(.system(size: 11)).foregroundStyle(Palette.inkSecondary)
                     Label("Middle button", systemImage: "computermouse")
                         .font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.ink)

@@ -166,9 +166,17 @@ final class NowPlaying {
 
     // MARK: Commands
 
-    func togglePlayPause() {
+    /// `heard`: from a shortcut, the Ring, a knock or a hot corner. Like the keyboard's play key, that
+    /// goes to the app macOS's Now Playing is on (a YouTube video in a browser, say) when it isn't
+    /// what's shown, rather than starting the paused music over it. The widget's and the notch's
+    /// buttons are for what they show.
+    func togglePlayPause(heard: Bool = false) {
         ensureListening()
         MediaDucker.shared.userActed()
+        if heard, heardElsewhere {
+            bridge.send(.togglePlayPause)
+            return
+        }
         if track != nil {
             // Feels instant; the next update from the app corrects it.
             elapsedAnchor = elapsed()
@@ -179,15 +187,17 @@ final class NowPlaying {
         else { bridge.send(.togglePlayPause) }
     }
 
-    func next() {
+    func next(heard: Bool = false) {
         ensureListening()
         MediaDucker.shared.userActed()
+        if heard, heardElsewhere { bridge.send(.next); return }
         if let app = scriptApp { Task { await ScriptedPlayers.send(.next, to: app) } } else { bridge.send(.next) }
     }
 
-    func previous() {
+    func previous(heard: Bool = false) {
         ensureListening()
         MediaDucker.shared.userActed()
+        if heard, heardElsewhere { bridge.send(.previous); return }
         if let app = scriptApp { Task { await ScriptedPlayers.send(.previous, to: app) } } else { bridge.send(.previous) }
     }
 
@@ -242,7 +252,10 @@ final class NowPlaying {
         guard p.type == "info" else { return }
         status = .ready
         let source = p.parentBundle ?? p.bundle
-        MediaDucker.shared.observe(bundle: p.title == nil ? nil : source, isMusicApp: p.isMusicApp ?? false,
+        let webMusic = source.map { Self.isWebMusic($0, album: p.album) } ?? false
+        systemSource = source.map { ($0, p.title != nil && (p.playing ?? ((p.rate ?? 0) > 0))) }
+        let musicFlag = source.map(Self.isBrowser) == true ? webMusic : (p.isMusicApp ?? false)
+        MediaDucker.shared.observe(bundle: p.title == nil ? nil : source, isMusicApp: musicFlag,
                                    key: p.title.map { "\($0)\u{1}\(p.artist ?? "")\u{1}\(p.album ?? "")" },
                                    playing: p.playing ?? ((p.rate ?? 0) > 0))
         guard let title = p.title, (p.pid ?? 0) != 0 || p.bundle != nil else {
@@ -252,14 +265,14 @@ final class NowPlaying {
         }
         let bundle = source ?? "pid.\(p.pid ?? 0)"
         lastSource = source.map { ($0, p.appName ?? Self.appName(for: $0) ?? $0) }
-        let allowed = Self.allowed(bundle, isMusicApp: p.isMusicApp ?? false)
+        let allowed = Self.allowed(bundle, isMusicApp: p.isMusicApp ?? false, album: p.album)
         if !allowed, lastSkipped != bundle {
             lastSkipped = bundle
             NowPlayingLog.write("not showing \(bundle) (not a music app, or skipped)")
         }
         let new = Track(title: title, artist: p.artist ?? "", album: p.album ?? "", duration: p.duration ?? 0,
                         bundle: bundle, appName: p.appName ?? Self.appName(for: bundle),
-                        isMusic: p.isMusicApp ?? Self.musicApps.contains(bundle))
+                        isMusic: (p.isMusicApp ?? Self.musicApps.contains(bundle)) || webMusic)
         let playing = p.playing ?? ((p.rate ?? 0) > 0)
         var report = Report(track: new, rate: p.rate ?? (playing ? 1 : 0), elapsed: p.elapsed, anchor: Date())
         if p.elapsed != nil {
@@ -442,12 +455,33 @@ final class NowPlaying {
     ]
 
     /// Whether this source shows, by "Show from" and the skipped apps.
-    static func allowed(_ bundle: String, isMusicApp: Bool) -> Bool {
+    static func allowed(_ bundle: String, isMusicApp: Bool, album: String? = nil) -> Bool {
         let d = Pref.defaults
         if (d.stringArray(forKey: NowPlayingPrefs.excluded) ?? []).contains(bundle) { return false }
         guard (d.string(forKey: NowPlayingPrefs.sources) ?? "music") == "music" else { return true }
-        if browsers.contains(bundle) || bundle.hasPrefix("com.apple.WebKit") { return false }
+        if isBrowser(bundle) { return isWebMusic(bundle, album: album) }
         return musicApps.contains(bundle) || isMusicApp
+    }
+
+    /// A browser, or a site saved as an app from one.
+    static func isBrowser(_ bundle: String) -> Bool {
+        browsers.contains(bundle) || bundle.hasPrefix("com.apple.WebKit")
+            || bundle.hasPrefix("com.apple.Safari.WebApp") || bundle.hasPrefix("com.google.Chrome.app.")
+    }
+
+    /// Music in a browser: YouTube Music, Spotify's or Apple Music's web player. Unlike a video, the
+    /// page names the song's album.
+    static func isWebMusic(_ bundle: String, album: String?) -> Bool {
+        isBrowser(bundle) && !(album ?? "").isEmpty
+    }
+
+    /// The app macOS's Now Playing is on right now, shown or not, and whether it's playing.
+    @ObservationIgnored private var systemSource: (bundle: String, playing: Bool)?
+
+    /// macOS's Now Playing is on another app than the one shown, and it's playing or the shown one isn't.
+    private var heardElsewhere: Bool {
+        guard let other = systemSource, other.bundle != track?.bundle else { return false }
+        return other.playing || !playing
     }
 
     /// The last app Now Playing reported, shown or not, for "Skip this app".
