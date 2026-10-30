@@ -301,7 +301,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
     }
 
     @MainActor var shortcutLabel: String? {
-        shortcutName.flatMap { KeyboardShortcuts.getShortcut(for: $0)?.description }
+        shortcutName.flatMap { KeyboardShortcuts.getShortcut(for: $0)?.label }
     }
 
     var windowLayout: WindowManager.Layout? {

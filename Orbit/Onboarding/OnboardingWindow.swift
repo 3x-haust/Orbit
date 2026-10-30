@@ -126,7 +126,7 @@ private struct OnboardingRingPage: View {
                 Text("Meet the Ring").font(.system(size: 26, weight: .bold))
                 Text("Your tools orbit the pointer. Open the Ring, move toward what you want, and it happens.")
                     .font(.system(size: 14)).foregroundStyle(.secondary)
-                step("1", "Hold %@ or the middle mouse button".loc(KeyboardShortcuts.getShortcut(for: .ring)?.description ?? "⌃⌥Space"))
+                step("1", "Hold %@ or the middle mouse button".loc(KeyboardShortcuts.getShortcut(for: .ring)?.label ?? "⌃⌥" + "Space".loc))
                 step("2", "Move toward an action — flick past it or let go")
                 step("3", "Or tap once and rest on an action until it fills")
             }
@@ -208,7 +208,7 @@ private struct OnboardingShortcutsPage: View {
                         Image(systemName: row.0).frame(width: 24).foregroundStyle(.secondary)
                         Text(row.1.loc).font(.orbitBody)
                         Spacer()
-                        Text(KeyboardShortcuts.getShortcut(for: row.2)?.description ?? "—")
+                        Text(KeyboardShortcuts.getShortcut(for: row.2)?.label ?? "—")
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                             .padding(.horizontal, 8).padding(.vertical, 3)
                             .background(RoundedRectangle(cornerRadius: 5).fill(Palette.raised))

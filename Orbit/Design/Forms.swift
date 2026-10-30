@@ -1,3 +1,4 @@
+import KeyboardShortcuts
 import SwiftUI
 
 /// A titled card of rows — the building block of every app page.
@@ -137,6 +138,15 @@ struct PillButtonStyle: ButtonStyle {
 }
 
 /// Keycaps for a shortcut string like "⌃⌥Space".
+extension KeyboardShortcuts.Shortcut {
+    /// What the keys read as. KeyboardShortcuts names the space bar "빈칸" in Korean; macOS and
+    /// everyone else say 스페이스.
+    @MainActor var label: String {
+        guard key == .space else { return description }
+        return String(description.prefix { "⌃⌥⇧⌘".contains($0) }) + "Space".loc
+    }
+}
+
 struct ShortcutKeys: View {
     let text: String?
 
