@@ -328,15 +328,16 @@ final class OverflowCover {
     private static func captureStrip(_ screen: NSScreen) async -> Strip? {
         // Listing every window on screen is most of a picture's cost; the display and the desktop's
         // windows stay the same until the Space changes.
-        let display: SCDisplay, desktopWindows: [SCWindow]
+        let display: SCDisplay, desktopWindows: [SCWindow], orbit: [SCRunningApplication]
         if let cached = shareable, Date().timeIntervalSince(cached.at) < 30 {
-            (display, desktopWindows) = (cached.display, cached.desktop)
+            (display, desktopWindows, orbit) = (cached.display, cached.desktop, cached.orbit)
         } else {
             guard let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true),
                   let d = content.displays.first(where: { $0.displayID == CGMainDisplayID() }) ?? content.displays.first else { return nil }
             display = d
             desktopWindows = content.windows.filter { $0.windowLayer < 0 && $0.isOnScreen }
-            shareable = (d, desktopWindows, Date())
+            orbit = content.applications.filter { $0.processID == ProcessInfo.processInfo.processIdentifier }
+            shareable = (d, desktopWindows, orbit, Date())
         }
         guard !desktopWindows.isEmpty else { MenuBarLog.write("cover: no desktop windows, skipped"); shareable = nil; return nil }
         let scale = screen.backingScaleFactor
@@ -344,7 +345,9 @@ final class OverflowCover {
         let originX = max(0, (screen.auxiliaryTopRightArea?.minX ?? screen.frame.minX) - screen.frame.minX - 40).rounded(.down)
         let rect = CGRect(x: originX, y: 0, width: screen.frame.width - originX, height: height)
         async let desktop = shot(SCContentFilter(display: display, including: desktopWindows), rect: rect, scale: scale)
-        async let real = shot(SCContentFilter(display: display, excludingWindows: []), rect: rect, scale: scale)
+        // The bar as shown, without Orbit's own windows: the notch's music ear sits right where the
+        // bar's color is read beside «, and its album tint came back as a dark red patch.
+        async let real = shot(SCContentFilter(display: display, excludingApplications: orbit, exceptingWindows: []), rect: rect, scale: scale)
         guard let d = await desktop else { return nil }
         // Caught mid-transition, the desktop can come back empty — a see-through, black picture.
         guard let avg = average(d), avg.3 > 0.9 else {
@@ -391,7 +394,7 @@ final class OverflowCover {
         return distance((a.0, a.1, a.2), (b.0, b.1, b.2)) < 0.05
     }
 
-    nonisolated(unsafe) private static var shareable: (display: SCDisplay, desktop: [SCWindow], at: Date)?
+    nonisolated(unsafe) private static var shareable: (display: SCDisplay, desktop: [SCWindow], orbit: [SCRunningApplication], at: Date)?
 
     private static func crop(_ image: CGImage, _ rect: CGRect, scale: CGFloat, originX: CGFloat = 0) -> CGImage? {
         let px = CGRect(x: (rect.minX - originX) * scale, y: rect.minY * scale, width: rect.width * scale, height: rect.height * scale).integral
