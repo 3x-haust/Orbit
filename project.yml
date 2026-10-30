@@ -62,7 +62,7 @@ targets:
         LSApplicationCategoryType: public.app-category.productivity
         NSHumanReadableCopyright: "© 2026 Orbit"
         NSScreenCaptureUsageDescription: Orbit needs screen access to take screenshots and recognize text on screen.
-        NSAppleEventsUsageDescription: Orbit uses this to switch Dark Mode and empty the Trash when you ask it to.
+        NSAppleEventsUsageDescription: Orbit uses this to switch Dark Mode, empty the Trash and run the AppleScripts you give your gestures, when you ask it to.
         NSCalendarsFullAccessUsageDescription: Orbit shows your events in the menu bar calendar. They never leave this Mac.
         NSAudioCaptureUsageDescription: Orbit routes each app's sound through its volume and EQ controls. Nothing is recorded.
         NSCameraUsageDescription: Orbit uses the camera on this Mac to recognize your face and unlock the apps you locked, and for the notch mirror when you turn it on. Nothing leaves your Mac.

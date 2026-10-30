@@ -131,6 +131,7 @@
 		984D3AA3F912342A57E8C610 /* RecordPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E202285F2A53FBC6DB8C7743 /* RecordPicker.swift */; };
 		99521B499048728273B7E99F /* AppsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AF473498FAA90059FE74B6 /* AppsPanel.swift */; };
 		99E61AE282CA542BB13A9F7D /* MenuCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051B3849AFE7B68FBB770536 /* MenuCommands.swift */; };
+		99F84C492430D96BBB32A8BD /* GestureAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C559796E9A3AABB5C34C71 /* GestureAction.swift */; };
 		9B920CE216E9796BF2ED4582 /* MenuBarCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840129039E3BCBDF10883756 /* MenuBarCalendar.swift */; };
 		9D47D1C129E210954E010BF0 /* PermissionPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */; };
 		9F2728A0FC19E7AA803CF6D5 /* FaceUnlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4AA143231EE285383B831E /* FaceUnlock.swift */; };
@@ -465,6 +466,7 @@
 		BF054AF38374B66F3105F1B9 /* NowPlayingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingPage.swift; sourceTree = "<group>"; };
 		C2E79D6398DBE3E2CA15BEF9 /* PasswordsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsPage.swift; sourceTree = "<group>"; };
 		C453D6B049BDC5E89C9D01E7 /* FloatingPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanel.swift; sourceTree = "<group>"; };
+		C4C559796E9A3AABB5C34C71 /* GestureAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureAction.swift; sourceTree = "<group>"; };
 		C506FC8E8986ACC027A64870 /* Shelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shelf.swift; sourceTree = "<group>"; };
 		C5E71B963E639C65F03B7CF8 /* SettingsIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsIndex.swift; sourceTree = "<group>"; };
 		C806453631EADA7FBF1D47F9 /* FaceScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceScanner.swift; sourceTree = "<group>"; };
@@ -1020,6 +1022,7 @@
 		DE966FB48A67A0C941A5F035 /* Gestures */ = {
 			isa = PBXGroup;
 			children = (
+				C4C559796E9A3AABB5C34C71 /* GestureAction.swift */,
 				7C883467C07829DCE4B08924 /* GestureLog.swift */,
 				3620456C9CB32A0D0E67155C /* MultitouchSource.swift */,
 				96EC5F7809FAC28EDAB5C718 /* TouchRecognizer.swift */,
@@ -1359,6 +1362,7 @@
 				72CA3ACB6FCD6FE7836674CB /* FeaturePages.swift in Sources */,
 				B5EF133BA2C6F410894C3972 /* FloatingPanel.swift in Sources */,
 				10E9CFCF5A6EB36C411D54D1 /* Forms.swift in Sources */,
+				99F84C492430D96BBB32A8BD /* GestureAction.swift in Sources */,
 				2A7A28288351F1A542C0E245 /* GestureLog.swift in Sources */,
 				E3E705AAC1D281BBDA3DD3A1 /* HiddenBar.swift in Sources */,
 				2AB5F48CC911005715AEAA13 /* HomePage.swift in Sources */,

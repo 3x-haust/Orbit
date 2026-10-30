@@ -57,7 +57,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Orbit uses this to switch Dark Mode and empty the Trash when you ask it to.</string>
+	<string>Orbit uses this to switch Dark Mode, empty the Trash and run the AppleScripts you give your gestures, when you ask it to.</string>
 	<key>NSAudioCaptureUsageDescription</key>
 	<string>Orbit routes each app's sound through its volume and EQ controls. Nothing is recorded.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
