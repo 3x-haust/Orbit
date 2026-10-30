@@ -28,6 +28,7 @@
 		14A743D4BB58DC05527FF48F /* SnippetCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24317635CFAD20822BC74B32 /* SnippetCore.swift */; };
 		15A744D5F2D8FFFDAE20B735 /* RecordingChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A32F78CC5FAD56E7B598379E /* RecordingChrome.swift */; };
 		17214F3661DACA4A26423334 /* LibArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B606BC2867F440CF3F59893 /* LibArchive.swift */; };
+		186C0ECEDAE7750D255DB31B /* GesturesPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490C3CEEF9484F67363BA96 /* GesturesPage.swift */; };
 		1AB07EB58BDE89F1A2B495B5 /* MenuBarHider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F38F76155697333D175E856 /* MenuBarHider.swift */; };
 		1BAC8C9DBDC5F0593897DB77 /* AppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C1520EB19CB914425CA377 /* AppsView.swift */; };
 		1C547E6AEABE7AB08326CE8C /* KnockPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4538EFE289F4A870DC563D8E /* KnockPage.swift */; };
@@ -406,6 +407,7 @@
 		7D7698EED3CA3B3BAA122017 /* AudioTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTap.swift; sourceTree = "<group>"; };
 		814260B5C9AC2E9E0C009A90 /* NotchPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPanel.swift; sourceTree = "<group>"; };
 		840129039E3BCBDF10883756 /* MenuBarCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCalendar.swift; sourceTree = "<group>"; };
+		8490C3CEEF9484F67363BA96 /* GesturesPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GesturesPage.swift; sourceTree = "<group>"; };
 		84E839E2F9F574D8C21AFBD9 /* ClipboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardView.swift; sourceTree = "<group>"; };
 		84EE39EBD3FE87C465F957E6 /* BatteryIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryIO.swift; sourceTree = "<group>"; };
 		85551DE3DDE2E99655304B90 /* PasswordTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordTools.swift; sourceTree = "<group>"; };
@@ -1101,6 +1103,7 @@
 				8E9171DD5AC3FD8F7372B764 /* BatteryPage.swift */,
 				46AD126FFA18662AD065C1A0 /* DisplaysPage.swift */,
 				9E15BE9E436E9AB591E2D0A9 /* FeaturePages.swift */,
+				8490C3CEEF9484F67363BA96 /* GesturesPage.swift */,
 				05EABB958605751517434087 /* HomePage.swift */,
 				20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */,
 				4538EFE289F4A870DC563D8E /* KnockPage.swift */,
@@ -1376,6 +1379,7 @@
 				2A7A28288351F1A542C0E245 /* GestureLog.swift in Sources */,
 				6352C3FF45A46BA080AED7F8 /* GestureMouse.swift in Sources */,
 				6D494064EF184AAE767553B4 /* Gestures.swift in Sources */,
+				186C0ECEDAE7750D255DB31B /* GesturesPage.swift in Sources */,
 				E3E705AAC1D281BBDA3DD3A1 /* HiddenBar.swift in Sources */,
 				2AB5F48CC911005715AEAA13 /* HomePage.swift in Sources */,
 				D264531884B9D26CC1AAA4D8 /* HotCorners.swift in Sources */,

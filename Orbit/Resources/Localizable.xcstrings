@@ -165,6 +165,17 @@
         }
       }
     },
+    "%@ also does %@. Both will happen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@은(는) macOS의 %@에도 쓰여요. 둘 다 실행돼요."
+          }
+        }
+      }
+    },
     "%@ can be cleaned up": {
       "extractionState": "manual",
       "localizations": {
@@ -370,6 +381,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ — macOS가 자리를 고정해 둔 아이콘"
+          }
+        }
+      }
+    },
+    "%@ — nothing set for it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 아직 정해진 동작이 없어요"
           }
         }
       }
@@ -1571,6 +1593,17 @@
         }
       }
     },
+    "A combo with ⌃, ⌥ or ⌘ (or an F-key), or double-tap a modifier like ⌘⌘. esc cancels.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃, ⌥, ⌘가 들어간 조합(또는 F 키)이나 ⌘⌘처럼 보조 키 두 번 누르기를 쓸 수 있어요. esc로 취소해요."
+          }
+        }
+      }
+    },
     "A copy of the encrypted vault. Opening it needs your Emergency Kit.": {
       "extractionState": "manual",
       "localizations": {
@@ -1776,6 +1809,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "노크할 때마다 무엇을 실행했는지 잠깐 보여줘요."
+          }
+        }
+      }
+    },
+    "A short note each time a gesture runs something.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제스처로 무언가 실행할 때마다 잠깐 알려줘요."
           }
         }
       }
@@ -2163,6 +2207,17 @@
         }
       }
     },
+    "Add a mouse button": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마우스 버튼 추가"
+          }
+        }
+      }
+    },
     "Add a number": {
       "extractionState": "manual",
       "localizations": {
@@ -2181,6 +2236,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "최근 캡처 붙이기"
+          }
+        }
+      }
+    },
+    "Add a trackpad gesture": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드 제스처 추가"
           }
         }
       }
@@ -2214,6 +2280,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "앱 추가…"
+          }
+        }
+      }
+    },
+    "Add keys": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키 추가"
           }
         }
       }
@@ -2606,6 +2683,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "전체 소리"
+          }
+        }
+      }
+    },
+    "All apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 앱"
           }
         }
       }
@@ -3273,6 +3361,17 @@
         }
       }
     },
+    "App not found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱을 찾을 수 없어요"
+          }
+        }
+      }
+    },
     "AppCleaner": {
       "extractionState": "manual"
     },
@@ -3478,6 +3577,28 @@
     },
     "AppleSMC": {
       "extractionState": "manual"
+    },
+    "AppleScript": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AppleScript"
+          }
+        }
+      }
+    },
+    "AppleScript…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AppleScript…"
+          }
+        }
+      }
     },
     "AppleShowAllFiles": {
       "extractionState": "manual"
@@ -4334,6 +4455,9 @@
     "BetterSnapTool": {
       "extractionState": "manual"
     },
+    "BetterTouchTool": {
+      "extractionState": "manual"
+    },
     "BetterZip 5": {
       "extractionState": "manual"
     },
@@ -4653,6 +4777,17 @@
         }
       }
     },
+    "Browser & tabs": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "브라우저와 탭"
+          }
+        }
+      }
+    },
     "Browser AutoFill menu": {
       "extractionState": "manual",
       "localizations": {
@@ -4740,6 +4875,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "버튼"
+          }
+        }
+      }
+    },
+    "Button %ld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld번 버튼"
           }
         }
       }
@@ -5906,6 +6052,17 @@
         }
       }
     },
+    "Choose App…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 선택…"
+          }
+        }
+      }
+    },
     "Choose File…": {
       "extractionState": "manual",
       "localizations": {
@@ -6475,6 +6632,17 @@
         }
       }
     },
+    "Click to record": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눌러서 기록"
+          }
+        }
+      }
+    },
     "Click to trim · right-click for more": {
       "extractionState": "manual",
       "localizations": {
@@ -6598,6 +6766,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "닫기 (Esc)"
+          }
+        }
+      }
+    },
+    "Close Tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "탭 닫기"
           }
         }
       }
@@ -9007,6 +9186,28 @@
     "Divvy": {
       "extractionState": "manual"
     },
+    "Do the gesture now": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 제스처를 해 보세요"
+          }
+        }
+      }
+    },
+    "Do the gesture on the trackpad…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드에서 제스처를 해 보세요…"
+          }
+        }
+      }
+    },
     "Dock": {
       "extractionState": "manual"
     },
@@ -9072,6 +9273,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "점"
+          }
+        }
+      }
+    },
+    "Double %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 두 번"
           }
         }
       }
@@ -11139,6 +11351,17 @@
         }
       }
     },
+    "Five-finger tap": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다섯 손가락 탭"
+          }
+        }
+      }
+    },
     "Fixed": {
       "extractionState": "manual",
       "localizations": {
@@ -11525,6 +11748,61 @@
         }
       }
     },
+    "Four-finger swipe down": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네 손가락 아래로 쓸기"
+          }
+        }
+      }
+    },
+    "Four-finger swipe left": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네 손가락 왼쪽으로 쓸기"
+          }
+        }
+      }
+    },
+    "Four-finger swipe right": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네 손가락 오른쪽으로 쓸기"
+          }
+        }
+      }
+    },
+    "Four-finger swipe up": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네 손가락 위로 쓸기"
+          }
+        }
+      }
+    },
+    "Four-finger tap": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네 손가락 탭"
+          }
+        }
+      }
+    },
     "Frame rate": {
       "extractionState": "manual",
       "localizations": {
@@ -11872,6 +12150,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "생성기"
+          }
+        }
+      }
+    },
+    "Gestures": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제스처"
           }
         }
       }
@@ -14004,6 +14293,28 @@
         }
       }
     },
+    "Keyboard Shortcut": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키보드 단축키"
+          }
+        }
+      }
+    },
+    "Keyboard Shortcut…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키보드 단축키…"
+          }
+        }
+      }
+    },
     "Keyboard first": {
       "extractionState": "manual",
       "localizations": {
@@ -15359,6 +15670,17 @@
         }
       }
     },
+    "Look up & data detectors": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "찾아보기 및 데이터 탐지기"
+          }
+        }
+      }
+    },
     "Looking for files %@ left behind…": {
       "extractionState": "manual",
       "localizations": {
@@ -15518,6 +15840,9 @@
           }
         }
       }
+    },
+    "Mac Mouse Fix": {
+      "extractionState": "manual"
     },
     "Mac and screen both stay awake. For talks, videos, reading.": {
       "extractionState": "manual",
@@ -16081,6 +16406,17 @@
         }
       }
     },
+    "Middle Click": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가운데 클릭"
+          }
+        }
+      }
+    },
     "Middle button": {
       "extractionState": "manual",
       "localizations": {
@@ -16091,6 +16427,9 @@
           }
         }
       }
+    },
+    "MiddleClick": {
+      "extractionState": "manual"
     },
     "Mine": {
       "extractionState": "manual",
@@ -16143,6 +16482,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mission Control"
+          }
+        }
+      }
+    },
+    "Mission Control and App Exposé": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mission Control과 앱 Exposé"
           }
         }
       }
@@ -16304,6 +16654,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "마우스 버튼"
+          }
+        }
+      }
+    },
+    "Mouse buttons": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마우스 버튼"
+          }
+        }
+      }
+    },
+    "Mouse buttons and keys need Accessibility": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마우스 버튼과 키는 손쉬운 사용 권한이 필요해요"
           }
         }
       }
@@ -17040,6 +17412,17 @@
         }
       }
     },
+    "New Tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "새 탭"
+          }
+        }
+      }
+    },
     "New York": {
       "extractionState": "manual"
     },
@@ -17094,6 +17477,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "다음 곡"
+          }
+        }
+      }
+    },
+    "Next Tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 탭"
           }
         }
       }
@@ -17383,6 +17777,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면에 설정용 QR 코드가 없어요. 사이트의 2단계 인증 설정 페이지를 연 다음 다시 해 보세요."
+          }
+        }
+      }
+    },
+    "No shortcuts found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "단축어가 없어요"
           }
         }
       }
@@ -18441,6 +18846,17 @@
         }
       }
     },
+    "Only in": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 앱에서만"
+          }
+        }
+      }
+    },
     "Only one display is connected": {
       "extractionState": "manual",
       "localizations": {
@@ -18514,6 +18930,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "앱 열기"
+          }
+        }
+      }
+    },
+    "Open App…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 열기…"
           }
         }
       }
@@ -18624,6 +19051,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "링크 열기"
+          }
+        }
+      }
+    },
+    "Open Link or File": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "링크나 파일 열기"
+          }
+        }
+      }
+    },
+    "Open Link or File…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "링크나 파일 열기…"
           }
         }
       }
@@ -20427,6 +20876,17 @@
         }
       }
     },
+    "Pick what it does": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "할 일을 골라 주세요"
+          }
+        }
+      }
+    },
     "Pick where your passwords are now. Orbit reads them on this Mac — nothing is uploaded.": {
       "extractionState": "manual",
       "localizations": {
@@ -20860,6 +21320,17 @@
         }
       }
     },
+    "Press %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 누르기"
+          }
+        }
+      }
+    },
     "Press %@ to grab part of the screen.": {
       "extractionState": "manual",
       "localizations": {
@@ -20893,6 +21364,17 @@
         }
       }
     },
+    "Press a mouse button…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마우스 버튼을 눌러 보세요…"
+          }
+        }
+      }
+    },
     "Press keys…": {
       "extractionState": "manual",
       "localizations": {
@@ -20922,6 +21404,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "키를 누르세요 · esc 취소 · ⌫ 지우기"
+          }
+        }
+      }
+    },
+    "Press the keys…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키를 눌러 보세요…"
           }
         }
       }
@@ -21032,6 +21525,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이전 곡"
+          }
+        }
+      }
+    },
+    "Previous Tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 탭"
           }
         }
       }
@@ -21202,6 +21706,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "스니펫 안 어디에나 넣을 수 있어요."
+          }
+        }
+      }
+    },
+    "Put three fingers on the trackpad to try it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드에 세 손가락을 올려 보세요"
           }
         }
       }
@@ -21649,6 +22164,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "글자 인식해서 복사"
+          }
+        }
+      }
+    },
+    "Recommended set": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "추천 세트"
           }
         }
       }
@@ -22124,6 +22650,17 @@
     "Renderer Utilization %": {
       "extractionState": "manual"
     },
+    "Reopen Closed Tab": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫은 탭 다시 열기"
+          }
+        }
+      }
+    },
     "Repeat": {
       "extractionState": "manual",
       "localizations": {
@@ -22581,6 +23118,28 @@
         }
       }
     },
+    "Rules for one app win over rules for every app. Mouse buttons and keys are only taken from the app when a rule uses them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "특정 앱 규칙이 모든 앱 규칙보다 먼저예요. 마우스 버튼과 키는 규칙에 쓰일 때만 앱 대신 Orbit이 받아요."
+          }
+        }
+      }
+    },
+    "Run AppleScript": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AppleScript 실행"
+          }
+        }
+      }
+    },
     "Run Command": {
       "extractionState": "manual",
       "localizations": {
@@ -22603,6 +23162,28 @@
         }
       }
     },
+    "Run Shell Script": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셸 스크립트 실행"
+          }
+        }
+      }
+    },
+    "Run Shortcut": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "단축어 실행"
+          }
+        }
+      }
+    },
     "Run from the battery while plugged in, down to %ld%%. Orbit must stay open.": {
       "extractionState": "manual",
       "localizations": {
@@ -22621,6 +23202,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "바로 실행"
+          }
+        }
+      }
+    },
+    "Run “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” 실행"
           }
         }
       }
@@ -22683,6 +23275,17 @@
         }
       }
     },
+    "Runs in the background. macOS may ask once to let Orbit control the app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "뒤에서 실행해요. 처음 한 번은 macOS가 Orbit이 앱을 제어해도 되는지 물어볼 수 있어요."
+          }
+        }
+      }
+    },
     "Runs to the left instead of the right.": {
       "extractionState": "manual",
       "localizations": {
@@ -22712,6 +23315,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "속도 기준"
+          }
+        }
+      }
+    },
+    "Runs with zsh in the background. Its output isn’t shown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "zsh로 뒤에서 실행해요. 출력은 보여주지 않아요."
           }
         }
       }
@@ -24261,6 +24875,28 @@
         }
       }
     },
+    "Shell Script": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셸 스크립트"
+          }
+        }
+      }
+    },
+    "Shell Script…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "셸 스크립트…"
+          }
+        }
+      }
+    },
     "Shortcut": {
       "extractionState": "manual",
       "localizations": {
@@ -25725,6 +26361,9 @@
         }
       }
     },
+    "SteerMouse": {
+      "extractionState": "manual"
+    },
     "Stop": {
       "extractionState": "manual",
       "localizations": {
@@ -26006,6 +26645,17 @@
         }
       }
     },
+    "Swipe between full-screen apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전체 화면 앱 간 쓸기"
+          }
+        }
+      }
+    },
     "Swipe down to open": {
       "extractionState": "manual",
       "localizations": {
@@ -26283,6 +26933,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "다이얼을 누르면 깨어 있어요. 아래에서 세션을 골라도 돼요."
+          }
+        }
+      }
+    },
+    "Taps with three to five fingers, swipes with three or four, or TipTap: rest one finger and tap beside it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세~다섯 손가락 탭, 세·네 손가락 스와이프, 또는 팁탭(한 손가락을 올려 둔 채 옆을 톡)을 쓸 수 있어요."
           }
         }
       }
@@ -26819,6 +27480,39 @@
         }
       }
     },
+    "The fourth button and up, alone or with ⌃⌥⇧⌘. The middle button opens the Ring.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네 번째 버튼부터, 단독으로 또는 ⌃⌥⇧⌘와 함께 쓸 수 있어요. 가운데 버튼은 링을 열어요."
+          }
+        }
+      }
+    },
+    "The gesture’s script failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제스처 스크립트가 실패했어요"
+          }
+        }
+      }
+    },
+    "The keys are sent to the app in front, as if you pressed them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직접 누른 것처럼 맨 앞 앱에 키를 보내요."
+          }
+        }
+      }
+    },
     "The last five things you copied. Click one to paste it.": {
       "extractionState": "manual",
       "localizations": {
@@ -27312,6 +28006,17 @@
         }
       }
     },
+    "This Mac’s trackpad can’t be read, so only mouse buttons and keys work.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac의 트랙패드를 읽을 수 없어서 마우스 버튼과 키만 쓸 수 있어요."
+          }
+        }
+      }
+    },
     "This app.": {
       "extractionState": "manual",
       "localizations": {
@@ -27466,6 +28171,72 @@
         }
       }
     },
+    "Three-finger drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 손가락 드래그"
+          }
+        }
+      }
+    },
+    "Three-finger swipe down": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 손가락 아래로 쓸기"
+          }
+        }
+      }
+    },
+    "Three-finger swipe left": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 손가락 왼쪽으로 쓸기"
+          }
+        }
+      }
+    },
+    "Three-finger swipe right": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 손가락 오른쪽으로 쓸기"
+          }
+        }
+      }
+    },
+    "Three-finger swipe up": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 손가락 위로 쓸기"
+          }
+        }
+      }
+    },
+    "Three-finger tap": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 손가락 탭"
+          }
+        }
+      }
+    },
     "Through 1Password’s command-line tool. 1Password asks you to allow it.": {
       "extractionState": "manual",
       "localizations": {
@@ -27614,6 +28385,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "팁: 키워드를 ; 나 ! 로 시작하면 평소 쓰는 단어가 바뀌는 일이 없어요."
+          }
+        }
+      }
+    },
+    "TipTap for tabs, a three-finger tap for middle click, side buttons for back and forward, and more — added switched off.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "팁탭으로 탭 넘기기, 세 손가락 탭으로 가운데 클릭, 옆 버튼으로 뒤로·앞으로 등을 꺼진 채로 추가해요."
+          }
+        }
+      }
+    },
+    "TipTap left": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왼쪽 팁탭"
+          }
+        }
+      }
+    },
+    "TipTap right": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오른쪽 팁탭"
           }
         }
       }
@@ -27907,6 +28711,68 @@
           }
         }
       }
+    },
+    "Trackpad Settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드 설정…"
+          }
+        }
+      }
+    },
+    "Trackpad gestures": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드 제스처"
+          }
+        }
+      }
+    },
+    "Trackpad gestures work without it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드 제스처는 권한 없이도 돼요."
+          }
+        }
+      }
+    },
+    "Trackpad gestures, mouse buttons and keys that run anything — in every app or only the ones you pick.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드 제스처, 마우스 버튼, 키로 무엇이든 실행해요. 모든 앱에서, 또는 고른 앱에서만요."
+          }
+        }
+      }
+    },
+    "TrackpadFourFingerHorizSwipeGesture": {
+      "extractionState": "manual"
+    },
+    "TrackpadFourFingerVertSwipeGesture": {
+      "extractionState": "manual"
+    },
+    "TrackpadThreeFingerDrag": {
+      "extractionState": "manual"
+    },
+    "TrackpadThreeFingerHorizSwipeGesture": {
+      "extractionState": "manual"
+    },
+    "TrackpadThreeFingerTapGesture": {
+      "extractionState": "manual"
+    },
+    "TrackpadThreeFingerVertSwipeGesture": {
+      "extractionState": "manual"
     },
     "Traditional Chinese (Big5)": {
       "extractionState": "manual",
@@ -30920,6 +31786,17 @@
         }
       }
     },
+    "Your own": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직접 설정"
+          }
+        }
+      }
+    },
     "Your own layout, saved as you edit": {
       "extractionState": "manual",
       "localizations": {
@@ -31220,6 +32097,9 @@
       "extractionState": "manual"
     },
     "archives.zipEncryption": {
+      "extractionState": "manual"
+    },
+    "art.ginzburg.MiddleClick": {
       "extractionState": "manual"
     },
     "at.EternalStorms.Yoink": {
@@ -31636,6 +32516,9 @@
       "extractionState": "manual"
     },
     "gb gigabyte gigabytes 기가": {
+      "extractionState": "manual"
+    },
+    "gestures.showWhatRan": {
       "extractionState": "manual"
     },
     "global: Orbit's own audio process isn't known yet; not tapping": {
@@ -32095,6 +32978,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS는 모든 기기에 같은 방향을 써요. Orbit에서는 마우스와 트랙패드를 따로 정할 수 있어요."
+          }
+        }
+      }
+    },
+    "macOS uses some of these gestures too": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS도 이 제스처 중 일부를 써요"
           }
         }
       }
@@ -32856,6 +33750,17 @@
     },
     "turn on": {
       "extractionState": "manual"
+    },
+    "twice": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "두 번"
+          }
+        }
+      }
     },
     "type:": {
       "extractionState": "manual"

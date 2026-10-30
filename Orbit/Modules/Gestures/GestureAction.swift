@@ -238,9 +238,19 @@ enum GestureAction: Codable, Hashable, Sendable {
     }
 }
 
-/// The user's shortcuts from the Shortcuts app, by name, for the action menu.
+/// The user's shortcuts from the Shortcuts app, by name, for the action menu. Asked once a minute at
+/// most: every rule's menu wants the list.
 enum ShortcutsLibrary {
-    static func names() async -> [String] {
+    @MainActor private static var cache: (names: [String], at: Date)?
+
+    @MainActor static func names() async -> [String] {
+        if let cache, Date().timeIntervalSince(cache.at) < 60 { return cache.names }
+        let names = await load()
+        cache = (names, Date())
+        return names
+    }
+
+    private static func load() async -> [String] {
         await withCheckedContinuation { done in
             DispatchQueue.global(qos: .userInitiated).async {
                 let p = Process()
