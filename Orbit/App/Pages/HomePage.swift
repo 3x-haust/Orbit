@@ -271,6 +271,7 @@ private struct CaptureThumb: View {
                     .resizable().aspectRatio(contentMode: .fill)
                     .frame(width: 150, height: 96)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous)) // clicks only where it shows
                     .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .strokeBorder(hovering ? Palette.accent : Palette.hairline, lineWidth: hovering ? 2 : 1))
                 Text(capture.date.orbitRelative).font(.system(size: 10)).foregroundStyle(Palette.inkSecondary)
