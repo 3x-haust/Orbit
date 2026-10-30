@@ -25,6 +25,8 @@ final class NowPlayingWidgetController {
     private var panel: NSPanel?
     private var cardSize = CGSize(width: 320, height: 120)
     private var dragStart: (mouse: NSPoint, origin: NSPoint)?
+    /// The Orbit window the widget has stepped behind.
+    private var yieldingTo: Int?
     private var pauseWork: DispatchWorkItem?
     private var observers: [Any] = []
 
@@ -100,15 +102,26 @@ final class NowPlayingWidgetController {
             MainActor.assumeIsolated { self?.place(animated: false) }
         })
         // A floating widget would sit on top of Orbit's own window and swallow its clicks (the page's
-        // switches are right under it in the top-right corner). While an Orbit window is in front,
-        // the widget steps behind it; it floats again once that window loses focus.
-        for name in [NSWindow.didBecomeKeyNotification, NSWindow.didResignKeyNotification] {
+        // switches are right under it in the top-right corner). Whenever an Orbit window shows where
+        // the widget is, the widget steps behind it, and floats again once it's closed or moved away.
+        let names = [NSWindow.didBecomeKeyNotification, NSWindow.didResignKeyNotification, NSWindow.didChangeOcclusionStateNotification,
+                     NSWindow.didMoveNotification, NSWindow.didResizeNotification, NSWindow.didMiniaturizeNotification,
+                     NSWindow.didDeminiaturizeNotification, NSWindow.willCloseNotification]
+        for name in names {
             observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.yieldToOrbitWindows() }
+                // Once the change has landed: a closing window is still visible while it's closing.
+                DispatchQueue.main.async { self?.applyLevel() }
+            })
+        }
+        // Stage Manager sets a window aside (or brings it back) as Orbit loses or gains focus, and
+        // tells the window nothing: look again once its animation is done.
+        for name in [NSApplication.didBecomeActiveNotification, NSApplication.didResignActiveNotification] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { self?.applyLevel() }
             })
         }
         watchPlayback()
-        yieldToOrbitWindows()
+        applyLevel() // a settings window may be open already
     }
 
     private func close() {
@@ -117,40 +130,49 @@ final class NowPlayingWidgetController {
         pauseWork?.cancel()
         panel?.orderOut(nil)
         panel = nil
+        yieldingTo = nil
     }
 
-    /// Orbit's own titled window that has focus, if any (not panels, toasts or overlays).
-    private var focusedOrbitWindow: NSWindow? {
-        guard let key = NSApp.keyWindow, key !== panel, key.styleMask.contains(.titled), key.isVisible else { return nil }
-        return key
-    }
-
-    private func yieldToOrbitWindows() {
-        guard let panel, flashWork == nil || state.flashing == false else { return }
-        if state.style.level == .floating, let front = focusedOrbitWindow {
-            panel.level = .normal
-            panel.order(.below, relativeTo: front.windowNumber)
-        } else {
-            applyLevel()
+    /// Orbit's own titled window (not panels, toasts or overlays) showing where the widget is.
+    /// Focused or not: one just opened from the menu bar, or brought back from another app, isn't
+    /// key until it's clicked, and that first click would land on the widget.
+    private var orbitWindowUnder: NSWindow? {
+        guard let panel, let widget = Self.shownBounds(panel) else { return nil }
+        return NSApp.orderedWindows.first { w in
+            guard w !== panel, w.styleMask.contains(.titled), w.isVisible, !w.isMiniaturized,
+                  w.occlusionState.contains(.visible) else { return false }
+            return Self.shownBounds(w)?.intersects(widget) ?? false
         }
+    }
+
+    /// Where the window server shows a window — not its frame, which stays put while Stage Manager
+    /// shrinks the window into the strip at the side.
+    private static func shownBounds(_ w: NSWindow) -> CGRect? {
+        guard w.windowNumber > 0,
+              let info = (CGWindowListCopyWindowInfo([.optionIncludingWindow], CGWindowID(w.windowNumber)) as? [[String: Any]])?.first,
+              info[kCGWindowIsOnscreen as String] as? Bool == true,
+              let bounds = info[kCGWindowBounds as String] as? NSDictionary else { return nil }
+        return CGRect(dictionaryRepresentation: bounds)
     }
 
     private func applyLevel() {
-        guard let panel else { return }
-        if state.style.level == .floating, let front = focusedOrbitWindow, !state.flashing {
+        guard let panel, !state.dragging else { return }
+        if state.style.level == .floating, !state.flashing, let window = orbitWindowUnder {
+            guard yieldingTo != window.windowNumber || panel.level != .normal else { return }
+            yieldingTo = window.windowNumber
             panel.level = .normal
-            panel.order(.below, relativeTo: front.windowNumber)
+            panel.order(.below, relativeTo: window.windowNumber)
             return
         }
-        switch state.style.level {
-        case .desktop:
-            // Just above the desktop icons: under every window, like a widget on the wallpaper.
-            panel.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
-            panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        case .floating:
-            panel.level = .floating
-            panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+        yieldingTo = nil
+        // Runs on every window change in Orbit: only touches the panel when there's something to change.
+        let (level, behavior): (NSWindow.Level, NSWindow.CollectionBehavior) = switch state.style.level {
+        // Just above the desktop icons: under every window, like a widget on the wallpaper.
+        case .desktop: (NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1), [.canJoinAllSpaces, .stationary, .ignoresCycle])
+        case .floating: (.floating, [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle])
         }
+        if panel.level != level { panel.level = level }
+        if panel.collectionBehavior != behavior { panel.collectionBehavior = behavior }
     }
 
     // MARK: Hide when paused
