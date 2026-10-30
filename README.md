@@ -81,6 +81,7 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 | ☕️ **Keep Awake** | Sessions by time, until a time or while an app runs — even with the lid closed. |
 | ✦ **Menu Bar** | Hides icons for real (no « chevron), brings one back on demand, plus a menu bar calendar. |
 | 🔲 **Hot Corners** | Any action on any corner. |
+| 🖐 **Gestures** | Three- to five-finger taps, three- and four-finger swipes, TipTap, extra mouse buttons and key combos (even ⌘⌘) run anything: Orbit actions, shortcuts, apps, links, Shortcuts or scripts — everywhere or per app. |
 | 🏃 **Runner** | A tiny animated CPU meter in the menu bar. |
 | 🙂 **Face Unlock** | Fill in macOS password prompts with your face. |
 | 🗂 **Shelf** | A drop zone that grows out of the notch or screen edge. |

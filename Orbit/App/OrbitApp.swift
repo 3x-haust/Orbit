@@ -68,6 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         MouseTrigger.shared.start()
         HotCorners.shared.start()
         Knock.shared.start() // only when it's on
+        Gestures.shared.start() // each source only while a rule needs it
         AppsCatalog.shared.start()
         Shelf.shared.startEdgeReveal()
         KeepAwake.shared.recoverIfNeeded()
@@ -275,6 +276,11 @@ enum DebugHook {
         case let c where c.hasPrefix("editor:"):
             if let image = NSImage(contentsOfFile: String(c.dropFirst(7))) { EditorWindow.open(image: image, fileURL: nil) }
         case "apps": AppsPanel.shared.show()
+        case "gestures-selftest":
+            // The trackpad recognizer against made-up touches; results land in gestures.log.
+            let lines = TouchRecognizer.selfTest()
+            lines.forEach { GestureLog.write("selftest \($0)") }
+            GestureLog.write("selftest: \(lines.filter { $0.hasPrefix("FAIL") }.count) of \(lines.count) failed")
         case "playpause": NowPlaying.shared.togglePlayPause(heard: true)
         case "bench-apps":
             // Opens the Apps grid five times and logs how its first two seconds play: main-thread

@@ -632,7 +632,13 @@
     "다음 맞춤법 검사기": "spell",
     "Knock": "knock",
     "tapcut": "knock",
-    "SlapMac": "knock"
+    "SlapMac": "knock",
+    "BetterTouchTool": "gestures",
+    "BTT": "gestures",
+    "MiddleClick": "gestures",
+    "Mac Mouse Fix": "gestures",
+    "SteerMouse": "gestures",
+    "Jitouch": "gestures"
   },
   "pages": {
     "home": [
@@ -716,6 +722,35 @@
       "gesture",
       "accelerometer",
       "slap"
+    ],
+    "gestures": [
+      "제스처",
+      "트랙패드",
+      "마우스",
+      "버튼",
+      "세 손가락",
+      "네 손가락",
+      "탭",
+      "스와이프",
+      "팁탭",
+      "단축키",
+      "키 조합",
+      "두 번 누르기",
+      "gesture",
+      "gestures",
+      "trackpad",
+      "mouse",
+      "swipe",
+      "tap",
+      "tiptap",
+      "button",
+      "hotkey",
+      "multitouch",
+      "BetterTouchTool",
+      "BTT",
+      "MiddleClick",
+      "middle click",
+      "가운데 클릭"
     ]
   },
   "actions": {

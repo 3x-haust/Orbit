@@ -37,6 +37,11 @@ final class Overlaps {
             .init(bundleID: "com.hegenberg.BetterSnapTool", name: "BetterSnapTool", replacedBy: .windows),
             .init(bundleID: "com.MrKai77.Loop", name: "Loop", replacedBy: .windows),
             .init(bundleID: "co.highlyopinionated.swish", name: "Swish", replacedBy: .windows),
+            // Gestures
+            .init(bundleID: "com.hegenberg.BetterTouchTool", name: "BetterTouchTool", replacedBy: .gestures, clash: "Trackpad gestures".loc),
+            .init(bundleID: "art.ginzburg.MiddleClick", name: "MiddleClick", replacedBy: .gestures, clash: "Three-finger tap".loc),
+            .init(bundleID: "com.nuebling.mac-mouse-fix", name: "Mac Mouse Fix", replacedBy: .gestures, clash: "Mouse buttons".loc),
+            .init(bundleID: "jp.plentycom.app.SteerMouse", name: "SteerMouse", replacedBy: .gestures, clash: "Mouse buttons".loc),
             // Keep awake
             .init(bundleID: "com.if.Amphetamine", name: "Amphetamine", replacedBy: .awake),
             .init(bundleID: "info.marcel-dierkes.KeepingYouAwake", name: "KeepingYouAwake", replacedBy: .awake),

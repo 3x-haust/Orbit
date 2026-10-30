@@ -12,7 +12,8 @@ final class MouseTrigger {
     static var button: Int64 { Pref.defaults.object(forKey: "ring.mouseButton") as? Int64 ?? 2 }
 
     private static let holdDelay: TimeInterval = 0.18
-    private nonisolated static let replayMarker: Int64 = 0x0B17
+    /// Marks clicks Orbit sends itself (a replayed quick click, a gesture's middle click), so this tap lets them through.
+    nonisolated static let replayMarker: Int64 = 0x0B17
 
     /// On its own thread: every middle and side click on the Mac goes through it, and the ones that
     /// aren't the Ring button pass right there without waiting on the main thread.
