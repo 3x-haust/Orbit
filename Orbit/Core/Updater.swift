@@ -474,8 +474,27 @@ private struct UpdatePromptView: View {
     }
 
     static func notes(_ markdown: String) -> AttributedString {
-        (try? AttributedString(markdown: markdown, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
-            ?? AttributedString(markdown)
+        let text = section(markdown)
+        return (try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+            ?? AttributedString(text)
+    }
+
+    /// Release notes are English, `---`, then Korean, then the install table. The card shows only the
+    /// part in Orbit's language (in a card this small the Korean sat below the fold), with headings
+    /// as bold lines, since inline Markdown leaves "### " as it is.
+    static func section(_ markdown: String) -> String {
+        let parts = markdown.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n---\n")
+        let korean = Bundle.main.preferredLocalizations.first == "ko"
+        var text = parts.count > 1 && korean ? parts[1] : parts[0]
+        if let install = text.range(of: "### Install") { text = String(text[..<install.lowerBound]) }
+        return text.components(separatedBy: "\n")
+            .map { line in
+                if line.hasPrefix("#") { return "**" + line.drop { $0 == "#" }.trimmingCharacters(in: .whitespaces) + "**" }
+                if line.hasPrefix("- ") { return "• " + line.dropFirst(2) }
+                return line
+            }
+            .joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
