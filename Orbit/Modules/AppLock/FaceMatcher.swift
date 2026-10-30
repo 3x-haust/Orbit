@@ -46,7 +46,7 @@ final class FaceMatcher {
     /// False when there's no face to compare against or the camera won't start.
     func start(timeout seconds: TimeInterval) -> Bool {
         enrolled = FaceStore.load()
-        guard !enrolled.isEmpty else { AppLockLog.write("scan: no enrolled face could be read"); return false }
+        guard !enrolled.isEmpty else { AppLockLog.write("scan: no enrolled face could be read (\(FaceStore.diagnose()))"); return false }
         guard FaceScanner.authorized else { AppLockLog.write("scan: camera not authorized"); return false }
         let strictness = FaceStore.Strictness(rawValue: Pref.defaults.string(forKey: Pref.appLockStrictness) ?? "") ?? .normal
         threshold = FaceStore.threshold(for: enrolled, strictness: strictness)

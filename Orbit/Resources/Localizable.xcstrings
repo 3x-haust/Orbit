@@ -28964,6 +28964,17 @@
         }
       }
     },
+    "Unlocking…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잠금 해제하는 중…"
+          }
+        }
+      }
+    },
     "Unmute": {
       "extractionState": "manual",
       "localizations": {
@@ -29387,6 +29398,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "마스터 비밀번호를 입력하세요"
+          }
+        }
+      }
+    },
+    "Use your face in place of your password": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "암호 대신 얼굴 쓰기"
+          }
+        }
+      }
+    },
+    "Use your password": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "암호로 열어 주세요"
           }
         }
       }

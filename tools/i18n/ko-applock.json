@@ -116,5 +116,8 @@
   "Face Unlock": "얼굴로 잠금 해제",
   "Your face instead of your password — at the lock screen, and whenever macOS asks for Touch ID or your password.": "암호 대신 얼굴로 풀어요. 잠금 화면에서도, macOS가 Touch ID나 암호를 물을 때도요.",
   "Face check": "얼굴 확인",
-  "If your face isn’t recognized, look once more before giving up.": "얼굴을 못 알아보면 한 번 더 확인해요."
+  "If your face isn’t recognized, look once more before giving up.": "얼굴을 못 알아보면 한 번 더 확인해요.",
+  "Unlocking…": "잠금 해제하는 중…",
+  "Use your password": "암호로 열어 주세요",
+  "Use your face in place of your password": "암호 대신 얼굴 쓰기"
 }

@@ -140,6 +140,7 @@
 		A776CC6903DBD133C0A390FF /* NotchWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CA25962DBF72E7ABE07BC60 /* NotchWindow.swift */; };
 		A7BDF5F6E7AE519BE1706FBD /* CaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7177418BE5818FFC61B9036 /* CaptureService.swift */; };
 		A7DEA5F2616636E6B6D8CB56 /* ArchiveHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741F84BA111D6712DC48CD8B /* ArchiveHUD.swift */; };
+		A94E350836727C5D807E337E /* LockScreenLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225A0D9E4D1D1403878F02F4 /* LockScreenLayer.swift */; };
 		AA93D15473FDBF0CB85ED5DC /* DiskScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0E77B26807492BA157D2C9 /* DiskScanner.swift */; };
 		AB48E84CD06C8B8168E84669 /* Shelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = C506FC8E8986ACC027A64870 /* Shelf.swift */; };
 		AB8F9E8F134DB7B890B24579 /* Cleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383CC35D6AA333437CF1BD4 /* Cleanup.swift */; };
@@ -316,6 +317,7 @@
 		1D747643D5A4C654CFCD42BC /* VideoEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoEditor.swift; sourceTree = "<group>"; };
 		1F820A85B704894C5D7DF9FE /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
 		20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotCornersPage.swift; sourceTree = "<group>"; };
+		225A0D9E4D1D1403878F02F4 /* LockScreenLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenLayer.swift; sourceTree = "<group>"; };
 		228EE6A65671BC430F63BB2B /* ReleaseNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseNotes.swift; sourceTree = "<group>"; };
 		24317635CFAD20822BC74B32 /* SnippetCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetCore.swift; sourceTree = "<group>"; };
 		250F55936A172DB6E457AA78 /* SnippetsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsPage.swift; sourceTree = "<group>"; };
@@ -793,6 +795,7 @@
 				C806453631EADA7FBF1D47F9 /* FaceScanner.swift */,
 				F99A4EC59D644F89EEACFBAF /* FaceStore.swift */,
 				BE4AA143231EE285383B831E /* FaceUnlock.swift */,
+				225A0D9E4D1D1403878F02F4 /* LockScreenLayer.swift */,
 				F19A41EACE2BCA1A699529FD /* MacUnlock.swift */,
 				4D420498634E50180A130C12 /* NotchHUD.swift */,
 			);
@@ -1357,6 +1360,7 @@
 				17214F3661DACA4A26423334 /* LibArchive.swift in Sources */,
 				0360E90B5892844BB8E2498A /* LiveTextOverlay.swift in Sources */,
 				0ECBC37B07B4B810F93EBA90 /* Localization.swift in Sources */,
+				A94E350836727C5D807E337E /* LockScreenLayer.swift in Sources */,
 				DE034569BCB6F182127E0829 /* MacUnlock.swift in Sources */,
 				1EECBFDB68EF2243B9E29013 /* MainWindow.swift in Sources */,
 				5D681DA819F536204D0501F1 /* MediaDucker.swift in Sources */,

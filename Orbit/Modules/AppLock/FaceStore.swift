@@ -18,19 +18,27 @@ enum FaceStore {
 
     static var isEnrolled: Bool { FileManager.default.fileExists(atPath: file.path) }
 
+    /// The last face read, kept for the lock screen: the file is sealed with complete protection, so
+    /// while the Mac is locked it may not open, and the lock screen is exactly when it's needed.
+    nonisolated(unsafe) private static var cached: [VNFeaturePrintObservation] = []
+
     static func save(_ prints: [VNFeaturePrintObservation]) throws {
         let data = try NSKeyedArchiver.archivedData(withRootObject: prints as NSArray, requiringSecureCoding: true)
         let sealed = try AES.GCM.seal(data, using: try key(create: true))
         guard let combined = sealed.combined else { throw CocoaError(.fileWriteUnknown) }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try combined.write(to: file, options: [.atomic, .completeFileProtection])
+        cached = prints
     }
 
     static func load() -> [VNFeaturePrintObservation] {
+        guard isEnrolled else { cached = []; return [] }
         guard let combined = try? Data(contentsOf: file), let key = try? key(create: false),
               let box = try? AES.GCM.SealedBox(combined: combined),
-              let data = try? AES.GCM.open(box, using: key) else { return [] }
-        return unarchive(data) ?? []
+              let data = try? AES.GCM.open(box, using: key),
+              let prints = unarchive(data), !prints.isEmpty else { return cached }
+        cached = prints
+        return prints
     }
 
     /// A feature print archives its time range as nested dictionaries, which macOS 27's secure
@@ -65,6 +73,7 @@ enum FaceStore {
 
     /// Removes the face and its key.
     static func delete() {
+        cached = []
         try? FileManager.default.removeItem(at: file)
         SecItemDelete([kSecClass: kSecClassGenericPassword, kSecAttrService: service, kSecAttrAccount: account] as CFDictionary)
     }
