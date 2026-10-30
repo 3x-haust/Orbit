@@ -67,6 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AppIndex.shared.start()
         MouseTrigger.shared.start()
         HotCorners.shared.start()
+        Knock.shared.start() // only when it's on
         AppsCatalog.shared.start()
         Shelf.shared.startEdgeReveal()
         KeepAwake.shared.recoverIfNeeded()

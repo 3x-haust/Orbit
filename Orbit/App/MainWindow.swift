@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum Page: String, CaseIterable, Identifiable {
-    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, apps, system, overlaps, shortcuts, setup, general
+    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, knock, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, apps, system, overlaps, shortcuts, setup, general
     var id: String { rawValue }
 
     var title: String { englishTitle.loc }
@@ -27,6 +27,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .input: "Korean Input"
         case .menubar: "Menu Bar"
         case .corners: "Hot Corners"
+        case .knock: "Knock"
         case .runner: "Runner"
         case .applock: "Face Unlock"
         case .sound: "Sound"
@@ -60,6 +61,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .input: "keyboard.badge.ellipsis"
         case .menubar: "menubar.rectangle"
         case .corners: "cursorarrow.motionlines"
+        case .knock: "hand.tap"
         case .runner: "hare"
         case .applock: "faceid"
         case .sound: "speaker.wave.2"
@@ -77,7 +79,7 @@ enum Page: String, CaseIterable, Identifiable {
     static let sections: [(title: String?, pages: [Page])] = [
         (nil, [.home, .ring]),
         ("Essentials", [.capture, .clipboard, .windows, .translate, .spell, .snippets, .passwords]),
-        ("Utilities", [.sound, .nowPlaying, .notch, .input, .awake, .menubar, .corners, .runner, .applock]),
+        ("Utilities", [.sound, .nowPlaying, .notch, .input, .awake, .menubar, .corners, .knock, .runner, .applock]),
         ("Mac", [.apps, .system, .displays, .battery, .storage, .archives]),
         ("Settings", [.overlaps, .shortcuts, .setup, .general]),
     ]
@@ -252,6 +254,7 @@ struct MainView: View {
         case .input: InputPage()
         case .menubar: MenuBarPage()
         case .corners: HotCornersPage()
+        case .knock: KnockPage()
         case .runner: RunnerPage()
         case .applock: AppLockPage()
         case .sound: SoundPage()

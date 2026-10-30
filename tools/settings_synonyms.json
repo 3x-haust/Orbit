@@ -629,7 +629,10 @@
     "그래머리": "spell",
     "랭귀지툴": "spell",
     "네이버 맞춤법 검사기": "spell",
-    "다음 맞춤법 검사기": "spell"
+    "다음 맞춤법 검사기": "spell",
+    "Knock": "knock",
+    "tapcut": "knock",
+    "SlapMac": "knock"
   },
   "pages": {
     "home": [
@@ -699,6 +702,20 @@
       "naver",
       "한스펠",
       "hanspell"
+    ],
+    "knock": [
+      "노크",
+      "똑똑",
+      "두드리기",
+      "두드려서",
+      "탭",
+      "제스처",
+      "가속도계",
+      "knock",
+      "tap",
+      "gesture",
+      "accelerometer",
+      "slap"
     ]
   },
   "actions": {
