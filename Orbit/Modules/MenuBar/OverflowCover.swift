@@ -410,9 +410,15 @@ final class OverflowCover {
         // Measured: MenuBarAgent posts AXLayoutChanged / AXMoved / AXUIElementDestroyed within a few
         // ms of its slots moving (AXValueChanged fires every second for the clock, so it's left out).
         // They come in floods of ten; one look per run-loop turn is enough.
-        let callback: AXObserverCallback = { _, _, name, _ in
+        let callback: AXObserverCallback = { _, element, name, _ in
             let notification = name as String
-            MainActor.assumeIsolated { OverflowCover.shared.barNotified(notification) }
+            // The observer also hears other apps' windows changing; only the bar's own count.
+            var pid: pid_t = 0
+            AXUIElementGetPid(element, &pid)
+            MainActor.assumeIsolated {
+                guard pid == OverflowCover.shared.agentPID else { return }
+                OverflowCover.shared.barNotified(notification)
+            }
         }
         guard AXObserverCreate(agent.processIdentifier, callback, &observer) == .success, let observer else { return }
         let root = AXUIElementCreateApplication(agent.processIdentifier)
