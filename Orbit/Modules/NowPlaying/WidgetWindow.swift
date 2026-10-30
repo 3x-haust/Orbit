@@ -25,6 +25,8 @@ final class NowPlayingWidgetController {
     private var panel: NSPanel?
     private var cardSize = CGSize(width: 320, height: 120)
     private var dragStart: (mouse: NSPoint, origin: NSPoint)?
+    /// A frame animation is under way: a plain `setFrame` now would be undone when it lands.
+    private var placing = 0
     /// The Orbit window the widget has stepped behind.
     private var yieldingTo: Int?
     private var pauseWork: DispatchWorkItem?
@@ -210,7 +212,9 @@ final class NowPlayingWidgetController {
     func contentSized(_ size: CGSize) {
         guard size.width > 1, size.height > 1, size != cardSize else { return }
         cardSize = size
-        if !state.dragging { place(animated: false) }
+        // A new look moves the window (with the old size) before the card has grown: aim the move at
+        // the new size instead, or it lands on the old frame and cuts the card off.
+        if !state.dragging { place(animated: placing > 0) }
     }
 
     var screen: NSScreen {
@@ -242,10 +246,18 @@ final class NowPlayingWidgetController {
         let card = Self.cardFrame(style: state.style, size: cardSize, in: vf)
         let frame = card.insetBy(dx: -Self.margin, dy: -Self.margin)
         if animated {
+            placing += 1
             NSAnimationContext.runAnimationGroup { ctx in
                 ctx.duration = 0.28
                 ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1)
                 panel.animator().setFrame(frame, display: true)
+            } completionHandler: { [weak self] in
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    self.placing -= 1
+                    // Whatever changed while it ran, end on the frame for the card as it is now.
+                    if self.placing == 0, !self.state.dragging { self.place(animated: false) }
+                }
             }
         } else {
             panel.setFrame(frame, display: true)
@@ -303,6 +315,49 @@ final class NowPlayingWidgetController {
         style.dy = dy.rounded()
     }
 }
+
+#if DEBUG
+extension NowPlayingWidgetController {
+    /// Applies every built-in theme the way its card does, a beat apart, and logs whether the window
+    /// ended up fitting the card and how long the main thread stalled along the way.
+    func debugCycleThemes() {
+        let saved = state.style
+        NowPlaying.shared.debugPlaceholder(title: "Night Drive", artist: "Orbit", duration: 214, elapsed: 62, artwork: WidgetContent.sampleArtwork)
+        let themes = WidgetTheme.builtIns
+        var worst: TimeInterval = 0
+        var last = ProcessInfo.processInfo.systemUptime
+        let tick = Timer(timeInterval: 0.005, repeats: true) { _ in
+            let now = ProcessInfo.processInfo.systemUptime
+            worst = max(worst, now - last)
+            last = now
+        }
+        RunLoop.main.add(tick, forMode: .common)
+        func step(_ i: Int) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [self] in
+                MainActor.assumeIsolated {
+                    if i > 0, let panel {
+                        let window = panel.frame.insetBy(dx: Self.margin, dy: Self.margin).size
+                        NowPlayingLog.write(String(format: "themes: %@ card %.0fx%.0f window %.0fx%.0f %@, worst stall %.0f ms",
+                                                   themes[i - 1].name, cardSize.width, cardSize.height, window.width, window.height,
+                                                   window == cardSize ? "fits" : "CLIPPED", worst * 1000))
+                    }
+                    worst = 0
+                    guard i < themes.count else {
+                        tick.invalidate()
+                        setStyle(saved, animated: true)
+                        NowPlaying.shared.debugPlaceholder(title: nil, artist: "", duration: 0, elapsed: 0, artwork: nil)
+                        return
+                    }
+                    last = ProcessInfo.processInfo.systemUptime
+                    setStyle(state.style.applyingLook(of: themes[i].style), animated: true)
+                    step(i + 1)
+                }
+            }
+        }
+        step(0)
+    }
+}
+#endif
 
 private extension CGRect {
     var area: CGFloat { isNull ? 0 : width * height }

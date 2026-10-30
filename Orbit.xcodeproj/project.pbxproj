@@ -63,6 +63,7 @@
 		3BA0C2A22DF36A3C1103A84E /* Displays.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBED0748D5847D2CBA915786 /* Displays.swift */; };
 		3C4390FCC5C346A8A2BB7F75 /* Overlaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD22A0C1E101763444473F2 /* Overlaps.swift */; };
 		3D52B645D68AD7559473A348 /* Shortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69EB112FB65E54BDA33FFAF0 /* Shortcuts.swift */; };
+		3FDECB6460AF989D87390705 /* CoverLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00B898DFB02B6BE238660012 /* CoverLookup.swift */; };
 		40E338DE25BEE646FD831DA0 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0724EB424E42353EE4B350 /* Toast.swift */; };
 		438C44ED2881BB8CF98D972D /* SnippetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CC51735505AD151CDC53452 /* SnippetStore.swift */; };
 		43B345C1F8978F38E4AC5612 /* AppLockPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116169D0D818C768B42D635D /* AppLockPage.swift */; };
@@ -297,6 +298,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		00B898DFB02B6BE238660012 /* CoverLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverLookup.swift; sourceTree = "<group>"; };
 		0298EB6B0E9F6C4EDEE0E364 /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
 		02BE31C0B5DE9D3E9D178B18 /* PermissionPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPrompt.swift; sourceTree = "<group>"; };
 		0489E383085140B8C153BB99 /* AuthPromptUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthPromptUnlock.swift; sourceTree = "<group>"; };
@@ -732,6 +734,7 @@
 		5B4F60CC87AFECE632836FC2 /* NowPlaying */ = {
 			isa = PBXGroup;
 			children = (
+				00B898DFB02B6BE238660012 /* CoverLookup.swift */,
 				B340EAEAE200252EAC25373B /* MediaDucker.swift */,
 				ACBC129BC60C7332FBB67A36 /* MediaRemoteBridge.swift */,
 				88ABFBA623F8CB4ACF3993B9 /* NotchPlayerViews.swift */,
@@ -1354,6 +1357,7 @@
 				DC4F6D70B9235F816C538EC3 /* ClipboardStore.swift in Sources */,
 				7D22FE22A7532828B966BB49 /* ClipboardView.swift in Sources */,
 				B2DD31C35449CFAC6F5B9700 /* Components.swift in Sources */,
+				3FDECB6460AF989D87390705 /* CoverLookup.swift in Sources */,
 				3115BA655B5BB4307E795530 /* DDC.swift in Sources */,
 				AA93D15473FDBF0CB85ED5DC /* DiskScanner.swift in Sources */,
 				B9E5D859297C72ADF1C7AC12 /* DisplayOSD.swift in Sources */,

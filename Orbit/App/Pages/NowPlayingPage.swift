@@ -12,7 +12,10 @@ struct NowPlayingPage: View {
     @AppStorage(NowPlayingPrefs.popupPlace) private var popupPlace = TrackPopup.Place.notch.rawValue
     @AppStorage(NowPlayingPrefs.popupOnlyHidden) private var popupOnlyHidden = true
     @AppStorage(NowPlayingPrefs.notch) private var notch = false
+    @AppStorage(NotchPrefs.enabled) private var orbitNotch = true
+    @AppStorage(NotchPrefs.liveMusic) private var notchMusic = true
     @AppStorage(NowPlayingPrefs.directControl) private var direct = false
+    @AppStorage(NowPlayingPrefs.sharperCovers) private var sharperCovers = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
@@ -150,10 +153,16 @@ struct NowPlayingPage: View {
 
             AutoPauseSection()
 
-            SettingsGroup(title: "Notch", footer: NotchPlayer.notchScreen == nil ? "Needs a display with a notch." : nil) {
+            SettingsGroup(title: "Notch", footer: orbitNotch ? nil : NotchPlayer.notchScreen == nil ? "Needs a display with a notch." : nil) {
                 SettingsRow(title: "Live in the notch", subtitle: "The cover and a little equalizer either side of the notch while music plays. Point at it for the controls.", symbol: "rectangle.topthird.inset.filled") {
-                    Toggle("", isOn: feature(NowPlayingPrefs.notch, $notch)).toggleStyle(.switch).labelsHidden()
-                        .disabled(NotchPlayer.notchScreen == nil)
+                    // With Orbit's notch on, the music there is its Music live activity: the same switch.
+                    if orbitNotch {
+                        Toggle("", isOn: Binding(get: { notchMusic }, set: { notchMusic = $0; NotchCenter.shared.apply() }))
+                            .toggleStyle(.switch).labelsHidden()
+                    } else {
+                        Toggle("", isOn: feature(NowPlayingPrefs.notch, $notch)).toggleStyle(.switch).labelsHidden()
+                            .disabled(NotchPlayer.notchScreen == nil)
+                    }
                 }
             }
 
@@ -170,6 +179,13 @@ struct NowPlayingPage: View {
                         RowDivider()
                         AutomationRow(app: app, status: automation.status[app] ?? .unknown)
                     }
+                }
+                RowDivider()
+                SettingsRow(title: "Sharper covers", subtitle: "When an app hands over a small cover, like YouTube Music in a browser, Orbit finds the song’s cover in Apple Music’s catalog. Only the title and artist are sent.", symbol: "photo.badge.checkmark") {
+                    Toggle("", isOn: Binding(get: { sharperCovers }, set: { on in
+                        sharperCovers = on
+                        NowPlayingLog.write("sharper covers \(on ? "on" : "off")")
+                    })).toggleStyle(.switch).labelsHidden()
                 }
             }
         }
@@ -315,7 +331,7 @@ private struct ThemeCard: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(LinearGradient(colors: [Color(red: 0.2, green: 0.22, blue: 0.34), Color(red: 0.3, green: 0.18, blue: 0.26)], startPoint: .top, endPoint: .bottom))
-                    NowPlayingWidgetView(style: theme.style, content: .sample)
+                    NowPlayingWidgetView(style: theme.style, content: .still)
                         .fixedSize()
                         .scaleEffect(thumbScale)
                         .allowsHitTesting(false)
@@ -327,6 +343,7 @@ private struct ThemeCard: View {
                     .foregroundStyle(selected ? Palette.ink : Palette.inkSecondary)
                     .lineLimit(1)
             }
+            .contentShape(Rectangle())
             .scaleEffect(hover ? 1.03 : 1)
             .animation(.spring(duration: 0.25, bounce: 0.3), value: hover)
         }

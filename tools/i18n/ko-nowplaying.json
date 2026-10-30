@@ -126,5 +126,7 @@
   "Pause for this app again": "이 앱에서도 다시 멈추기",
   "Ignore an app": "앱 무시하기",
   "Its sound never pauses the music.": "이 앱 소리로는 음악을 멈추지 않아요.",
-  "Music apps like Music, Spotify, TIDAL and Podcasts, and music in a browser such as YouTube Music. Other videos in browsers are left out: choose All for YouTube videos too.": "Music, Spotify, TIDAL, 팟캐스트 같은 음악 앱과 YouTube Music처럼 브라우저에서 듣는 음악이 보여요. 브라우저의 다른 영상은 빼요. YouTube 영상까지 보려면 전부를 고르세요."
+  "Music apps like Music, Spotify, TIDAL and Podcasts, and music in a browser such as YouTube Music. Other videos in browsers are left out: choose All for YouTube videos too.": "Music, Spotify, TIDAL, 팟캐스트 같은 음악 앱과 YouTube Music처럼 브라우저에서 듣는 음악이 보여요. 브라우저의 다른 영상은 빼요. YouTube 영상까지 보려면 전부를 고르세요.",
+  "Sharper covers": "선명한 커버",
+  "When an app hands over a small cover, like YouTube Music in a browser, Orbit finds the song’s cover in Apple Music’s catalog. Only the title and artist are sent.": "브라우저의 YouTube Music처럼 앱이 작은 커버를 넘겨주면, Apple Music 카탈로그에서 그 곡의 커버를 찾아와요. 제목과 아티스트만 보내요."
 }

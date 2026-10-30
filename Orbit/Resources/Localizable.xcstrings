@@ -24842,6 +24842,17 @@
         }
       }
     },
+    "Sharper covers": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선명한 커버"
+          }
+        }
+      }
+    },
     "Shelf": {
       "extractionState": "manual",
       "localizations": {
@@ -31044,6 +31055,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Orbit을 종료하면"
+          }
+        }
+      }
+    },
+    "When an app hands over a small cover, like YouTube Music in a browser, Orbit finds the song’s cover in Apple Music’s catalog. Only the title and artist are sent.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "브라우저의 YouTube Music처럼 앱이 작은 커버를 넘겨주면, Apple Music 카탈로그에서 그 곡의 커버를 찾아와요. 제목과 아티스트만 보내요."
           }
         }
       }

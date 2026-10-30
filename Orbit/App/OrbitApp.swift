@@ -282,6 +282,7 @@ enum DebugHook {
             lines.forEach { GestureLog.write("selftest \($0)") }
             GestureLog.write("selftest: \(lines.filter { $0.hasPrefix("FAIL") }.count) of \(lines.count) failed")
         case "playpause": NowPlaying.shared.togglePlayPause(heard: true)
+        case "widget-themes": NowPlayingWidgetController.shared.debugCycleThemes()
         case "bench-apps":
             // Opens the Apps grid five times and logs how its first two seconds play: main-thread
             // frame gaps are what reads as lag.
