@@ -123,7 +123,7 @@ Everything stays on your Mac. Orbit has no account, no server and no analytics; 
 ## Requirements
 
 - macOS 15 Sequoia or later (Liquid Glass, Apple Translation and Apple Intelligence spell check need macOS 26)
-- Apple silicon (tested on M-series MacBooks)
+- Apple silicon or Intel (tested on M-series MacBooks)
 
 ## Build from source
 

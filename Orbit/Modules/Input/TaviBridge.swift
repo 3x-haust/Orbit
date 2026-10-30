@@ -35,10 +35,20 @@ final class TaviBridge {
     /// The input method Orbit carries, and a newer one fetched from Tavi's releases; the newest wins.
     private var bundled: URL? {
         let candidates = [Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/TaviInputMethod.app"), Self.downloaded]
-            .filter { Self.version($0) != nil }
+            .filter { Self.version($0) != nil && Self.runsHere($0) }
         return candidates.max { a, b in Self.isNewer(Self.version(b) ?? "", than: Self.version(a) ?? "") }
     }
     private static let downloaded = Storage.dir("Tavi").appendingPathComponent("TaviInputMethod.app")
+
+    /// Tavi's releases may be Apple silicon only; on an Intel Mac such a copy can't start.
+    private static func runsHere(_ app: URL) -> Bool {
+        guard let archs = Bundle(url: app)?.executableArchitectures?.map(\.intValue) else { return true }
+        #if arch(x86_64)
+        return archs.contains(NSBundleExecutableArchitectureX86_64)
+        #else
+        return archs.contains(NSBundleExecutableArchitectureARM64)
+        #endif
+    }
     private let wordsURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("Tavi/words.json")
     private let prefs = UserDefaults(suiteName: inputMethodID)
