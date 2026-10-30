@@ -25,6 +25,10 @@ enum NowPlayingPrefs {
     static let autoPauseExcluded = "nowplaying.autoPause.excluded"
 
     static var autoPauseOn: Bool { Pref.defaults.object(forKey: autoPause) as? Bool ?? true }
+
+    /// Look up a large cover when an app hands over a small one. On by default.
+    static let sharperCovers = "nowplaying.sharperCovers"
+    static var sharperCoversOn: Bool { Pref.defaults.object(forKey: sharperCovers) as? Bool ?? true }
 }
 
 /// Everything about how the widget looks and behaves. Stored as JSON; keys added later fall back

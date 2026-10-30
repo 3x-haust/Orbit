@@ -15,6 +15,7 @@ struct NowPlayingPage: View {
     @AppStorage(NotchPrefs.enabled) private var orbitNotch = true
     @AppStorage(NotchPrefs.liveMusic) private var notchMusic = true
     @AppStorage(NowPlayingPrefs.directControl) private var direct = false
+    @AppStorage(NowPlayingPrefs.sharperCovers) private var sharperCovers = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
@@ -178,6 +179,13 @@ struct NowPlayingPage: View {
                         RowDivider()
                         AutomationRow(app: app, status: automation.status[app] ?? .unknown)
                     }
+                }
+                RowDivider()
+                SettingsRow(title: "Sharper covers", subtitle: "When an app hands over a small cover, like YouTube Music in a browser, Orbit finds the song’s cover in Apple Music’s catalog. Only the title and artist are sent.", symbol: "photo.badge.checkmark") {
+                    Toggle("", isOn: Binding(get: { sharperCovers }, set: { on in
+                        sharperCovers = on
+                        NowPlayingLog.write("sharper covers \(on ? "on" : "off")")
+                    })).toggleStyle(.switch).labelsHidden()
                 }
             }
         }

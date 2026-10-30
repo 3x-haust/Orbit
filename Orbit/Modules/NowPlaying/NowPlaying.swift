@@ -334,8 +334,27 @@ final class NowPlaying {
 
     private func syncArtwork() {
         guard let t = track, let bundle = t.bundle else { return }
-        let image = covers[bundle].flatMap { $0.key == t.key ? $0.image : nil }
+        var image = covers[bundle].flatMap { $0.key == t.key ? $0.image : nil }
+        if let small = image, CoverLookup.isSmall(small) {
+            if let sharp = sharpCovers[t.key] { image = sharp } else { sharpen(t) }
+        }
         if image !== artwork { setArtwork(image) }
+    }
+
+    /// Large covers found for songs whose player handed over a small one, by song.
+    @ObservationIgnored private var sharpCovers: [String: NSImage] = [:]
+    @ObservationIgnored private var lookedUp: Set<String> = []
+
+    private func sharpen(_ t: Track) {
+        guard NowPlayingPrefs.sharperCoversOn, !lookedUp.contains(t.key) else { return }
+        if lookedUp.count > 200 { lookedUp.removeAll(); sharpCovers.removeAll() }
+        lookedUp.insert(t.key)
+        Task {
+            guard let image = await CoverLookup.sharper(title: t.title, artist: t.artist, album: t.album) else { return }
+            NowPlayingLog.write("artwork: a sharper cover from Apple Music")
+            sharpCovers[t.key] = image
+            syncArtwork()
+        }
     }
 
     /// Auto-pause paused this app. Now Playing may not say so while a video is its current app.
