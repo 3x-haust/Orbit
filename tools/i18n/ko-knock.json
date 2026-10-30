@@ -1,0 +1,22 @@
+{
+  "Knock": "노크",
+  "Knock on your MacBook twice or three times to run anything in Orbit.": "맥북을 두세 번 똑똑 두드리면 Orbit의 기능이 바로 실행돼요.",
+  "Knocks": "노크 동작",
+  "Two knocks": "두 번 노크",
+  "Knock, knock.": "똑, 똑.",
+  "Three knocks": "세 번 노크",
+  "Knock, knock, knock — in an even beat.": "똑, 똑, 똑. 일정한 박자로 두드려요.",
+  "Knocks right as you type or click don’t count, nor while the Mac is moving, asleep or locked.": "타이핑하거나 클릭하는 순간의 진동은 노크로 치지 않아요. 맥이 움직이거나, 잠자거나, 잠겨 있을 때도요.",
+  "Sensitivity": "감도",
+  "Show what ran": "실행한 기능 알림",
+  "A short note after each knock.": "노크할 때마다 무엇을 실행했는지 잠깐 보여줘요.",
+  "Knock twice to try it": "두 번 두드려서 시험해 보세요",
+  "Turn on Knock to try it": "노크를 켜면 여기서 시험해 볼 수 있어요",
+  "This Mac has no motion sensor": "이 맥에는 움직임 센서가 없어요",
+  "The motion sensor didn’t answer": "움직임 센서가 응답하지 않아요",
+  "Knock feels knocks with the sensor inside MacBooks with Apple silicon (M2 or later, and some M1 Pro). Desktop Macs and Intel MacBooks don’t have one.": "노크는 Apple 실리콘 맥북(M2 이상, 일부 M1 Pro)에 들어 있는 움직임 센서로 두드림을 느껴요. 데스크톱 맥과 Intel 맥북에는 이 센서가 없어요.",
+  "Turn Knock off and on again, or restart the Mac.": "노크를 껐다가 다시 켜거나, 맥을 재시동해 보세요.",
+  "High feels the lightest taps; Low needs a firmer knock and ignores more bumps.": "높음은 살짝만 두드려도 알아듣고, 낮음은 조금 더 확실히 두드려야 하는 대신 다른 충격을 더 잘 걸러요.",
+  "High": "높음",
+  "Low": "낮음"
+}

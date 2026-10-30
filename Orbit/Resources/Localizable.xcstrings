@@ -1769,6 +1769,17 @@
         }
       }
     },
+    "A short note after each knock.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노크할 때마다 무엇을 실행했는지 잠깐 보여줘요."
+          }
+        }
+      }
+    },
     "A small badge for the app that’s playing.": {
       "extractionState": "manual",
       "localizations": {
@@ -12463,6 +12474,17 @@
         }
       }
     },
+    "High": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높음"
+          }
+        }
+      }
+    },
     "High %ld° Low %ld°": {
       "extractionState": "manual",
       "localizations": {
@@ -12470,6 +12492,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "최고 %ld° 최저 %ld°"
+          }
+        }
+      }
+    },
+    "High feels the lightest taps; Low needs a firmer knock and ignores more bumps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높음은 살짝만 두드려도 알아듣고, 낮음은 조금 더 확실히 두드려야 하는 대신 다른 충격을 더 잘 걸러요."
           }
         }
       }
@@ -14046,6 +14079,94 @@
         }
       }
     },
+    "Knock": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노크"
+          }
+        }
+      }
+    },
+    "Knock feels knocks with the sensor inside MacBooks with Apple silicon (M2 or later, and some M1 Pro). Desktop Macs and Intel MacBooks don’t have one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노크는 Apple 실리콘 맥북(M2 이상, 일부 M1 Pro)에 들어 있는 움직임 센서로 두드림을 느껴요. 데스크톱 맥과 Intel 맥북에는 이 센서가 없어요."
+          }
+        }
+      }
+    },
+    "Knock on your MacBook twice or three times to run anything in Orbit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "맥북을 두세 번 똑똑 두드리면 Orbit의 기능이 바로 실행돼요."
+          }
+        }
+      }
+    },
+    "Knock twice to try it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "두 번 두드려서 시험해 보세요"
+          }
+        }
+      }
+    },
+    "Knock, knock, knock — in an even beat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "똑, 똑, 똑. 일정한 박자로 두드려요."
+          }
+        }
+      }
+    },
+    "Knock, knock.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "똑, 똑."
+          }
+        }
+      }
+    },
+    "Knocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노크 동작"
+          }
+        }
+      }
+    },
+    "Knocks right as you type or click don’t count, nor while the Mac is moving, asleep or locked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "타이핑하거나 클릭하는 순간의 진동은 노크로 치지 않아요. 맥이 움직이거나, 잠자거나, 잠겨 있을 때도요."
+          }
+        }
+      }
+    },
     "Korean": {
       "extractionState": "manual",
       "localizations": {
@@ -15306,6 +15427,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Music에 좋아요를 남겨요."
+          }
+        }
+      }
+    },
+    "Low": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "낮음"
           }
         }
       }
@@ -23721,6 +23853,17 @@
         }
       }
     },
+    "Sensitivity": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "감도"
+          }
+        }
+      }
+    },
     "Sent": {
       "extractionState": "manual",
       "localizations": {
@@ -24486,6 +24629,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 앱 다시 보이기"
+          }
+        }
+      }
+    },
+    "Show what ran": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실행한 기능 알림"
           }
         }
       }
@@ -26668,6 +26822,17 @@
         }
       }
     },
+    "The motion sensor didn’t answer": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "움직임 센서가 응답하지 않아요"
+          }
+        }
+      }
+    },
     "The orange satellite follows your direction.": {
       "extractionState": "manual",
       "localizations": {
@@ -27062,6 +27227,17 @@
         }
       }
     },
+    "This Mac has no motion sensor": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 맥에는 움직임 센서가 없어요"
+          }
+        }
+      }
+    },
     "This Mac has no notch, so Orbit draws one.": {
       "extractionState": "manual",
       "localizations": {
@@ -27201,6 +27377,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "스레드"
+          }
+        }
+      }
+    },
+    "Three knocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세 번 노크"
           }
         }
       }
@@ -27977,6 +28164,17 @@
         }
       }
     },
+    "Turn Knock off and on again, or restart the Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노크를 껐다가 다시 켜거나, 맥을 재시동해 보세요."
+          }
+        }
+      }
+    },
     "Turn Off": {
       "extractionState": "manual",
       "localizations": {
@@ -28094,6 +28292,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "시스템 설정에서 Apple Intelligence를 켜면 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "Turn on Knock to try it": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노크를 켜면 여기서 시험해 볼 수 있어요"
           }
         }
       }
@@ -28259,6 +28468,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "노치 위에서 두 손가락으로 아래로 쓸면 열리고, 위로 쓸면 닫혀요."
+          }
+        }
+      }
+    },
+    "Two knocks": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "두 번 노크"
           }
         }
       }
