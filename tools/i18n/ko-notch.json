@@ -92,5 +92,8 @@
   "Opens as the notch's Shelf tab.": "노치의 선반 탭으로 열려요",
   "Tab when it opens": "열 때 보여줄 탭",
   "Dragging a file in, or the Shelf shortcut, always opens the Shelf.": "파일을 끌어오거나 선반 단축키를 쓰면 항상 선반으로 열려요.",
-  "Last viewed": "마지막에 본 탭"
+  "Last viewed": "마지막에 본 탭",
+  "A notice when Do Not Disturb or another Focus turns on or off.": "방해 금지 모드나 다른 집중 모드가 켜지거나 꺼질 때 알려줘요.",
+  "macOS keeps which Focus is on in a protected folder: Orbit needs Full Disk Access to see it.": "켜진 집중 모드는 macOS가 보호된 폴더에 둬서, Orbit이 보려면 전체 디스크 접근 권한이 필요해요.",
+  "Allow Full Disk Access": "전체 디스크 접근 허용"
 }

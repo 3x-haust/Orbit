@@ -14,7 +14,7 @@ final class NotchLive {
     private(set) var battery: BatteryState?
 
     @ObservationIgnored private var powerSource: CFRunLoopSource?
-    @ObservationIgnored private var focusObservers: [Any] = []
+    @ObservationIgnored private var focus: NotchFocus?
     @ObservationIgnored private var bluetooth: NotchBluetooth?
     @ObservationIgnored private var config: NotchCenter.Config?
 
@@ -39,17 +39,12 @@ final class NotchLive {
             powerSource = nil
         }
 
-        let focus = config?.live.contains(NotchPrefs.liveFocus) == true
-        if focus, focusObservers.isEmpty {
-            let dnc = DistributedNotificationCenter.default()
-            for (name, enabled) in [("_NSDoNotDisturbEnabledNotification", true), ("_NSDoNotDisturbDisabledNotification", false)] {
-                focusObservers.append(dnc.addObserver(forName: .init(name), object: nil, queue: .main) { _ in
-                    MainActor.assumeIsolated { NotchLive.shared.focusChanged(enabled) }
-                })
-            }
-        } else if !focus {
-            focusObservers.forEach { DistributedNotificationCenter.default().removeObserver($0) }
-            focusObservers.removeAll()
+        let watchFocus = config?.live.contains(NotchPrefs.liveFocus) == true
+        if watchFocus, focus == nil {
+            focus = NotchFocus { NotchLive.shared.focusChanged($0) }
+        } else if !watchFocus {
+            focus?.stop()
+            focus = nil
         }
 
         let bt = config?.live.contains(NotchPrefs.liveBluetooth) == true
@@ -69,9 +64,100 @@ final class NotchLive {
         }
     }
 
-    private func focusChanged(_ on: Bool) {
-        NotchCenter.shared.flash(.init(symbol: on ? "moon.fill" : "moon", tint: on ? .indigo : .white.opacity(0.8),
-                                       title: on ? "Focus On" : "Focus Off", detail: nil, trailing: nil), for: 2.2)
+    private func focusChanged(_ mode: NotchFocus.Mode?) {
+        let symbol = mode?.symbol.flatMap { NSImage(systemSymbolName: $0, accessibilityDescription: nil) == nil ? nil : $0 }
+        NotchCenter.shared.flash(.init(symbol: mode == nil ? "moon" : symbol ?? "moon.fill", tint: mode == nil ? .white.opacity(0.8) : .indigo,
+                                       title: mode == nil ? "Focus Off" : "Focus On", detail: mode?.name, trailing: nil), for: 2.2)
+    }
+}
+
+// MARK: - Focus
+
+/// Which Focus is on. macOS stopped posting the old Do Not Disturb notifications when Focus came in, and
+/// its Focus API is only for messaging apps; what's on is in donotdisturbd's own files, which need Full
+/// Disk Access to read. Their folder is watched, so a change shows up the moment it's written.
+@MainActor
+final class NotchFocus {
+    struct Mode: Equatable {
+        var id: String
+        var name: String?
+        var symbol: String?
+    }
+
+    private static let folder = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/DoNotDisturb/DB")
+
+    /// Without Full Disk Access the folder can't be read, and Focus can't be seen.
+    static var readable: Bool { (try? Data(contentsOf: folder.appendingPathComponent("Assertions.json"))) != nil }
+
+    /// The Focus that's on, nil when none; nil as a whole when it can't be read.
+    static func current() -> Mode?? {
+        guard let data = try? Data(contentsOf: folder.appendingPathComponent("Assertions.json")) else { return nil }
+        return .some(parse(assertions: data, configurations: try? Data(contentsOf: folder.appendingPathComponent("ModeConfigurations.json"))))
+    }
+
+    /// `Assertions.json` lists the Focus turned on by hand (or by a Shortcut), newest last;
+    /// `ModeConfigurations.json` has each Focus's name and symbol.
+    nonisolated static func parse(assertions: Data, configurations: Data?) -> Mode? {
+        guard let root = try? JSONSerialization.jsonObject(with: assertions) as? [String: Any],
+              let records = ((root["data"] as? [[String: Any]])?.first?["storeAssertionRecords"]) as? [[String: Any]],
+              let details = records.last?["assertionDetails"] as? [String: Any],
+              let id = details["assertionDetailsModeIdentifier"] as? String else { return nil }
+        var mode = Mode(id: id)
+        if let configurations, let root = try? JSONSerialization.jsonObject(with: configurations) as? [String: Any],
+           let modes = (root["data"] as? [[String: Any]])?.first?["modeConfigurations"] as? [String: Any],
+           let info = (modes[id] as? [String: Any])?["mode"] as? [String: Any] {
+            mode.name = info["name"] as? String
+            mode.symbol = info["symbolImageName"] as? String
+        }
+        return mode
+    }
+
+    private let changed: (Mode?) -> Void
+    private var last: Mode??
+    private var stream: FSEventStreamRef?
+    private var observer: Any?
+
+    init(changed: @escaping (Mode?) -> Void) {
+        self.changed = changed
+        last = Self.current()
+        let context = UnsafeMutablePointer<FSEventStreamContext>.allocate(capacity: 1)
+        defer { context.deallocate() }
+        context.initialize(to: FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil))
+        stream = FSEventStreamCreate(nil, { _, info, _, _, _, _ in
+            guard let info else { return }
+            let focus = Unmanaged<NotchFocus>.fromOpaque(info).takeUnretainedValue()
+            MainActor.assumeIsolated { focus.check() }
+        }, context, [Self.folder.path] as CFArray, FSEventStreamEventId(kFSEventStreamEventIdSinceNow), 0.2,
+        FSEventStreamCreateFlags(kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagNoDefer))
+        if let stream {
+            FSEventStreamSetDispatchQueue(stream, .main)
+            FSEventStreamStart(stream)
+        }
+        // Full Disk Access granted in System Settings: start from what's on now, without a notice.
+        observer = NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { [weak self] in
+                guard let self, self.last == nil else { return }
+                self.last = Self.current()
+            }
+        }
+    }
+
+    func stop() {
+        if let stream {
+            FSEventStreamStop(stream)
+            FSEventStreamInvalidate(stream)
+            FSEventStreamRelease(stream)
+        }
+        stream = nil
+        observer.map(NotificationCenter.default.removeObserver)
+        observer = nil
+    }
+
+    private func check() {
+        guard let now = Self.current() else { return }
+        defer { last = now }
+        guard let before = last, before?.id != now?.id else { return }
+        changed(now)
     }
 }
 
