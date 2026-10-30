@@ -64,7 +64,11 @@ final class AppUninstaller {
             phase = .scanning
             task = Task {
                 async let size = Task.detached { DiskSize.of(url, guarded: false) }.value
-                let found = await scan(url)
+                var found = await scan(url)
+                // The Tavi app shares its input method's settings and word list with Orbit's 한/영.
+                if bundleID?.hasPrefix("dev.3xhaust.") == true, TaviBridge.shared.installedVersion != nil {
+                    found.removeAll { $0.url.path.localizedCaseInsensitiveContains("tavi") }
+                }
                 appSize = await size
                 guard !Task.isCancelled else { return }
                 withAnimation(.spring(duration: 0.4)) {
