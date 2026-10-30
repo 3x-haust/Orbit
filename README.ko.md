@@ -123,7 +123,7 @@ Orbit은 GitHub 릴리즈에서 스스로 업데이트해요. **일반 › 업�
 ## 요구 사항
 
 - macOS 15 Sequoia 이상 (Liquid Glass, Apple 번역, Apple Intelligence 맞춤법은 macOS 26 이상)
-- Apple silicon (M 시리즈 맥북에서 테스트)
+- Apple silicon 또는 Intel (M 시리즈 맥북에서 테스트)
 
 ## 직접 빌드
 
