@@ -129,8 +129,15 @@ struct NowPlayingWidgetView: View {
             ZStack {
                 content.palette.background
                 if let art = content.artwork {
-                    Image(nsImage: art).resizable().aspectRatio(contentMode: .fill)
-                        .scaleEffect(1.6).blur(radius: 44).saturation(1.3).opacity(0.55)
+                    // Sized by the card: a filled cover is taller than it, and would stretch the card's
+                    // background past it and take clicks meant for what's beside the widget.
+                    Color.clear
+                        .overlay {
+                            Image(nsImage: art).resizable().aspectRatio(contentMode: .fill)
+                                .scaleEffect(1.6).blur(radius: 44).saturation(1.3).opacity(0.55)
+                        }
+                        .clipped()
+                        .allowsHitTesting(false)
                         .id(content.generation).transition(.opacity)
                 }
                 LinearGradient(colors: [.black.opacity(0.15), .black.opacity(0.5)], startPoint: .top, endPoint: .bottom)

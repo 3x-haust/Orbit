@@ -214,8 +214,14 @@ private struct PreviewStage: View {
                     .fill(LinearGradient(colors: [Color(red: 0.17, green: 0.2, blue: 0.32), Color(red: 0.36, green: 0.22, blue: 0.3), Color(red: 0.12, green: 0.1, blue: 0.16)],
                                          startPoint: .topLeading, endPoint: .bottomTrailing))
                 if let art = (live ?? .sample).artwork {
-                    Image(nsImage: art).resizable().aspectRatio(contentMode: .fill).blur(radius: 60).opacity(0.35)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    // Filled, the cover is far taller than the stage, and clipping only hides the
+                    // overflow: it stretched the stage and took the clicks meant for the header's
+                    // switch above it. Sized by the stage instead, and never hit.
+                    Color.clear
+                        .overlay { Image(nsImage: art).resizable().aspectRatio(contentMode: .fill).blur(radius: 60).opacity(0.35) }
+                        .clipped()
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
                 NowPlayingWidgetView(style: style, content: live ?? .sample, hovering: hovering)
                     .fixedSize()

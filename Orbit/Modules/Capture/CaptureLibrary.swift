@@ -392,6 +392,7 @@ private struct LibraryTile: View {
                     .overlay {
                         if let image = library.thumbnail(for: item) {
                             Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
+                                .allowsHitTesting(false) // overflows the tile, onto its neighbors
                         } else {
                             ProgressView().controlSize(.small)
                         }
