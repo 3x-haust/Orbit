@@ -8,6 +8,9 @@ final class WidgetState {
     var hovering = false
     /// Hidden after being paused for a while ("Hide when paused").
     var pausedAway = false
+    /// The last song (by generation) seen playing here. One that turns up already paused never played
+    /// here, so "Hide when paused" keeps it away rather than showing it for a moment.
+    var playedGeneration: Int?
     var dragging = false
     /// Briefly lifted above the windows so you can find it.
     var flashing = false
@@ -195,6 +198,8 @@ final class NowPlayingWidgetController {
 
     private func playbackChanged() {
         pauseWork?.cancel()
+        let np = NowPlaying.shared
+        if np.playing, state.playedGeneration != np.generation { state.playedGeneration = np.generation }
         if NowPlaying.shared.playing || !state.style.hideWhenPaused {
             if state.pausedAway { withAnimation(.easeOut(duration: 0.3)) { state.pausedAway = false } }
             return
@@ -405,8 +410,9 @@ private struct WidgetHost: View {
     var body: some View {
         let style = state.style
         let content = WidgetContent.current() ?? (style.hideWhenIdle ? nil : .idle)
+        let neverPlayed = style.hideWhenPaused && content.map { $0.live && !$0.playing && $0.generation != state.playedGeneration } == true
         ZStack {
-            if let content, !state.pausedAway {
+            if let content, !state.pausedAway, !neverPlayed {
                 NowPlayingWidgetView(style: style, content: content, hovering: state.hovering) { controller.drag($0) }
                     .fixedSize()
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { controller.contentSized($0) }
