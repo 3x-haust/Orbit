@@ -7,7 +7,8 @@ import Foundation
 /// then Music's old paused song, then the tab again. So every app it reported is remembered, and the one
 /// shown is picked from the apps the user allows: the one that most recently started playing, else the
 /// one already showing. An app that isn't allowed never replaces what's showing, and a switch waits a
-/// moment so a handoff's play/pause churn doesn't flash.
+/// moment so a handoff's play/pause churn doesn't flash — showing a song where none was waits too:
+/// when a video plays again, Now Playing passes through Music's old song on the way.
 ///
 /// The banner is only for a new song: an allowed app moved to a title it hasn't shown, and kept playing
 /// for a second. A paused song turning up, an app taking over, or Music coming back after auto-pause
@@ -46,6 +47,8 @@ struct NowPlayingSources<Info: Equatable> {
     private(set) var current: String?
     /// The app Now Playing was on when Orbit started listening.
     private var first: String?
+    /// Now Playing has been on another app since: `first` coming back later is a leftover.
+    private var movedOn = false
     private var waitingSince: TimeInterval?
     private var pending: (bundle: String, key: String, at: TimeInterval)?
     /// The last song each app showed.
@@ -59,7 +62,7 @@ struct NowPlayingSources<Info: Equatable> {
             sources[previous] = p
         }
         current = bundle
-        if first == nil { first = bundle }
+        if first == nil { first = bundle } else if first != bundle { movedOn = true }
         guard allowed else { return }
         var s = sources[bundle] ?? Source(bundle: bundle, key: key, info: info, playing: false, startedAt: now, updatedAt: now)
         var playing = playing
@@ -87,6 +90,7 @@ struct NowPlayingSources<Info: Equatable> {
         sources.removeAll()
         current = nil
         first = nil
+        movedOn = false
         shown = nil
         waitingSince = nil
         pending = nil
@@ -115,9 +119,9 @@ struct NowPlayingSources<Info: Equatable> {
         var step = Step()
         let target = pick()
         if target != shown {
-            // The same app going on (a new song, the time, playing again) shows at once; another app
-            // taking over, a pause, or nothing left waits a moment in case it's just a handoff.
-            let instant = shown == nil || (target?.bundle == shown?.bundle && (target?.playing == true || shown?.playing == false))
+            // The same app going on (a new song, the time, playing again) shows at once; a song turning
+            // up, another app taking over, a pause, or nothing left waits a moment in case it's just a handoff.
+            let instant = shown != nil && target?.bundle == shown?.bundle && (target?.playing == true || shown?.playing == false)
             let since = waitingSince ?? now
             if instant || now >= since + Self.switchDelay {
                 waitingSince = nil
@@ -155,8 +159,9 @@ struct NowPlayingSources<Info: Equatable> {
         }
         if let shown, let s = sources[shown.bundle] { return s }
         // Nothing playing and nothing showing: the paused song Now Playing was on from the start. A paused
-        // app it jumps to later is an old leftover (Music's last song when a video starts), not news.
-        guard let current, current == first else { return nil }
+        // app it jumps to later is an old leftover (Music's last song when a video starts), not news —
+        // even the first one, once Now Playing has been elsewhere.
+        guard let current, current == first, !movedOn else { return nil }
         return sources[current]
     }
 }
