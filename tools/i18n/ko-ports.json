@@ -1,0 +1,23 @@
+{
+  "Ports": "포트",
+  "What's listening on your Mac, and which project started it. Type a port in the launcher to jump there.": "Mac에서 열려 있는 포트와 그걸 띄운 프로젝트를 보여줘요. 런처에 포트 번호를 쳐도 바로 찾아가요.",
+  "Dev servers": "개발 서버",
+  "No dev servers running": "실행 중인 개발 서버가 없어요",
+  "Start one — npm run dev, rails s, python -m http.server — and it shows up here with its project.": "npm run dev, rails s, python -m http.server 같은 걸 실행하면 프로젝트와 함께 여기에 나타나요.",
+  "Only processes you own show here; macOS keeps other users' sockets private.": "내가 실행한 프로세스만 보여요. 다른 사용자의 포트는 macOS가 보여주지 않아요.",
+  "Other devices on your network can reach it, not only this Mac.": "이 Mac뿐 아니라 같은 네트워크의 다른 기기에서도 접속할 수 있어요.",
+  "Open in Browser": "브라우저에서 열기",
+  "Copy URL": "URL 복사",
+  "Stop…": "중지…",
+  "Force Stop…": "강제 중지…",
+  "Force Stop": "강제 중지",
+  "Stop “%@” on :%ld?": "“%@”(:%ld)을(를) 중지할까요?",
+  "Force stop “%@” on :%ld?": "“%@”(:%ld)을(를) 강제로 중지할까요?",
+  "Like pressing Control-C in its terminal.": "터미널에서 Control-C를 누른 것과 같아요.",
+  "It ends right away, without a chance to clean up.": "정리할 틈 없이 바로 꺼져요.",
+  "It also closes %@.": "%@도 같이 닫혀요.",
+  "Stopped :%ld": ":%ld 중지함",
+  "It already stopped.": "이미 꺼졌어요.",
+  "Port": "포트",
+  "Show in Ports": "포트에서 보기"
+}

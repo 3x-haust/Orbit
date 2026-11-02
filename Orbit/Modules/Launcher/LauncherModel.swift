@@ -69,8 +69,8 @@ final class LauncherModel {
     }
 
     private func run(_ action: LauncherAction) {
-        // Window titles come and go (every web page has one); remembering them would only grow the table.
-        if let id = selected?.id, !id.hasPrefix("win.") { Frecency.bump(id) }
+        // Window titles and ports come and go (every web page has one); remembering them would only grow the table.
+        if let id = selected?.id, !id.hasPrefix("win."), !id.hasPrefix("port.") { Frecency.bump(id) }
         onDismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { action.perform() }
     }
@@ -95,6 +95,7 @@ final class LauncherModel {
         }
 
         result += SmartAnswers.answers(for: q)
+        result += PortScanner.shared.launcherItems(for: q) { [weak self] in self?.refresh() }
         let answered = !result.isEmpty
 
         // Only what the query is really about: once something matches by name, keyword hits and

@@ -7501,6 +7501,17 @@
         }
       }
     },
+    "Copy URL": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL 복사"
+          }
+        }
+      }
+    },
     "Copy Username": {
       "extractionState": "manual",
       "localizations": {
@@ -8869,6 +8880,17 @@
     },
     "Deutsch": {
       "extractionState": "manual"
+    },
+    "Dev servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개발 서버"
+          }
+        }
+      }
     },
     "Developer": {
       "extractionState": "manual",
@@ -11660,6 +11682,28 @@
         }
       }
     },
+    "Force Stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "강제 중지"
+          }
+        }
+      }
+    },
+    "Force Stop…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "강제 중지…"
+          }
+        }
+      }
+    },
     "Force quit “%@”?": {
       "extractionState": "manual",
       "localizations": {
@@ -11667,6 +11711,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "“%@”을(를) 강제 종료할까요?"
+          }
+        }
+      }
+    },
+    "Force stop “%@” on :%ld?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”(:%ld)을(를) 강제로 중지할까요?"
           }
         }
       }
@@ -13771,6 +13826,28 @@
     "Istanbul": {
       "extractionState": "manual"
     },
+    "It already stopped.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미 꺼졌어요."
+          }
+        }
+      }
+    },
+    "It also closes %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@도 같이 닫혀요."
+          }
+        }
+      }
+    },
     "It also listens for ⌘C ⌘C, so both would open. Quit DeepL, or turn this off.": {
       "extractionState": "manual",
       "localizations": {
@@ -13789,6 +13866,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "다른 사용자나 macOS의 프로세스라 Orbit이 끝낼 수 없어요."
+          }
+        }
+      }
+    },
+    "It ends right away, without a chance to clean up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정리할 틈 없이 바로 꺼져요."
           }
         }
       }
@@ -15225,6 +15313,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Spotify 앱에서 직접 눌러 주세요"
+          }
+        }
+      }
+    },
+    "Like pressing Control-C in its terminal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "터미널에서 Control-C를 누른 것과 같아요."
           }
         }
       }
@@ -17572,6 +17671,17 @@
         }
       }
     },
+    "No dev servers running": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실행 중인 개발 서버가 없어요"
+          }
+        }
+      }
+    },
     "No events": {
       "extractionState": "manual",
       "localizations": {
@@ -18890,6 +19000,17 @@
         }
       }
     },
+    "Only processes you own show here; macOS keeps other users' sockets private.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내가 실행한 프로세스만 보여요. 다른 사용자의 포트는 macOS가 보여주지 않아요."
+          }
+        }
+      }
+    },
     "Only while running on battery.": {
       "extractionState": "manual",
       "localizations": {
@@ -19216,6 +19337,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "로그인 시 열기"
+          }
+        }
+      }
+    },
+    "Open in Browser": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "브라우저에서 열기"
           }
         }
       }
@@ -20258,6 +20390,17 @@
         }
       }
     },
+    "Other devices on your network can reach it, not only this Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac뿐 아니라 같은 네트워크의 다른 기기에서도 접속할 수 있어요."
+          }
+        }
+      }
+    },
     "Other languages": {
       "extractionState": "manual",
       "localizations": {
@@ -21241,6 +21384,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "뽀모도로"
+          }
+        }
+      }
+    },
+    "Port": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포트"
+          }
+        }
+      }
+    },
+    "Ports": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포트"
           }
         }
       }
@@ -25252,6 +25417,17 @@
         }
       }
     },
+    "Show in Ports": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "포트에서 보기"
+          }
+        }
+      }
+    },
     "Show key hints": {
       "extractionState": "manual",
       "localizations": {
@@ -26264,6 +26440,17 @@
         }
       }
     },
+    "Start one — npm run dev, rails s, python -m http.server — and it shows up here with its project.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm run dev, rails s, python -m http.server 같은 걸 실행하면 프로젝트와 함께 여기에 나타나요."
+          }
+        }
+      }
+    },
     "Started": {
       "extractionState": "manual",
       "localizations": {
@@ -26499,6 +26686,28 @@
         }
       }
     },
+    "Stop “%@” on :%ld?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”(:%ld)을(를) 중지할까요?"
+          }
+        }
+      }
+    },
+    "Stopped :%ld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ":%ld 중지함"
+          }
+        }
+      }
+    },
     "Stopping the charge needs the helper (approved once in Login Items). It keeps your limit even while Orbit is closed.": {
       "extractionState": "manual",
       "localizations": {
@@ -26528,6 +26737,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%ld%%에서 충전을 멈춰요"
+          }
+        }
+      }
+    },
+    "Stop…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "중지…"
           }
         }
       }
@@ -31011,6 +31231,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "숨긴 아이콘을 볼 때 메뉴 막대에서 누르는 아이콘이에요."
+          }
+        }
+      }
+    },
+    "What's listening on your Mac, and which project started it. Type a port in the launcher to jump there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac에서 열려 있는 포트와 그걸 띄운 프로젝트를 보여줘요. 런처에 포트 번호를 쳐도 바로 찾아가요."
           }
         }
       }

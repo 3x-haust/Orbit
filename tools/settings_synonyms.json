@@ -638,7 +638,10 @@
     "MiddleClick": "gestures",
     "Mac Mouse Fix": "gestures",
     "SteerMouse": "gestures",
-    "Jitouch": "gestures"
+    "Jitouch": "gestures",
+    "PortKiller": "ports",
+    "LeftOpen": "ports",
+    "Seeports": "ports"
   },
   "pages": {
     "home": [
@@ -751,6 +754,23 @@
       "MiddleClick",
       "middle click",
       "가운데 클릭"
+    ],
+    "ports": [
+      "포트",
+      "열린 포트",
+      "개발 서버",
+      "로컬호스트",
+      "서버 끄기",
+      "포트 종료",
+      "port",
+      "ports",
+      "listening",
+      "localhost",
+      "dev server",
+      "lsof",
+      "kill port",
+      "PortKiller",
+      "LeftOpen"
     ]
   },
   "actions": {
