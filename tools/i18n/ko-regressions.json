@@ -1,0 +1,13 @@
+{
+  "%ld hours %ld minutes ahead": "%ld시간 %ld분 빠름",
+  "%ld hours %ld minutes behind": "%ld시간 %ld분 느림",
+  "%ld minutes ahead": "%ld분 빠름",
+  "%ld minutes behind": "%ld분 느림",
+  "Couldn’t allocate an archive entry.": "압축 항목을 만들지 못했어요.",
+  "Couldn’t create an archive part.": "분할 압축 파일을 만들지 못했어요.",
+  "Couldn’t read the complete archive.": "압축 파일 전체를 읽지 못했어요.",
+  "Couldn’t restart Orbit": "Orbit을 다시 시작하지 못했어요",
+  "Couldn’t start Orbit safely": "Orbit을 안전하게 시작하지 못했어요",
+  "File names collide after normalization. Rename the conflicting files and try again.": "이름 변환 후 파일 이름이 겹쳐요. 겹치는 파일의 이름을 바꾸고 다시 시도해 주세요.",
+  "Too many archive parts. Choose a larger part size.": "분할 압축 파일이 너무 많아요. 조각 크기를 더 크게 선택해 주세요."
+}

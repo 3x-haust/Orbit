@@ -92,7 +92,7 @@ final class Archives {
 
     static func isArchive(_ url: URL) -> Bool {
         let ext = url.pathExtension.lowercased()
-        if ext.range(of: #"^\d{3}$"#, options: .regularExpression) != nil { return true } // split parts
+        if ext.range(of: #"^\d{3,4}$"#, options: .regularExpression) != nil { return true } // split parts through .9999
         if ext == "pkg" { return false } // installers open in Installer
         if extractableExtensions.contains(ext) { return true }
         if let t = UTType(filenameExtension: ext), t.conforms(to: .archive), !t.conforms(to: .diskImage) { return true }

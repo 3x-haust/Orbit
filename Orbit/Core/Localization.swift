@@ -27,11 +27,19 @@ enum AppLanguage {
     }
 
     static func relaunch() {
-        let url = Bundle.main.bundleURL
-        let config = NSWorkspace.OpenConfiguration()
-        config.createsNewApplicationInstance = true
-        NSWorkspace.shared.openApplication(at: url, configuration: config) { _, _ in
-            DispatchQueue.main.async { NSApp.terminate(nil) }
+        // Wait for the old process/instance lock, just like the updater. Keep paths out of shell source.
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; output=$(/usr/bin/open \"$2\" 2>&1) || /usr/bin/logger -t Orbit \"Could not restart $2: $output\"", "sh",
+                             "\(ProcessInfo.processInfo.processIdentifier)", Bundle.main.bundleURL.path]
+        do {
+            try process.run()
+            AppQuit.now()
+        } catch {
+            let alert = NSAlert()
+            alert.messageText = "Couldn’t restart Orbit".loc
+            alert.informativeText = error.localizedDescription
+            alert.runModal()
         }
     }
 }

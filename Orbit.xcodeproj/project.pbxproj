@@ -209,6 +209,7 @@
 		E4078F8C5C644373D6FE36CB /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC6AF77BAB454B1CD81EB5D8 /* Permissions.swift */; };
 		E5BC56A34032B581222751FE /* RunnerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137E54221090E07A7BF5EF60 /* RunnerStore.swift */; };
 		E65C66D700AE1B182DC8BC7B /* OrbitApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFA77B4FD4DF15BC26FEA45 /* OrbitApp.swift */; };
+		F7A0C156E2E1D3B141AD2810 /* OrbitInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A0C156E2E1D3B141AD2811 /* OrbitInstance.swift */; };
 		E6DED8490641F20037CC6C1C /* NowPlayingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF054AF38374B66F3105F1B9 /* NowPlayingPage.swift */; };
 		E85BC3F2623468D630629885 /* SMC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79ACF93D9104C9A5531DAE5E /* SMC.swift */; };
 		E945B31314EB820D7F5489AF /* NotchViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE81E19832E02AF985C6FFC /* NotchViews.swift */; };
@@ -381,6 +382,7 @@
 		5C3FC599293C674161B888E4 /* FanControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControl.swift; sourceTree = "<group>"; };
 		5D868E5FDB67716BF9496EFF /* NotchCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchCenter.swift; sourceTree = "<group>"; };
 		5DFA77B4FD4DF15BC26FEA45 /* OrbitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitApp.swift; sourceTree = "<group>"; };
+		F7A0C156E2E1D3B141AD2811 /* OrbitInstance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitInstance.swift; sourceTree = "<group>"; };
 		5F3359BD264F25A5BDB18C47 /* KnockSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnockSensor.swift; sourceTree = "<group>"; };
 		6406B570B80B948CA5894761 /* RunnerStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerStats.swift; sourceTree = "<group>"; };
 		6425C398F27D814B72602854 /* LauncherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherModel.swift; sourceTree = "<group>"; };
@@ -981,6 +983,7 @@
 			children = (
 				8AF67C0A1DFDED6C0E54A7A5 /* MainWindow.swift */,
 				5DFA77B4FD4DF15BC26FEA45 /* OrbitApp.swift */,
+				F7A0C156E2E1D3B141AD2811 /* OrbitInstance.swift */,
 				85091825458DB657598E4036 /* Generated */,
 				FEF4185051BDB09BA7BFC9B9 /* Pages */,
 				DA1E0922702012D7007BA53C /* Search */,
@@ -1459,6 +1462,7 @@
 				2094B461A6FD1E0644664C7C /* OpenWindows.swift in Sources */,
 				FC0E220D1D7474B338F4FFD3 /* OrbitAction.swift in Sources */,
 				E65C66D700AE1B182DC8BC7B /* OrbitApp.swift in Sources */,
+				F7A0C156E2E1D3B141AD2810 /* OrbitInstance.swift in Sources */,
 				B122E86FCF717A7E23C2F24C /* OrbitRing.swift in Sources */,
 				57A1ED4B04E409BB6D5FFBCE /* OverflowCover.swift in Sources */,
 				3C4390FCC5C346A8A2BB7F75 /* Overlaps.swift in Sources */,
@@ -1692,7 +1696,7 @@
 				CODE_SIGN_IDENTITY = 7CBA1EA9C27F25912D4A2774F0D1B98B6C5A7BF5;
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = UM52UU4B7L;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1707,7 +1711,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.4.6;
+				MARKETING_VERSION = 1.4.7;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1848,7 +1852,7 @@
 				CODE_SIGN_IDENTITY = 7CBA1EA9C27F25912D4A2774F0D1B98B6C5A7BF5;
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = UM52UU4B7L;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1869,7 +1873,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.4.6;
+				MARKETING_VERSION = 1.4.7;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 /// Lets a running job be stopped from another thread.
 final class ArchiveCancel: @unchecked Sendable {
@@ -163,7 +164,9 @@ enum ArchiveEngine {
                     path = NameEncoding.decode(rawPath, zipEncoding ?? NameEncoding.detect([rawPath]))
                 }
                 guard let safe = sanitize(path) else { _ = la.readDataSkip(a); continue }
-                if safe.hasPrefix("__MACOSX") { _ = la.readDataSkip(a); continue }
+                if safe.hasPrefix("__MACOSX/") || (safe == "__MACOSX" && UInt32(la.entryFiletype(entry)) == LibArchive.ifDir) {
+                    _ = la.readDataSkip(a); continue
+                }
                 if password == nil, la.entryIsEncrypted(entry) != 0 { throw ArchiveError.needsPassword }
                 dest.appendingPathComponent(safe).path.withCString { la.entryCopyPathname(entry, $0) }
                 if let link = la.entryHardlink(entry).map({ p in
@@ -262,10 +265,9 @@ enum ArchiveEngine {
         let parent = first.deletingLastPathComponent()
         let base = items.count == 1 ? (isDirectory(first) ? first.lastPathComponent : first.deletingPathExtension().lastPathComponent)
                                     : String(localized: "Archive")
-        let output = unique(parent.appendingPathComponent("\(base).\(options.format.fileExtension)"))
+        let output = unique(parent.appendingPathComponent("\(base).\(options.format.fileExtension)"), includingSplitParts: true)
         var stats = (long: 0, renamed: 0)
-        let partial = parent.appendingPathComponent(".\(output.lastPathComponent).orbit-partial")
-        try? fm.removeItem(at: partial)
+        let partial = parent.appendingPathComponent(".orbit-partial-\(UUID().uuidString)")
         do {
             if options.format == .dmg {
                 try makeDiskImage(items, name: base, at: partial, options: options, cancel: cancel, progress: progress)
@@ -273,13 +275,13 @@ enum ArchiveEngine {
                 stats = try writeArchive(items, to: partial, options: options, cancel: cancel, progress: progress)
             }
             if cancel.isCancelled { throw ArchiveError.cancelled }
-            try fm.moveItem(at: partial, to: output)
+            try publish(partial, to: output)
         } catch {
             try? fm.removeItem(at: partial)
             throw error
         }
         var url = output
-        if let size = options.splitSize, size > 0 { url = try split(output, every: size) }
+        if let size = options.splitSize, size > 0 { url = try split(output, every: size, cancel: cancel) }
         progress(1)
         return CompressResult(url: url, longPaths: stats.long, renamed: stats.renamed)
     }
@@ -288,14 +290,15 @@ enum ArchiveEngine {
 
     private static func walk(_ items: [URL], skipMac: Bool) -> [Source] {
         var out: [Source] = []
-        let clutter: Set<String> = [".DS_Store", "__MACOSX", ".localized", "Thumbs.db", "desktop.ini", "Icon\r",
+        let clutter: Set<String> = [".DS_Store", ".localized", "Thumbs.db", "desktop.ini", "Icon\r",
                                     ".Spotlight-V100", ".fseventsd", ".Trashes", ".TemporaryItems", ".DocumentRevisions-V100"]
-        func skipped(_ name: String) -> Bool {
-            skipMac && (clutter.contains(name) || name.hasPrefix("._"))
+        func skipped(_ url: URL) -> Bool {
+            let name = url.lastPathComponent
+            return skipMac && (clutter.contains(name) || name.hasPrefix("._") || (name == "__MACOSX" && isDirectory(url)))
         }
         for item in items {
             let rootName = item.lastPathComponent
-            if skipped(rootName) { continue }
+            if skipped(item) { continue }
             out.append(Source(url: item, name: rootName))
             var isDir: ObjCBool = false
             guard fm.fileExists(atPath: item.path, isDirectory: &isDir), isDir.boolValue,
@@ -303,7 +306,7 @@ enum ArchiveEngine {
                   let e = fm.enumerator(at: item, includingPropertiesForKeys: [.isDirectoryKey], options: [], errorHandler: { _, _ in true })
             else { continue }
             for case let u as URL in e {
-                if skipped(u.lastPathComponent) {
+                if skipped(u) {
                     if (try? u.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true { e.skipDescendants() }
                     continue
                 }
@@ -319,6 +322,18 @@ enum ArchiveEngine {
                                      progress: @escaping @Sendable (Double) -> Void) throws -> (long: Int, renamed: Int) {
         guard la.available else { throw ArchiveError.unavailable }
         let sources = walk(items, skipMac: options.skipMacFiles)
+        let forWindows = options.windowsCompatible && options.format == .zip
+        // Reject transformed directory paths too: separate trees must never merge.
+        var paths = Set<String>()
+        let names = try sources.map { source -> String in
+            let normalized = source.name.precomposedStringWithCanonicalMapping
+            let name = forWindows ? windowsSafe(normalized) : normalized
+            let key = forWindows ? name.folding(options: [.caseInsensitive], locale: Locale(identifier: "en_US_POSIX")) : name
+            guard paths.insert(key).inserted else {
+                throw ArchiveError.failed(String(localized: "File names collide after normalization. Rename the conflicting files and try again."))
+            }
+            return name
+        }
         let total = sources.reduce(Int64(0)) { sum, s in
             let v = try? s.url.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
             return sum + (v?.isRegularFile == true ? Int64(v?.fileSize ?? 0) : 0)
@@ -358,24 +373,17 @@ enum ArchiveEngine {
         _ = la.readDiskSetStandardLookup(disk)
         // No xattrs (quarantine, Finder tags), ACLs or BSD flags; AppleDouble is never asked for.
         _ = la.readDiskSetBehavior(disk, LibArchive.diskNoXattr | LibArchive.diskNoACL | LibArchive.diskNoFFlags)
-        let forWindows = options.windowsCompatible && options.format == .zip
         var long = 0, renamed = 0
         var done: Int64 = 0
         var lastReport = Date.distantPast
         let chunk = 1 << 20
-        for s in sources {
+        for (s, name) in zip(sources, names) {
             if cancel.isCancelled { throw ArchiveError.cancelled }
-            guard let entry = la.entryNew() else { continue }
+            guard let entry = la.entryNew() else { throw ArchiveError.failed(String(localized: "Couldn’t allocate an archive entry.")) }
             defer { la.entryFree(entry) }
             s.url.path.withCString { la.entryCopySourcepath(entry, $0) }
-            guard la.readDiskEntryFromFile(disk, entry, -1, nil) >= LibArchive.warn else { continue }
-            // macOS spells names decomposed (NFD: ㅎ+ㅏ+ㄴ); everyone else expects composed (NFC: 한).
-            var name = s.name.precomposedStringWithCanonicalMapping
-            if forWindows {
-                let safe = windowsSafe(name)
-                if safe != name { renamed += 1 }
-                name = safe
-            }
+            guard la.readDiskEntryFromFile(disk, entry, -1, nil) >= LibArchive.warn else { throw ArchiveError.failed(la.error(disk)) }
+            if name != s.name.precomposedStringWithCanonicalMapping { renamed += 1 }
             if name.utf16.count > 260 { long += 1 }
             name.withCString { la.entryCopyPathname(entry, $0) }
             if options.format == .zip {
@@ -389,12 +397,13 @@ enum ArchiveEngine {
                 la.entryCopyGname(entry, nil)
             }
             if la.writeHeader(a, entry) < LibArchive.warn { throw ArchiveError.failed(la.error(a)) }
-            if UInt32(la.entryFiletype(entry)) == LibArchive.ifReg, let h = try? FileHandle(forReadingFrom: s.url) {
+            if UInt32(la.entryFiletype(entry)) == LibArchive.ifReg {
+                let h = try FileHandle(forReadingFrom: s.url)
                 defer { try? h.close() }
-                while let data = try? h.read(upToCount: chunk), !data.isEmpty {
+                while let data = try h.read(upToCount: chunk), !data.isEmpty {
                     if cancel.isCancelled { throw ArchiveError.cancelled }
                     let w = data.withUnsafeBytes { la.writeData(a, $0.baseAddress, data.count) }
-                    if w < 0 { throw ArchiveError.failed(la.error(a)) }
+                    if w != data.count { throw ArchiveError.failed(la.error(a)) }
                     done += Int64(data.count)
                     if total > 0, Date().timeIntervalSince(lastReport) > 0.05 {
                         lastReport = Date()
@@ -402,7 +411,7 @@ enum ArchiveEngine {
                     }
                 }
             }
-            _ = la.writeFinishEntry(a)
+            if la.writeFinishEntry(a) != LibArchive.ok { throw ArchiveError.failed(la.error(a)) }
         }
         if la.writeClose(a) != LibArchive.ok { throw ArchiveError.failed(la.error(a)) }
         return (long, renamed)
@@ -457,32 +466,66 @@ enum ArchiveEngine {
     }
 
     /// name.zip → name.zip.001, .002 … (the 7-Zip/Keka convention; Orbit and Keka join them back).
-    private static func split(_ file: URL, every size: Int64) throws -> URL {
-        let total = (try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+    private static func split(_ file: URL, every size: Int64, cancel: ArchiveCancel) throws -> URL {
+        let total = Int64(try file.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0)
         guard total > size else { return file }
+        guard (total - 1) / size < Int64(LibArchive.maxVolumeCount) else {
+            throw ArchiveError.failed(String(localized: "Too many archive parts. Choose a larger part size."))
+        }
+        let staging = file.deletingLastPathComponent().appendingPathComponent(".orbit-split-\(UUID().uuidString)")
+        try fm.createDirectory(at: staging, withIntermediateDirectories: false)
+        defer { try? fm.removeItem(at: staging) }
         let h = try FileHandle(forReadingFrom: file)
         defer { try? h.close() }
-        var index = 1
-        var first: URL?
-        while true {
-            let part = file.deletingLastPathComponent().appendingPathComponent(String(format: "%@.%03d", file.lastPathComponent, index))
-            fm.createFile(atPath: part.path, contents: nil)
-            let out = try FileHandle(forWritingTo: part)
-            var written: Int64 = 0
-            while written < size, let data = try h.read(upToCount: Int(min(Int64(1 << 22), size - written))), !data.isEmpty {
-                try out.write(contentsOf: data)
-                written += Int64(data.count)
+        var published: [URL] = []
+        do {
+            var remaining = total
+            var index = 1
+            while remaining > 0 {
+                if cancel.isCancelled { throw ArchiveError.cancelled }
+                let name = String(format: "%@.%03d", file.lastPathComponent, index)
+                let staged = staging.appendingPathComponent(name)
+                guard fm.createFile(atPath: staged.path, contents: nil) else { throw ArchiveError.failed(String(localized: "Couldn’t create an archive part.")) }
+                let out = try FileHandle(forWritingTo: staged)
+                defer { try? out.close() }
+                var written: Int64 = 0
+                let target = min(size, remaining)
+                while written < target {
+                    if cancel.isCancelled { throw ArchiveError.cancelled }
+                    guard let data = try h.read(upToCount: Int(min(Int64(1 << 22), target - written))), !data.isEmpty else {
+                        throw ArchiveError.failed(String(localized: "Couldn’t read the complete archive."))
+                    }
+                    try out.write(contentsOf: data)
+                    written += Int64(data.count)
+                }
+                try out.close()
+                let part = file.deletingLastPathComponent().appendingPathComponent(name)
+                try publish(staged, to: part)
+                published.append(part)
+                remaining -= written
+                index += 1
             }
-            try out.close()
-            if written == 0 { try? fm.removeItem(at: part); break }
-            if first == nil { first = part }
-            index += 1
+            if cancel.isCancelled { throw ArchiveError.cancelled }
+            try fm.removeItem(at: file)
+            return published[0]
+        } catch {
+            // Retain the complete archive; roll back only parts this job published.
+            for part in published { try? fm.removeItem(at: part) }
+            throw error
         }
-        try fm.removeItem(at: file)
-        return first ?? file
     }
 
     // MARK: Helpers
+
+    /// Same-volume, atomic, exclusive publication: never replace a concurrent destination.
+    private static func publish(_ source: URL, to destination: URL) throws {
+        let result = source.path.withCString { from in
+            destination.path.withCString { to in renamex_np(from, to, UInt32(RENAME_EXCL)) }
+        }
+        guard result == 0 else {
+            throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno), userInfo: [NSFilePathErrorKey: destination.path])
+        }
+    }
 
     static func isDirectory(_ url: URL) -> Bool {
         var d: ObjCBool = false
@@ -490,14 +533,28 @@ enum ArchiveEngine {
             && (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) != true
     }
 
-    static func unique(_ url: URL) -> URL {
-        guard fm.fileExists(atPath: url.path) else { return url }
+    static func unique(_ url: URL, includingSplitParts: Bool = false) -> URL {
+        func key(_ name: String) -> String {
+            name.folding(options: [.caseInsensitive], locale: Locale(identifier: "en_US_POSIX")).precomposedStringWithCanonicalMapping
+        }
+        let existing = Set((includingSplitParts ? ((try? fm.contentsOfDirectory(atPath: url.deletingLastPathComponent().path)) ?? []) : []).map(key))
+        // Even orphan .002/.1000 volumes reserve the base; never mix backups.
+        let splitBases = Set(existing.compactMap { name -> String? in
+            let suffix = (name as NSString).pathExtension
+            guard suffix.count >= 3, suffix.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+            return (name as NSString).deletingPathExtension
+        })
+        func occupied(_ candidate: URL) -> Bool {
+            fm.fileExists(atPath: candidate.path) || splitBases.contains(key(candidate.lastPathComponent))
+                || existing.contains(key(candidate.lastPathComponent))
+        }
+        guard occupied(url) else { return url }
         let dir = url.deletingLastPathComponent()
         let ext = url.pathExtension
         let stem = url.deletingPathExtension().lastPathComponent
         for i in 2...9999 {
             let candidate = dir.appendingPathComponent(ext.isEmpty ? "\(stem) \(i)" : "\(stem) \(i).\(ext)")
-            if !fm.fileExists(atPath: candidate.path) { return candidate }
+            if !occupied(candidate) { return candidate }
         }
         return dir.appendingPathComponent(UUID().uuidString + (ext.isEmpty ? "" : ".\(ext)"))
     }
