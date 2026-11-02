@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "  run %d: open() %.1fms, first tick %.1fms, worst gap %.1fms, dropped %d of %d frames, per ¼s %@": {
+      "extractionState": "manual"
+    },
     " (Annotated).png": {
       "extractionState": "manual"
     },
@@ -16,6 +19,12 @@
     " : full.map { ": {
       "extractionState": "manual"
     },
+    " : got.map(\\.rawValue).joined(separator: ": {
+      "extractionState": "manual"
+    },
+    " : t.raw)": {
+      "extractionState": "manual"
+    },
     " and certificate leaf[subject.OU] = ": {
       "extractionState": "manual"
     },
@@ -23,6 +32,9 @@
       "extractionState": "manual"
     },
     " band too small": {
+      "extractionState": "manual"
+    },
+    " c to f": {
       "extractionState": "manual"
     },
     " in ": {
@@ -38,6 +50,15 @@
       "extractionState": "manual"
     },
     " }.joined(separator: ": {
+      "extractionState": "manual"
+    },
+    "## Orbit": {
+      "extractionState": "manual"
+    },
+    "## Orbit 1.2.4": {
+      "extractionState": "manual"
+    },
+    "### Install": {
       "extractionState": "manual"
     },
     "#%02X%02X%02X": {
@@ -538,6 +559,28 @@
         }
       }
     },
+    "%ld hours %ld minutes ahead": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld시간 %ld분 빠름"
+          }
+        }
+      }
+    },
+    "%ld hours %ld minutes behind": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld시간 %ld분 느림"
+          }
+        }
+      }
+    },
     "%ld hours ahead": {
       "extractionState": "manual",
       "localizations": {
@@ -622,6 +665,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%ld개, 이 Mac에만 저장돼요."
+          }
+        }
+      }
+    },
+    "%ld minutes ahead": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld분 빠름"
+          }
+        }
+      }
+    },
+    "%ld minutes behind": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld분 느림"
           }
         }
       }
@@ -864,7 +929,19 @@
     "&quot;": {
       "extractionState": "manual"
     },
+    "(Official Video)": {
+      "extractionState": "manual"
+    },
     ") by AppleScript": {
+      "extractionState": "manual"
+    },
+    ") hover preserves metadata size": {
+      "extractionState": "manual"
+    },
+    ") small cover grows to fit metadata and footer": {
+      "extractionState": "manual"
+    },
+    ") }.count) failed": {
       "extractionState": "manual"
     },
     ")), submitting": {
@@ -885,7 +962,13 @@
     "+%.1f": {
       "extractionState": "manual"
     },
+    "+10c to f": {
+      "extractionState": "manual"
+    },
     ", ProcessInfo.processInfo.systemUptime)))": {
+      "extractionState": "manual"
+    },
+    ", jolt.strength))g": {
       "extractionState": "manual"
     },
     ", ms))ms": {
@@ -909,10 +992,28 @@
     ", unpaired": {
       "extractionState": "manual"
     },
+    "- Remastered 2011": {
+      "extractionState": "manual"
+    },
+    "- c to f": {
+      "extractionState": "manual"
+    },
+    "--10 c": {
+      "extractionState": "manual"
+    },
     "--type=": {
       "extractionState": "manual"
     },
     "--utility-sub-type=": {
+      "extractionState": "manual"
+    },
+    "-.5 km to m": {
+      "extractionState": "manual"
+    },
+    "-10 c to f": {
+      "extractionState": "manual"
+    },
+    "-Fpcn": {
       "extractionState": "manual"
     },
     "-J": {
@@ -924,7 +1025,13 @@
     "-P": {
       "extractionState": "manual"
     },
+    "-iTCP": {
+      "extractionState": "manual"
+    },
     "-nP": {
+      "extractionState": "manual"
+    },
+    "-sTCP:LISTEN": {
       "extractionState": "manual"
     },
     ".DS_Store": {
@@ -1058,6 +1165,9 @@
         }
       }
     },
+    "10 c to f": {
+      "extractionState": "manual"
+    },
     "10 fps": {
       "extractionState": "manual",
       "localizations": {
@@ -1084,6 +1194,9 @@
       }
     },
     "100 MB": {
+      "extractionState": "manual"
+    },
+    "10\\t": {
       "extractionState": "manual"
     },
     "10km in miles": {
@@ -1349,6 +1462,12 @@
           }
         }
       }
+    },
+    "45-minute ahead": {
+      "extractionState": "manual"
+    },
+    "45-minute behind": {
+      "extractionState": "manual"
     },
     "4h": {
       "extractionState": "manual",
@@ -3218,6 +3337,9 @@
         }
       }
     },
+    "Android Debug Bridge": {
+      "extractionState": "manual"
+    },
     "Animate song changes": {
       "extractionState": "manual",
       "localizations": {
@@ -3591,6 +3713,9 @@
     "AppleLanguages": {
       "extractionState": "manual"
     },
+    "AppleMultitouchDevice": {
+      "extractionState": "manual"
+    },
     "AppleMultitouchTrackpadHIDEventDriver": {
       "extractionState": "manual"
     },
@@ -3598,6 +3723,12 @@
       "extractionState": "manual"
     },
     "AppleSMC": {
+      "extractionState": "manual"
+    },
+    "AppleSPUHIDDevice": {
+      "extractionState": "manual"
+    },
+    "AppleSPUHIDDriver": {
       "extractionState": "manual"
     },
     "AppleScript": {
@@ -4023,6 +4154,12 @@
         }
       }
     },
+    "Assertions.json": {
+      "extractionState": "manual"
+    },
+    "Astro": {
+      "extractionState": "manual"
+    },
     "At least 10 characters": {
       "extractionState": "manual"
     },
@@ -4362,6 +4499,9 @@
           }
         }
       }
+    },
+    "BatchInterval": {
+      "extractionState": "manual"
     },
     "Battery": {
       "extractionState": "manual",
@@ -4865,6 +5005,9 @@
         }
       }
     },
+    "Bun": {
+      "extractionState": "manual"
+    },
     "Bundle ID": {
       "extractionState": "manual",
       "localizations": {
@@ -4972,6 +5115,9 @@
       "extractionState": "manual"
     },
     "CHTE": {
+      "extractionState": "manual"
+    },
+    "CLIPPED": {
       "extractionState": "manual"
     },
     "CNY": {
@@ -5494,6 +5640,9 @@
       }
     },
     "Cargo": {
+      "extractionState": "manual"
+    },
+    "Cargo.toml": {
       "extractionState": "manual"
     },
     "Carry a file or window into a corner — drop it on the Shelf, or into Mission Control.": {
@@ -6938,6 +7087,9 @@
         }
       }
     },
+    "Code Helper": {
+      "extractionState": "manual"
+    },
     "Code Helper (Plugin)": {
       "extractionState": "manual"
     },
@@ -7705,6 +7857,17 @@
         }
       }
     },
+    "Couldn’t allocate an archive entry.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압축 항목을 만들지 못했어요."
+          }
+        }
+      }
+    },
     "Couldn’t back up the vault": {
       "extractionState": "manual",
       "localizations": {
@@ -7756,6 +7919,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "마이크를 바꾸지 못했어요"
+          }
+        }
+      }
+    },
+    "Couldn’t create an archive part.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "분할 압축 파일을 만들지 못했어요."
           }
         }
       }
@@ -7958,6 +8132,17 @@
         }
       }
     },
+    "Couldn’t read the complete archive.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압축 파일 전체를 읽지 못했어요."
+          }
+        }
+      }
+    },
     "Couldn’t read the passwords.": {
       "extractionState": "manual",
       "localizations": {
@@ -7976,6 +8161,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Orbit을 바꾸지 못했어요"
+          }
+        }
+      }
+    },
+    "Couldn’t restart Orbit": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit을 다시 시작하지 못했어요"
           }
         }
       }
@@ -8031,6 +8227,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "단어 목록을 저장하지 못했어요"
+          }
+        }
+      }
+    },
+    "Couldn’t start Orbit safely": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit을 안전하게 시작하지 못했어요"
           }
         }
       }
@@ -8210,6 +8417,9 @@
           }
         }
       }
+    },
+    "Create React App": {
+      "extractionState": "manual"
     },
     "Create Vault": {
       "extractionState": "manual",
@@ -8778,6 +8988,9 @@
         }
       }
     },
+    "Deno": {
+      "extractionState": "manual"
+    },
     "Denver": {
       "extractionState": "manual"
     },
@@ -9113,6 +9326,12 @@
         }
       }
     },
+    "Discord": {
+      "extractionState": "manual"
+    },
+    "Discord Helper (Renderer)": {
+      "extractionState": "manual"
+    },
     "Disk": {
       "extractionState": "manual",
       "localizations": {
@@ -9230,6 +9449,9 @@
     "Divvy": {
       "extractionState": "manual"
     },
+    "Django": {
+      "extractionState": "manual"
+    },
     "Do the gesture now": {
       "extractionState": "manual",
       "localizations": {
@@ -9253,6 +9475,9 @@
       }
     },
     "Dock": {
+      "extractionState": "manual"
+    },
+    "Docker": {
       "extractionState": "manual"
     },
     "Documents": {
@@ -10615,6 +10840,9 @@
         }
       }
     },
+    "Expo": {
+      "extractionState": "manual"
+    },
     "Export (encrypted)": {
       "extractionState": "manual",
       "localizations": {
@@ -10788,6 +11016,12 @@
           }
         }
       }
+    },
+    "FAIL": {
+      "extractionState": "manual"
+    },
+    "FAIL duplicate instance lock": {
+      "extractionState": "manual"
     },
     "FNum": {
       "extractionState": "manual"
@@ -11133,6 +11367,17 @@
         }
       }
     },
+    "File names collide after normalization. Rename the conflicting files and try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이름 변환 후 파일 이름이 겹쳐요. 겹치는 파일의 이름을 바꾸고 다시 시도해 주세요."
+          }
+        }
+      }
+    },
     "Files": {
       "extractionState": "manual",
       "localizations": {
@@ -11370,6 +11615,9 @@
         }
       }
     },
+    "Firebase": {
+      "extractionState": "manual"
+    },
     "Firefox": {
       "extractionState": "manual"
     },
@@ -11428,6 +11676,9 @@
         }
       }
     },
+    "Flask": {
+      "extractionState": "manual"
+    },
     "Flat": {
       "extractionState": "manual",
       "localizations": {
@@ -11482,6 +11733,9 @@
           }
         }
       }
+    },
+    "Flow": {
+      "extractionState": "manual"
     },
     "Flycut": {
       "extractionState": "manual"
@@ -12187,6 +12441,9 @@
         }
       }
     },
+    "Gemfile": {
+      "extractionState": "manual"
+    },
     "General": {
       "extractionState": "manual",
       "localizations": {
@@ -12474,6 +12731,9 @@
           }
         }
       }
+    },
+    "Gunicorn": {
+      "extractionState": "manual"
     },
     "HDMI 1": {
       "extractionState": "manual",
@@ -13181,6 +13441,9 @@
           }
         }
       }
+    },
+    "Hugo": {
+      "extractionState": "manual"
     },
     "I": {
       "extractionState": "manual"
@@ -14050,6 +14313,15 @@
         }
       }
     },
+    "Java": {
+      "extractionState": "manual"
+    },
+    "Jekyll": {
+      "extractionState": "manual"
+    },
+    "Jupyter": {
+      "extractionState": "manual"
+    },
     "Just now": {
       "extractionState": "manual",
       "localizations": {
@@ -14065,6 +14337,9 @@
       "extractionState": "manual"
     },
     "KRW": {
+      "extractionState": "manual"
+    },
+    "Kalax": {
       "extractionState": "manual"
     },
     "Keep": {
@@ -15172,6 +15447,9 @@
     "Library/Developer/Xcode/DerivedData": {
       "extractionState": "manual"
     },
+    "Library/DoNotDisturb/DB": {
+      "extractionState": "manual"
+    },
     "Library/Group Containers": {
       "extractionState": "manual"
     },
@@ -15945,6 +16223,24 @@
     "MMMdEEEjmm": {
       "extractionState": "manual"
     },
+    "MTDeviceCreateList": {
+      "extractionState": "manual"
+    },
+    "MTDeviceGetSensorSurfaceDimensions": {
+      "extractionState": "manual"
+    },
+    "MTDeviceStart": {
+      "extractionState": "manual"
+    },
+    "MTDeviceStop": {
+      "extractionState": "manual"
+    },
+    "MTRegisterContactFrameCallback": {
+      "extractionState": "manual"
+    },
+    "MTUnregisterContactFrameCallback": {
+      "extractionState": "manual"
+    },
     "MXN": {
       "extractionState": "manual"
     },
@@ -16485,6 +16781,9 @@
         }
       }
     },
+    "Metro": {
+      "extractionState": "manual"
+    },
     "Mexico City": {
       "extractionState": "manual"
     },
@@ -16640,7 +16939,13 @@
         }
       }
     },
+    "ModeConfigurations.json": {
+      "extractionState": "manual"
+    },
     "Modify Settings": {
+      "extractionState": "manual"
+    },
+    "MongoDB": {
       "extractionState": "manual"
     },
     "MonitorControl": {
@@ -17182,6 +17487,9 @@
         }
       }
     },
+    "MySQL": {
+      "extractionState": "manual"
+    },
     "M월 d일 (E)": {
       "extractionState": "manual"
     },
@@ -17372,6 +17680,9 @@
           }
         }
       }
+    },
+    "NestJS": {
+      "extractionState": "manual"
     },
     "Network": {
       "extractionState": "manual",
@@ -17612,6 +17923,9 @@
           }
         }
       }
+    },
+    "Next.js": {
+      "extractionState": "manual"
     },
     "Night Drive": {
       "extractionState": "manual"
@@ -17967,6 +18281,9 @@
           }
         }
       }
+    },
+    "Node.js": {
+      "extractionState": "manual"
     },
     "NominalChargeCapacity": {
       "extractionState": "manual"
@@ -18555,6 +18872,9 @@
         }
       }
     },
+    "Nuxt": {
+      "extractionState": "manual"
+    },
     "O": {
       "extractionState": "manual"
     },
@@ -18754,6 +19074,9 @@
           }
         }
       }
+    },
+    "Ollama": {
+      "extractionState": "manual"
     },
     "OmniDiskSweeper": {
       "extractionState": "manual"
@@ -19908,6 +20231,15 @@
         }
       }
     },
+    "Orbit gesture keys": {
+      "extractionState": "manual"
+    },
+    "Orbit gesture mouse": {
+      "extractionState": "manual"
+    },
+    "Orbit gestures log": {
+      "extractionState": "manual"
+    },
     "Orbit includes Tavi. Installing takes a second; macOS then asks you to add it once.": {
       "extractionState": "manual",
       "localizations": {
@@ -19992,6 +20324,9 @@
       }
     },
     "Orbit keyboard cleaning": {
+      "extractionState": "manual"
+    },
+    "Orbit knock sensor": {
       "extractionState": "manual"
     },
     "Orbit learns your face from a few angles. Confirm with Touch ID or your password, then slowly move your head in a circle.": {
@@ -20434,6 +20769,9 @@
         }
       }
     },
+    "Out of Time (feat. Pyxis & Jay Diggs)": {
+      "extractionState": "manual"
+    },
     "Out of the way of full-screen videos and games.": {
       "extractionState": "manual",
       "localizations": {
@@ -20479,6 +20817,9 @@
       }
     },
     "P": {
+      "extractionState": "manual"
+    },
+    "PASS duplicate instance lock": {
       "extractionState": "manual"
     },
     "PASSWORD": {
@@ -21424,6 +21765,9 @@
         }
       }
     },
+    "Postgres": {
+      "extractionState": "manual"
+    },
     "Power": {
       "extractionState": "manual",
       "localizations": {
@@ -21738,6 +22082,12 @@
         }
       }
     },
+    "PrimaryUsage": {
+      "extractionState": "manual"
+    },
+    "PrimaryUsagePage": {
+      "extractionState": "manual"
+    },
     "Print it, then keep it somewhere safe": {
       "extractionState": "manual",
       "localizations": {
@@ -21875,6 +22225,9 @@
         }
       }
     },
+    "Puma": {
+      "extractionState": "manual"
+    },
     "Push the pointer into a corner of the screen to run anything in Orbit.": {
       "extractionState": "manual",
       "localizations": {
@@ -21931,6 +22284,9 @@
       }
     },
     "Python": {
+      "extractionState": "manual"
+    },
+    "Python http.server": {
       "extractionState": "manual"
     },
     "Q": {
@@ -22119,6 +22475,9 @@
       "extractionState": "manual"
     },
     "RUB": {
+      "extractionState": "manual"
+    },
+    "Rails": {
       "extractionState": "manual"
     },
     "Rain": {
@@ -22578,6 +22937,9 @@
         }
       }
     },
+    "Redis": {
+      "extractionState": "manual"
+    },
     "Redo (⇧⌘Z)": {
       "extractionState": "manual",
       "localizations": {
@@ -22679,6 +23041,9 @@
           }
         }
       }
+    },
+    "Remix": {
+      "extractionState": "manual"
     },
     "Remove": {
       "extractionState": "manual",
@@ -22915,6 +23280,9 @@
       }
     },
     "ReportCrash": {
+      "extractionState": "manual"
+    },
+    "ReportInterval": {
       "extractionState": "manual"
     },
     "Require a blink": {
@@ -23294,6 +23662,9 @@
         }
       }
     },
+    "Ruby": {
+      "extractionState": "manual"
+    },
     "Ruler": {
       "extractionState": "manual",
       "localizations": {
@@ -23547,6 +23918,24 @@
       "extractionState": "manual"
     },
     "SHA512": {
+      "extractionState": "manual"
+    },
+    "SLSMainConnectionID": {
+      "extractionState": "manual"
+    },
+    "SLSRemoveWindowsFromSpaces": {
+      "extractionState": "manual"
+    },
+    "SLSShowSpaces": {
+      "extractionState": "manual"
+    },
+    "SLSSpaceAddWindowsAndRemoveFromSpaces": {
+      "extractionState": "manual"
+    },
+    "SLSSpaceCreate": {
+      "extractionState": "manual"
+    },
+    "SLSSpaceSetAbsoluteLevel": {
       "extractionState": "manual"
     },
     "SSD": {
@@ -24728,6 +25117,12 @@
         }
       }
     },
+    "SensorPropertyPowerState": {
+      "extractionState": "manual"
+    },
+    "SensorPropertyReportingState": {
+      "extractionState": "manual"
+    },
     "Sent": {
       "extractionState": "manual",
       "localizations": {
@@ -24740,6 +25135,9 @@
       }
     },
     "Seoul": {
+      "extractionState": "manual"
+    },
+    "Seoul to India": {
       "extractionState": "manual"
     },
     "Separate mouse and trackpad": {
@@ -26785,6 +27183,9 @@
         }
       }
     },
+    "Storybook": {
+      "extractionState": "manual"
+    },
     "Straight": {
       "extractionState": "manual",
       "localizations": {
@@ -26795,6 +27196,9 @@
           }
         }
       }
+    },
+    "Streamlit": {
+      "extractionState": "manual"
     },
     "Strength": {
       "extractionState": "manual",
@@ -26864,6 +27268,9 @@
           }
         }
       }
+    },
+    "SvelteKit": {
+      "extractionState": "manual"
     },
     "Swap direction (⌘⇧S)": {
       "extractionState": "manual",
@@ -28769,6 +29176,17 @@
         }
       }
     },
+    "Too many archive parts. Choose a larger part size.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "분할 압축 파일이 너무 많아요. 조각 크기를 더 크게 선택해 주세요."
+          }
+        }
+      }
+    },
     "Tools": {
       "extractionState": "manual",
       "localizations": {
@@ -29324,6 +29742,9 @@
         }
       }
     },
+    "Turborepo": {
+      "extractionState": "manual"
+    },
     "Turn Back On": {
       "extractionState": "manual",
       "localizations": {
@@ -29818,6 +30239,9 @@
       "extractionState": "manual"
     },
     "UM52UU4B7L": {
+      "extractionState": "manual"
+    },
+    "US": {
       "extractionState": "manual"
     },
     "USB-C": {
@@ -30684,6 +31108,9 @@
         }
       }
     },
+    "Uvicorn": {
+      "extractionState": "manual"
+    },
     "V": {
       "extractionState": "manual"
     },
@@ -30749,6 +31176,9 @@
     "Vault.orbitvault": {
       "extractionState": "manual"
     },
+    "Vercel": {
+      "extractionState": "manual"
+    },
     "Version": {
       "extractionState": "manual",
       "localizations": {
@@ -30792,6 +31222,9 @@
           }
         }
       }
+    },
+    "Vibes": {
+      "extractionState": "manual"
     },
     "Video": {
       "extractionState": "manual",
@@ -30839,6 +31272,9 @@
           }
         }
       }
+    },
+    "Vite": {
+      "extractionState": "manual"
     },
     "Vivaldi": {
       "extractionState": "manual"
@@ -31723,6 +32159,9 @@
         }
       }
     },
+    "Wrangler": {
+      "extractionState": "manual"
+    },
     "Write / s": {
       "extractionState": "manual",
       "localizations": {
@@ -32189,7 +32628,10 @@
         }
       }
     },
-    "\\.\\d{3}$": {
+    "[MV]": {
+      "extractionState": "manual"
+    },
+    "\\.\\d{3,4}$": {
       "extractionState": "manual"
     },
     "\\.part(\\d+)\\.rar$": {
@@ -32228,7 +32670,7 @@
     "^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$": {
       "extractionState": "manual"
     },
-    "^\\d{3}$": {
+    "^\\d{3,4}$": {
       "extractionState": "manual"
     },
     "_CFPreferencesCopyMultipleWithContainer": {
@@ -32240,13 +32682,10 @@
     "_CFPreferencesSynchronizeWithContainer": {
       "extractionState": "manual"
     },
-    "_NSDoNotDisturbDisabledNotification": {
-      "extractionState": "manual"
-    },
-    "_NSDoNotDisturbEnabledNotification": {
-      "extractionState": "manual"
-    },
     "__MACOSX": {
+      "extractionState": "manual"
+    },
+    "__MACOSX/": {
       "extractionState": "manual"
     },
     "a  b → a b": {
@@ -32291,6 +32730,9 @@
     "always hidden": {
       "extractionState": "manual"
     },
+    "amazon music": {
+      "extractionState": "manual"
+    },
     "amsterdam 암스테르담": {
       "extractionState": "manual"
     },
@@ -32323,6 +32765,9 @@
       "extractionState": "manual"
     },
     "appearance dark light 화면 모드 다크": {
+      "extractionState": "manual"
+    },
+    "apple music": {
       "extractionState": "manual"
     },
     "application/json": {
@@ -32386,6 +32831,9 @@
       "extractionState": "manual"
     },
     "art.ginzburg.MiddleClick": {
+      "extractionState": "manual"
+    },
+    "artwork: a sharper cover from Apple Music": {
       "extractionState": "manual"
     },
     "at.EternalStorms.Yoink": {
@@ -32510,6 +32958,9 @@
     "boston 보스턴": {
       "extractionState": "manual"
     },
+    "both fingers land together": {
+      "extractionState": "manual"
+    },
     "brightnessForKeyboard:": {
       "extractionState": "manual"
     },
@@ -32625,6 +33076,9 @@
     "corners.whileDragging": {
       "extractionState": "manual"
     },
+    "couldn't open the motion sensor": {
+      "extractionState": "manual"
+    },
     "couldn’t create the event tap": {
       "extractionState": "manual"
     },
@@ -32729,6 +33183,9 @@
     "en_US.UTF-8": {
       "extractionState": "manual"
     },
+    "en_US_POSIX": {
+      "extractionState": "manual"
+    },
     "encrypted: YES": {
       "extractionState": "manual"
     },
@@ -32771,6 +33228,9 @@
     "first name": {
       "extractionState": "manual"
     },
+    "five-finger tap": {
+      "extractionState": "manual"
+    },
     "flt ": {
       "extractionState": "manual"
     },
@@ -32778,6 +33238,24 @@
       "extractionState": "manual"
     },
     "fold: couldn't bring the divider back; staying as is": {
+      "extractionState": "manual"
+    },
+    "four-finger spread": {
+      "extractionState": "manual"
+    },
+    "four-finger swipe down": {
+      "extractionState": "manual"
+    },
+    "four-finger swipe left": {
+      "extractionState": "manual"
+    },
+    "four-finger swipe right": {
+      "extractionState": "manual"
+    },
+    "four-finger swipe up": {
+      "extractionState": "manual"
+    },
+    "four-finger tap": {
       "extractionState": "manual"
     },
     "frame-%03d.png": {
@@ -32829,6 +33307,9 @@
       "extractionState": "manual"
     },
     "ha hectare hectares 헥타르": {
+      "extractionState": "manual"
+    },
+    "half-hour ahead": {
       "extractionState": "manual"
     },
     "hanoi 하노이 vietnam 베트남": {
@@ -32896,6 +33377,9 @@
     "iStat Menus": {
       "extractionState": "manual"
     },
+    "ignored: the Mac just woke or unlocked": {
+      "extractionState": "manual"
+    },
     "import ": {
       "extractionState": "manual"
     },
@@ -32953,6 +33437,12 @@
     "keyboard input sources 키보드 입력": {
       "extractionState": "manual"
     },
+    "keyboard: listening": {
+      "extractionState": "manual"
+    },
+    "keyboard: stopped": {
+      "extractionState": "manual"
+    },
     "keyboardClean.duration": {
       "extractionState": "manual"
     },
@@ -32966,6 +33456,9 @@
       "extractionState": "manual"
     },
     "kmh km/h kph 시속": {
+      "extractionState": "manual"
+    },
+    "knock.showWhatRan": {
       "extractionState": "manual"
     },
     "ko-KR": {
@@ -32998,13 +33491,31 @@
     "load: ": {
       "extractionState": "manual"
     },
+    "localhost:3000": {
+      "extractionState": "manual"
+    },
     "lock screen screen saver 잠금 화면": {
+      "extractionState": "manual"
+    },
+    "lock screen: SkyLight isn't available, nothing will show there": {
+      "extractionState": "manual"
+    },
+    "lock screen: face matched, but the saved password couldn't be read": {
       "extractionState": "manual"
     },
     "lock screen: face matched, typed the password and pressed Return": {
       "extractionState": "manual"
     },
+    "lock screen: locked, watching for you": {
+      "extractionState": "manual"
+    },
+    "lock screen: looking for your face": {
+      "extractionState": "manual"
+    },
     "lock screen: still locked after typing; pressing Return again": {
+      "extractionState": "manual"
+    },
+    "lock screen: the face check didn't start": {
       "extractionState": "manual"
     },
     "lock 화면 잠금": {
@@ -33494,7 +34005,16 @@
     "moscow 모스크바 러시아": {
       "extractionState": "manual"
     },
+    "motion sensor streaming": {
+      "extractionState": "manual"
+    },
     "mouse 마우스": {
+      "extractionState": "manual"
+    },
+    "mouse: listening": {
+      "extractionState": "manual"
+    },
+    "mouse: stopped": {
       "extractionState": "manual"
     },
     "movable:": {
@@ -33510,6 +34030,9 @@
       "extractionState": "manual"
     },
     "name@example.com": {
+      "extractionState": "manual"
+    },
+    "negative temperature is 14F": {
       "extractionState": "manual"
     },
     "net.freemacsoft.AppCleaner": {
@@ -33528,6 +34051,30 @@
       "extractionState": "manual"
     },
     "next track": {
+      "extractionState": "manual"
+    },
+    "next-server (v16.1.6)": {
+      "extractionState": "manual"
+    },
+    "next@15": {
+      "extractionState": "manual"
+    },
+    "no Accessibility permission": {
+      "extractionState": "manual"
+    },
+    "no face set up": {
+      "extractionState": "manual"
+    },
+    "no motion sensor on this Mac": {
+      "extractionState": "manual"
+    },
+    "no saved password": {
+      "extractionState": "manual"
+    },
+    "node · PID 4120 · ~/code/web · 2h": {
+      "extractionState": "manual"
+    },
+    "non-finite amount rejected": {
       "extractionState": "manual"
     },
     "not really there": {
@@ -33586,6 +34133,9 @@
     "nowplaying.popupPlace": {
       "extractionState": "manual"
     },
+    "nowplaying.sharperCovers": {
+      "extractionState": "manual"
+    },
     "npm, Homebrew, CocoaPods, Gradle and pip download caches.": {
       "extractionState": "manual",
       "localizations": {
@@ -33618,6 +34168,12 @@
           }
         }
       }
+    },
+    "one-finger pointing": {
+      "extractionState": "manual"
+    },
+    "one-finger tap": {
+      "extractionState": "manual"
     },
     "one-time password": {
       "extractionState": "manual"
@@ -33739,7 +34295,13 @@
     "pid=,ppid=,uid=,pcpu=,rss=,comm=": {
       "extractionState": "manual"
     },
+    "pinch with two fingers": {
+      "extractionState": "manual"
+    },
     "play/pause from Orbit — dropping the auto-pause": {
+      "extractionState": "manual"
+    },
+    "positive temperature is 50F": {
       "extractionState": "manual"
     },
     "previous track": {
@@ -33799,6 +34361,9 @@
     "s sec secs second seconds 초": {
       "extractionState": "manual"
     },
+    "same zone": {
+      "extractionState": "manual"
+    },
     "san francisco sf 샌프란시스코 실리콘밸리": {
       "extractionState": "manual"
     },
@@ -33812,9 +34377,6 @@
       "extractionState": "manual"
     },
     "scan: no camera found": {
-      "extractionState": "manual"
-    },
-    "scan: no enrolled face could be read": {
       "extractionState": "manual"
     },
     "screen time 스크린 타임": {
@@ -33859,6 +34421,9 @@
     "shelf.edgeReveal": {
       "extractionState": "manual"
     },
+    "short three-finger nudge": {
+      "extractionState": "manual"
+    },
     "singapore 싱가포르": {
       "extractionState": "manual"
     },
@@ -33875,6 +34440,12 @@
           }
         }
       }
+    },
+    "slow second finger": {
+      "extractionState": "manual"
+    },
+    "slow three-finger rest": {
+      "extractionState": "manual"
     },
     "snippet snippets text expander expansion abbreviation keyword template 스니펫 상용구 자동 완성 텍스트 확장": {
       "extractionState": "manual"
@@ -33933,6 +34504,15 @@
       "extractionState": "manual"
     },
     "store,": {
+      "extractionState": "manual"
+    },
+    "sub-hour ahead": {
+      "extractionState": "manual"
+    },
+    "sub-hour behind": {
+      "extractionState": "manual"
+    },
+    "switched off": {
       "extractionState": "manual"
     },
     "sydney 시드니 호주": {
@@ -33997,10 +34577,40 @@
     "the app before Orbit": {
       "extractionState": "manual"
     },
+    "the motion sensor opened but sent nothing": {
+      "extractionState": "manual"
+    },
     "the the": {
       "extractionState": "manual"
     },
+    "themes: %@ card %.0fx%.0f window %.0fx%.0f %@, worst stall %.0f ms": {
+      "extractionState": "manual"
+    },
     "this is the same face": {
+      "extractionState": "manual"
+    },
+    "three-finger click": {
+      "extractionState": "manual"
+    },
+    "three-finger drag diagonal": {
+      "extractionState": "manual"
+    },
+    "three-finger pinch": {
+      "extractionState": "manual"
+    },
+    "three-finger swipe down": {
+      "extractionState": "manual"
+    },
+    "three-finger swipe left": {
+      "extractionState": "manual"
+    },
+    "three-finger swipe right": {
+      "extractionState": "manual"
+    },
+    "three-finger swipe up": {
+      "extractionState": "manual"
+    },
+    "three-finger tap": {
       "extractionState": "manual"
     },
     "time ": {
@@ -34013,6 +34623,15 @@
       "extractionState": "manual"
     },
     "timer delay countdown 타이머 지연": {
+      "extractionState": "manual"
+    },
+    "tiptap left": {
+      "extractionState": "manual"
+    },
+    "tiptap right": {
+      "extractionState": "manual"
+    },
+    "tiptap with moving rest finger": {
       "extractionState": "manual"
     },
     "tokyo 도쿄 동경": {
@@ -34028,6 +34647,9 @@
       "extractionState": "manual"
     },
     "trackpad gestures 트랙패드": {
+      "extractionState": "manual"
+    },
+    "trackpad: stopped": {
       "extractionState": "manual"
     },
     "translate deepl papago google 번역 번역기": {
@@ -34058,6 +34680,15 @@
           }
         }
       }
+    },
+    "two-finger scroll": {
+      "extractionState": "manual"
+    },
+    "two-finger scroll sideways": {
+      "extractionState": "manual"
+    },
+    "two-finger tap (right click)": {
+      "extractionState": "manual"
     },
     "type:": {
       "extractionState": "manual"
@@ -34106,6 +34737,9 @@
     "updates.lastChecked": {
       "extractionState": "manual"
     },
+    "updates.lastRunVersion": {
+      "extractionState": "manual"
+    },
     "us$": {
       "extractionState": "manual"
     },
@@ -34150,6 +34784,12 @@
     "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; /usr/bin/open \"$2\"": {
       "extractionState": "manual"
     },
+    "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; output=$(/usr/bin/open \"$2\" 2>&1) || /usr/bin/logger -t Orbit \"Could not restart $2: $output\"": {
+      "extractionState": "manual"
+    },
+    "whole hour": {
+      "extractionState": "manual"
+    },
     "wifi wi-fi 와이파이 무선": {
       "extractionState": "manual"
     },
@@ -34180,6 +34820,9 @@
       "extractionState": "manual"
     },
     "you@example.com": {
+      "extractionState": "manual"
+    },
+    "youtube music": {
       "extractionState": "manual"
     },
     "yyyy-MM-dd 'at' HH.mm.ss": {
@@ -34315,6 +34958,9 @@
           }
         }
       }
+    },
+    "↩ C": {
+      "extractionState": "manual"
     },
     "⇧⌘C": {
       "extractionState": "manual"

@@ -51,12 +51,27 @@ enum OrbitPlanet {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var duplicateInstance = false
+    private var launchURLs: [URL] = []
+
+    private func startupFailed(_ error: Error) -> Never {
+        let alert = NSAlert()
+        alert.messageText = "Couldn’t start Orbit safely".loc
+        alert.informativeText = error.localizedDescription
+        alert.runModal()
+        exit(EXIT_FAILURE)
+    }
+
     func applicationWillFinishLaunching(_ notification: Notification) {
+        do { duplicateInstance = try !OrbitInstance.claim() }
+        catch { startupFailed(error) }
+        guard !duplicateInstance else { return }
         // SwiftUI's MenuBarExtra item; keep Orbit's mark next to the calendar on the right.
         Pref.seedMenuBarPosition("Item-0", 120)
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        guard !duplicateInstance else { handoffLaunch(notification); return }
         Pref.register()
         NotchPrefs.register()
         _ = Permissions.shared
@@ -118,14 +133,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !Pref.defaults.bool(forKey: Pref.onboarded) {
             OnboardingWindow.show()
         }
+        OrbitInstance.ready = true
+    }
+
+    private func handoffLaunch(_ notification: Notification) {
+        let urls = launchURLs
+        launchURLs.removeAll()
+        OrbitInstance.handoff(urls: urls) { result in
+            switch result {
+            case .success(false):
+                // AppKit may have delivered more documents while awaiting acknowledgement.
+                if self.launchURLs.isEmpty { exit(EXIT_SUCCESS) }
+                self.handoffLaunch(notification)
+            case .success(true):
+                self.duplicateInstance = false
+                Pref.seedMenuBarPosition("Item-0", 120)
+                self.applicationDidFinishLaunching(notification)
+                let pending = urls + self.launchURLs
+                self.launchURLs.removeAll()
+                if !pending.isEmpty { Archives.shared.open(pending) }
+            case .failure(let error): self.startupFailed(error)
+            }
+        }
     }
 
     /// Archives double-clicked in Finder once Orbit opens them (Archives page).
     func application(_ application: NSApplication, open urls: [URL]) {
-        Archives.shared.open(urls)
+        if duplicateInstance { launchURLs += urls }
+        else { Archives.shared.open(urls) }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        OrbitInstance.ready = false
+        guard !duplicateInstance else { return }
         AudioMixer.shared.shutdown() // never leave an app's audio muted behind a dead tap
     }
 
@@ -134,10 +174,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Logging out, restarting and shutting down always quit.
     /// Closed-lid mode must never outlive Orbit.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard !duplicateInstance else { return .terminateNow }
         if !AppQuit.confirmed, !AppQuit.systemIsEnding, MainWindow.shared.isOpen {
             MainWindow.shared.close()
             return .terminateCancel
         }
+        OrbitInstance.ready = false
         guard KeepAwake.shared.closedLidActive else { return .terminateNow }
         Task {
             await KeepAwake.shared.restoreForQuit()
@@ -148,7 +190,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Clicking Orbit in the Dock or Finder while it's running opens the app window.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        MainWindow.show()
+        if !duplicateInstance { MainWindow.show() }
         return true
     }
 
@@ -283,6 +325,12 @@ enum DebugHook {
             GestureLog.write("selftest: \(lines.filter { $0.hasPrefix("FAIL") }.count) of \(lines.count) failed")
         case "playpause": NowPlaying.shared.togglePlayPause(heard: true)
         case "widget-themes": NowPlayingWidgetController.shared.debugCycleThemes()
+        case "issues-selftest":
+            var lines = SmartAnswers.regressionTests() + NowPlayingWidgetView.regressionTests()
+            do { lines.append(try OrbitInstance.rejectsSecondLock() ? "PASS duplicate instance lock" : "FAIL duplicate instance lock") }
+            catch { lines.append("FAIL duplicate instance lock: \(error)") }
+            lines.forEach { perfLog("issues-selftest \($0)") }
+            perfLog("issues-selftest: \(lines.filter { $0.hasPrefix("FAIL") }.count) failed")
         case "bench-apps":
             // Opens the Apps grid five times and logs how its first two seconds play: main-thread
             // frame gaps are what reads as lag.
@@ -331,6 +379,7 @@ enum DebugHook {
 
     @MainActor static func perfLog(_ line: String) {
         let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Orbit/perf.log")
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         let line = "\(Date()) \(line)\n"
         if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
         else { try? Data(line.utf8).write(to: url) }

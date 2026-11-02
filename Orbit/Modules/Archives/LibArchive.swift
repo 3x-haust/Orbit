@@ -166,16 +166,18 @@ enum ArchiveError: LocalizedError, Equatable {
 }
 
 extension LibArchive {
+    static let maxVolumeCount = 9999
+
     /// Every part of a split or multi-volume set, in order, starting from whichever part was opened.
     static func volumes(for url: URL) -> [URL] {
         let dir = url.deletingLastPathComponent()
         let name = url.lastPathComponent
         let fm = FileManager.default
-        // name.zip.001, name.7z.002 …
-        if let r = name.range(of: #"\.\d{3}$"#, options: .regularExpression) {
+        // name.zip.001, name.7z.002 … through .9999.
+        if let r = name.range(of: #"\.\d{3,4}$"#, options: .regularExpression) {
             let stem = String(name[..<r.lowerBound])
             var parts: [URL] = []
-            for i in 1...9999 {
+            for i in 1...maxVolumeCount {
                 let u = dir.appendingPathComponent(String(format: "%@.%03d", stem, i))
                 guard fm.fileExists(atPath: u.path) else { break }
                 parts.append(u)
@@ -187,7 +189,7 @@ extension LibArchive {
             let stem = String(name[..<r.lowerBound])
             let digits = name[r].filter(\.isNumber).count
             var parts: [URL] = []
-            for i in 1...9999 {
+            for i in 1...maxVolumeCount {
                 let n = String(format: "%0\(digits)d", i)
                 let u = dir.appendingPathComponent("\(stem).part\(n).rar")
                 guard fm.fileExists(atPath: u.path) else { break }
@@ -277,7 +279,7 @@ extension LibArchive {
     /// "Photos.tar.gz" → "Photos", "Movie.7z.001" → "Movie", "Set.part1.rar" → "Set".
     static func baseName(of url: URL) -> String {
         var name = url.lastPathComponent
-        if let r = name.range(of: #"\.\d{3}$"#, options: .regularExpression) { name.removeSubrange(r) }
+        if let r = name.range(of: #"\.\d{3,4}$"#, options: .regularExpression) { name.removeSubrange(r) }
         if let r = name.range(of: #"\.part\d+\.rar$"#, options: [.regularExpression, .caseInsensitive]) { name.replaceSubrange(r, with: ".rar") }
         let lower = name.lowercased()
         for ext in [".tar.gz", ".tar.bz2", ".tar.xz", ".tar.zst", ".tar.lz", ".tar.lzma", ".tar.z"] where lower.hasSuffix(ext) {

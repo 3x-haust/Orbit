@@ -60,8 +60,10 @@ enum SmartAnswers {
     private static func split(_ q: String) -> (Double, String, String?)? {
         let text = q.trimmingCharacters(in: .whitespaces)
         var i = text.startIndex
+        if i < text.endIndex, text[i] == "-" || text[i] == "+" { i = text.index(after: i) }
+        let numberStart = i
         while i < text.endIndex, text[i].isNumber || text[i] == "," || text[i] == "." { i = text.index(after: i) }
-        guard i > text.startIndex else { return nil }
+        guard i > numberStart else { return nil }
         var number = String(text[..<i])
         var rest = text[i...].trimmingCharacters(in: .whitespaces)
         // Korean magnitudes, but only when a unit follows ("5만원", not "5만").
@@ -70,14 +72,14 @@ enum SmartAnswers {
             rest = String(rest.dropFirst()).trimmingCharacters(in: .whitespaces)
             break
         }
-        guard let value = amount(number), !rest.isEmpty else { return nil }
+        guard let value = amount(number), value.isFinite, !rest.isEmpty else { return nil }
         var words = rest.split(separator: " ").map(String.init)
         if let c = words.firstIndex(where: { ["to", "in", "into", "->", "→", "=", "에서", "으로", "로"].contains($0.lowercased()) }) {
             let from = words[..<c].joined(separator: " "), to = words[(c + 1)...].joined(separator: " ")
             guard !from.isEmpty else { return nil }
             return (value, from, to.isEmpty ? nil : to)
         }
-        guard words.count <= 2 else { return nil }
+        guard !words.isEmpty, words.count <= 2 else { return nil }
         let from = words.removeFirst()
         return (value, from, words.first)
     }
@@ -99,7 +101,8 @@ enum SmartAnswers {
         for (symbol, code) in [("$", "usd"), ("€", "eur"), ("£", "gbp"), ("¥", "jpy"), ("₩", "krw")] where text.hasPrefix(symbol) {
             let rest = text.dropFirst().trimmingCharacters(in: .whitespaces)
             let parts = rest.split(separator: " ", maxSplits: 1).map(String.init)
-            text = parts[0] + code + (parts.count > 1 ? " " + parts[1] : "")
+            guard let number = parts.first else { return [] }
+            text = number + code + (parts.count > 1 ? " " + parts[1] : "")
         }
         guard let (value, fromWord, toWord) = split(text), let from = Currency.code(fromWord) else { return [] }
         let local = Locale.current.currency?.identifier ?? "KRW"
@@ -156,11 +159,56 @@ enum SmartAnswers {
         f.setLocalizedDateFormatFromTemplate("jmm")
         let time = f.string(from: now)
         f.setLocalizedDateFormatFromTemplate("MMMdEEE")
-        let diff = (zone.secondsFromGMT(for: now) - TimeZone.current.secondsFromGMT(for: now)) / 3600
-        let offset = diff == 0 ? "Same time as here".loc : (diff > 0 ? "%ld hours ahead".loc(diff) : "%ld hours behind".loc(-diff))
+        let diff = zone.secondsFromGMT(for: now) - TimeZone.current.secondsFromGMT(for: now)
+        let offset = clockOffset(seconds: diff)
         return [answer(id: "clock.\(zone.identifier)", title: time, subtitle: "\(city) · \(f.string(from: now)) · \(offset)",
                        symbol: "clock", tint: .orange, accessory: "World Clock", copy: time)]
     }
+
+    private static func clockOffset(seconds: Int) -> String {
+        guard seconds != 0 else { return "Same time as here".loc }
+        let minutes = abs(seconds) / 60
+        let hours = minutes / 60, remainder = minutes % 60
+        if remainder == 0 {
+            return seconds > 0 ? "%ld hours ahead".loc(hours) : "%ld hours behind".loc(hours)
+        }
+        if hours == 0 {
+            return seconds > 0 ? "%ld minutes ahead".loc(remainder) : "%ld minutes behind".loc(remainder)
+        }
+        return seconds > 0 ? "%ld hours %ld minutes ahead".loc(hours, remainder) : "%ld hours %ld minutes behind".loc(hours, remainder)
+    }
+
+    #if DEBUG
+    /// Offline checks of the production parser and result builders.
+    static func regressionTests() -> [String] {
+        var lines: [String] = []
+        func check(_ ok: Bool, _ label: String) { lines.append("\(ok ? "PASS" : "FAIL") \(label)") }
+        for symbol in ["$", "€", "£", "¥", "₩"] {
+            for suffix in ["", " ", "   ", "\t"] { check(currency(symbol + suffix).isEmpty, "bare currency \(symbol)\(suffix.count)") }
+        }
+        for (query, expected) in [("-10 c to f", -10.0), ("+10c to f", 10.0), ("-.5 km to m", -0.5), ("-5만원을 달러로", -50000.0)] {
+            check(split(query)?.0 == expected, "signed amount \(query)")
+        }
+        for query in ["-", "+", "- c to f", "--10 c", "10\t", "10   "] {
+            check(split(query) == nil, "incomplete amount \(query)")
+        }
+        check(split(String(repeating: "9", count: 400) + " c to f") == nil, "non-finite amount rejected")
+        let formatter = MeasurementFormatter()
+        formatter.unitOptions = .providedUnit
+        formatter.numberFormatter.maximumFractionDigits = 4
+        check(units("-10 c to f").first?.title == formatter.string(from: Measurement(value: 14, unit: UnitTemperature.fahrenheit)), "negative temperature is 14F")
+        check(units("10 c to f").first?.title == formatter.string(from: Measurement(value: 50, unit: UnitTemperature.fahrenheit)), "positive temperature is 50F")
+        check(clockOffset(seconds: -12600) == "%ld hours %ld minutes behind".loc(3, 30), "Seoul to India")
+        check(clockOffset(seconds: 12600) == "%ld hours %ld minutes ahead".loc(3, 30), "half-hour ahead")
+        check(clockOffset(seconds: 20700) == "%ld hours %ld minutes ahead".loc(5, 45), "45-minute ahead")
+        check(clockOffset(seconds: -20700) == "%ld hours %ld minutes behind".loc(5, 45), "45-minute behind")
+        check(clockOffset(seconds: -1800) == "%ld minutes behind".loc(30), "sub-hour behind")
+        check(clockOffset(seconds: 1800) == "%ld minutes ahead".loc(30), "sub-hour ahead")
+        check(clockOffset(seconds: 3600) == "%ld hours ahead".loc(1), "whole hour")
+        check(clockOffset(seconds: 0) == "Same time as here".loc, "same zone")
+        return lines
+    }
+    #endif
 
     // MARK: Dictionary
 

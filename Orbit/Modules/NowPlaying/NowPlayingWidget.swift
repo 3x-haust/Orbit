@@ -171,7 +171,10 @@ struct NowPlayingWidgetView: View {
                 Spacer(minLength: 6)
                 footer(controlSize: max(13, min(20, style.artworkSize * 0.17)))
             }
-            .frame(width: style.textWidth, height: style.artworkSize, alignment: Alignment(horizontal: style.horizontalAlignment, vertical: .center))
+            // Small covers must not cap the combined height of metadata and controls.
+            .frame(width: style.textWidth)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(minHeight: style.artworkSize, alignment: Alignment(horizontal: style.horizontalAlignment, vertical: .center))
         }
     }
 
@@ -381,6 +384,40 @@ struct NowPlayingWidgetView: View {
     private func control(_ symbol: String, _ size: Double, tint: Color? = nil, light: Bool = false, action: @escaping () -> Void) -> some View {
         WidgetControl(symbol: symbol, size: size, color: tint ?? (light ? .white : ink), enabled: content.live, action: action)
     }
+
+    #if DEBUG
+    @MainActor static func regressionTests() -> [String] {
+        var style = WidgetStyle.standard
+        style.artworkSize = 48
+        style.titleSize = 26
+        style.showAlbum = true
+        style.background = .solid
+        style.animate = false
+        var content = WidgetContent.still
+        content.title = "Out of Time (feat. Pyxis & Jay Diggs)"
+        content.artist = "Kalax"
+        func size(_ style: WidgetStyle, hovering: Bool) -> CGSize {
+            NSHostingView(rootView: NowPlayingWidgetView(style: style, content: content, hovering: hovering).fixedSize()).fittingSize
+        }
+        let full = size(style, hovering: false), hover = size(style, hovering: true)
+        style.showArtist = false
+        style.showAlbum = false
+        style.showProgress = false
+        style.showControls = false
+        let minimal = size(style, hovering: false)
+        var lines = ["\(full.height > minimal.height + 20 ? "PASS" : "FAIL") small cover grows to fit metadata and footer",
+                     "\(abs(full.height - hover.height) < 1 && abs(full.width - hover.width) < 1 ? "PASS" : "FAIL") hover preserves metadata size"]
+        let screen = CGRect(x: -1440, y: 0, width: 1440, height: 900)
+        for anchor in WidgetStyle.Anchor.allCases {
+            style.anchor = anchor
+            style.dx = -5000
+            style.dy = 5000
+            let frame = NowPlayingWidgetController.cardFrame(style: style, size: full, in: screen)
+            lines.append("\(screen.contains(frame) ? "PASS" : "FAIL") widget stays inside screen at \(anchor.rawValue)")
+        }
+        return lines
+    }
+    #endif
 
     static func time(_ s: Double) -> String {
         let t = Int(s.rounded(.down))
