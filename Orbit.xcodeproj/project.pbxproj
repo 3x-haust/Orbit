@@ -256,9 +256,9 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstSubfolderSpec = 10;
 			files = (
-				7053460C20BED1AECE46810F /* OrbitFanHelper in Embed Dependencies */,
+				91F840B3C051FD28BBE8E49E /* OrbitMediaRemote.dylib in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -267,9 +267,9 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 10;
+			dstSubfolderSpec = 6;
 			files = (
-				91F840B3C051FD28BBE8E49E /* OrbitMediaRemote.dylib in Embed Dependencies */,
+				7053460C20BED1AECE46810F /* OrbitFanHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;

@@ -276,6 +276,14 @@ final class NowPlaying {
                         isMusic: (p.isMusicApp ?? Self.musicApps.contains(bundle)) || webMusic
                             || Self.isMusicService(bundle, appName: p.appName))
         let playing = p.playing ?? ((p.rate ?? 0) > 0)
+        // A browser's video that ran to its end, such as a streaming site's preview, isn't playing: the
+        // tab keeps reporting it after the user has moved on to another title.
+        let ended = !playing && Self.isBrowser(bundle) && Self.ranOut(elapsed: p.elapsed, duration: p.duration)
+        if ended {
+            if sources.sources[bundle] != nil { NowPlayingLog.write("not showing \(bundle): its video ended") }
+            sources.forget(bundle)
+        }
+        let shows = allowed && !ended
         var report = Report(track: new, rate: p.rate ?? (playing ? 1 : 0), elapsed: p.elapsed, anchor: Date())
         if p.elapsed != nil {
             // MediaRemote's timestamp can be well in the past for paused tracks.
@@ -284,7 +292,7 @@ final class NowPlaying {
             report.elapsed = old.elapsed
             report.anchor = old.anchor
         }
-        if allowed {
+        if shows {
             if let art = p.artwork, let data = Data(base64Encoded: art), let image = NSImage(data: data) {
                 covers[bundle] = (new.key, p.artworkKey, image)
             } else if let c = covers[bundle], c.key != new.key {
@@ -292,8 +300,14 @@ final class NowPlaying {
                 covers[bundle] = p.artworkKey != nil && c.artworkKey == p.artworkKey ? (new.key, c.artworkKey, c.image) : nil
             }
         }
-        sources.report(bundle, key: new.key, info: report, playing: playing, allowed: allowed, now: Self.uptime)
+        sources.report(bundle, key: new.key, info: report, playing: playing, allowed: shows, now: Self.uptime)
         settle()
+    }
+
+    /// Stopped at its last second.
+    static func ranOut(elapsed: Double?, duration: Double?) -> Bool {
+        guard let elapsed, let duration, duration > 0 else { return false }
+        return elapsed >= duration - 1
     }
 
     private static var uptime: TimeInterval { ProcessInfo.processInfo.systemUptime }
