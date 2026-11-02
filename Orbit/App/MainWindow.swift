@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum Page: String, CaseIterable, Identifiable {
-    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, knock, gestures, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, apps, system, overlaps, shortcuts, setup, general
+    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, knock, gestures, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, apps, system, ports, overlaps, shortcuts, setup, general
     var id: String { rawValue }
 
     var title: String { englishTitle.loc }
@@ -35,6 +35,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .storage: "Storage"
         case .awake: "Awake"
         case .system: "System"
+        case .ports: "Ports"
         case .overlaps: "Overlapping Apps"
         case .shortcuts: "Shortcuts"
         case .setup: "Permissions"
@@ -70,6 +71,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .storage: "internaldrive"
         case .awake: "cup.and.saucer"
         case .system: "cpu"
+        case .ports: "network"
         case .overlaps: "square.on.square.dashed"
         case .shortcuts: "keyboard"
         case .setup: "lock.shield"
@@ -82,7 +84,7 @@ enum Page: String, CaseIterable, Identifiable {
         (nil, [.home, .ring]),
         ("Essentials", [.capture, .clipboard, .windows, .translate, .spell, .snippets, .passwords]),
         ("Utilities", [.sound, .nowPlaying, .notch, .input, .awake, .menubar, .corners, .knock, .gestures, .runner, .applock]),
-        ("Mac", [.apps, .system, .displays, .battery, .storage, .archives]),
+        ("Mac", [.apps, .system, .ports, .displays, .battery, .storage, .archives]),
         ("Settings", [.overlaps, .shortcuts, .setup, .general]),
     ]
 }
@@ -251,6 +253,7 @@ struct MainView: View {
         case .windows: WindowsPage()
         case .awake: AwakePage()
         case .system: SystemPage()
+        case .ports: PortsPage()
         case .translate: TranslatePage()
         case .spell: SpellPage()
         case .input: InputPage()
