@@ -206,7 +206,15 @@
       "캐시",
       "cache",
       "휴지통",
-      "trash"
+      "trash",
+      "시스템 데이터",
+      "system data",
+      "시뮬레이터",
+      "simulator",
+      "에뮬레이터",
+      "emulator",
+      "가상 머신",
+      "docker"
     ],
     [
       "앱 삭제",

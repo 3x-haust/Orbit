@@ -252,6 +252,28 @@
         }
       }
     },
+    "%@ forgets what’s in it: settings, sign-ins and downloads, as if it were just installed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@이(가) 설정, 로그인, 다운로드를 잊고 막 설치한 상태가 돼요."
+          }
+        }
+      }
+    },
+    "%@ found, in %ld places": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$ld곳에서 %1$@ 찾음"
+          }
+        }
+      }
+    },
     "%@ free": {
       "extractionState": "manual",
       "localizations": {
@@ -665,6 +687,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%ld개, 이 Mac에만 저장돼요."
+          }
+        }
+      }
+    },
+    "%ld local backups. macOS keeps them until your backup disk is back, and deletes them by itself when space runs low.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac에 있는 백업 %ld개예요. 백업 디스크를 다시 연결할 때까지 남겨 두고, 공간이 모자라면 macOS가 알아서 지워요."
           }
         }
       }
@@ -1778,6 +1811,17 @@
         }
       }
     },
+    "A folder you keep in your home folder. Storage’s categories above don’t include it, so it’s part of System & Other.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈 폴더에 직접 둔 폴더예요. 위의 저장 공간 분류에는 안 들어가서 ‘시스템 및 기타’로 잡혀요."
+          }
+        }
+      }
+    },
     "A fresh unique ID": {
       "extractionState": "manual",
       "localizations": {
@@ -1785,6 +1829,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "새 고유 ID"
+          }
+        }
+      }
+    },
+    "A hidden folder a command-line tool or app made.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "명령줄 도구나 앱이 만든 숨김 폴더예요."
           }
         }
       }
@@ -3340,6 +3395,28 @@
     "Android Debug Bridge": {
       "extractionState": "manual"
     },
+    "Android SDK": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Android SDK"
+          }
+        }
+      }
+    },
+    "Android emulators": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Android 에뮬레이터"
+          }
+        }
+      }
+    },
     "Animate song changes": {
       "extractionState": "manual",
       "localizations": {
@@ -3468,6 +3545,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "앱 캐시"
+          }
+        }
+      }
+    },
+    "App containers aren’t counted": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 컨테이너는 아직 안 셌어요"
+          }
+        }
+      }
+    },
+    "App data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 데이터"
           }
         }
       }
@@ -3678,6 +3777,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apple 앱"
+          }
+        }
+      }
+    },
+    "Apple apps and services": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 앱과 서비스"
           }
         }
       }
@@ -3923,6 +4033,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "소리를 내는 앱이 바로 여기에 나타나요."
+          }
+        }
+      }
+    },
+    "Apps’ files for all users": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 사용자용 앱 파일"
           }
         }
       }
@@ -4396,6 +4517,17 @@
         }
       }
     },
+    "Backed up %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 백업"
+          }
+        }
+      }
+    },
     "Background": {
       "extractionState": "manual",
       "localizations": {
@@ -4423,6 +4555,17 @@
     },
     "BackgroundShortcutRunner": {
       "extractionState": "manual"
+    },
+    "Backups Finder made of your devices. Finder › your device › Manage Backups shows the same list.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder가 만든 기기 백업이에요. Finder › 기기 › 백업 관리에도 같은 목록이 있어요."
+          }
+        }
+      }
     },
     "Bahasa Indonesia": {
       "extractionState": "manual"
@@ -4961,6 +5104,28 @@
         }
       }
     },
+    "Builds you archived to upload or share, with their debug symbols. Keep the ones for versions people still use.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업로드하거나 공유하려고 아카이브한 빌드와 디버그 심볼이에요. 아직 쓰는 버전 것은 남겨 두세요."
+          }
+        }
+      }
+    },
+    "Builds, indexes and logs for every project you opened. Xcode rebuilds a project’s when you open it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "열어 본 모든 프로젝트의 빌드, 인덱스, 로그예요. 프로젝트를 열면 Xcode가 다시 만들어요."
+          }
+        }
+      }
+    },
     "Built in": {
       "extractionState": "manual",
       "localizations": {
@@ -5007,6 +5172,17 @@
     },
     "Bun": {
       "extractionState": "manual"
+    },
+    "Bun itself and its package cache.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun 본체와 패키지 캐시예요."
+          }
+        }
+      }
     },
     "Bundle ID": {
       "extractionState": "manual",
@@ -5162,6 +5338,17 @@
     },
     "CVC": {
       "extractionState": "manual"
+    },
+    "Cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캐시"
+          }
+        }
+      }
     },
     "Cached files": {
       "extractionState": "manual",
@@ -6420,6 +6607,17 @@
         }
       }
     },
+    "Claude Code: sessions, settings and plugins.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code의 세션, 설정, 플러그인이에요."
+          }
+        }
+      }
+    },
     "Clean Keyboard": {
       "extractionState": "manual",
       "localizations": {
@@ -7093,6 +7291,17 @@
     "Code Helper (Plugin)": {
       "extractionState": "manual"
     },
+    "Codex CLI: sessions, logs and plugins.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex CLI의 세션, 로그, 플러그인이에요."
+          }
+        }
+      }
+    },
     "Collects on-device usage signals for Siri and Screen Time.": {
       "extractionState": "manual",
       "localizations": {
@@ -7209,6 +7418,17 @@
         }
       }
     },
+    "Comes back": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 생겨요"
+          }
+        }
+      }
+    },
     "Comfort": {
       "extractionState": "manual",
       "localizations": {
@@ -7307,6 +7527,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "압축하기…"
+          }
+        }
+      }
+    },
+    "Conda packages and environments.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conda 패키지와 환경이에요."
+          }
+        }
+      }
+    },
+    "Conda with its environments.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conda와 그 환경들이에요."
           }
         }
       }
@@ -7539,6 +7781,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "QR 코드 복사됨"
+          }
+        }
+      }
+    },
+    "Copies of simulators Xcode makes to run tests in parallel. It makes them again for the next test run.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode가 테스트를 동시에 돌리려고 만든 시뮬레이터 복사본이에요. 다음 테스트 때 다시 만들어요."
           }
         }
       }
@@ -7941,6 +8194,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "보관함을 만들지 못했어요."
+          }
+        }
+      }
+    },
+    "Couldn’t delete %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 지우지 못했어요"
           }
         }
       }
@@ -8526,6 +8790,17 @@
     "CurrentCapacity": {
       "extractionState": "manual"
     },
+    "Cursor extensions": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cursor 확장"
+          }
+        }
+      }
+    },
     "Curved": {
       "extractionState": "manual",
       "localizations": {
@@ -8676,6 +8951,17 @@
         }
       }
     },
+    "Dart & Flutter packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dart·Flutter 패키지"
+          }
+        }
+      }
+    },
     "Dart / Flutter pub": {
       "extractionState": "manual"
     },
@@ -8791,6 +9077,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "요일"
+          }
+        }
+      }
+    },
+    "Debug symbols Xcode copied from iPhones and Watches you connected. It copies them again next time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결했던 iPhone·Watch에서 Xcode가 복사해 온 디버그 심볼이에요. 다음에 연결하면 다시 복사해요."
           }
         }
       }
@@ -8991,6 +9288,17 @@
     "Deno": {
       "extractionState": "manual"
     },
+    "Deno and its cache.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deno와 그 캐시예요."
+          }
+        }
+      }
+    },
     "Denver": {
       "extractionState": "manual"
     },
@@ -9127,6 +9435,17 @@
         }
       }
     },
+    "Developer tools & caches": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개발 도구와 캐시"
+          }
+        }
+      }
+    },
     "Development build — installing is off": {
       "extractionState": "manual",
       "localizations": {
@@ -9151,6 +9470,17 @@
     },
     "Device Utilization %": {
       "extractionState": "manual"
+    },
+    "Device support files": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기기 지원 파일"
+          }
+        }
+      }
     },
     "Dia": {
       "extractionState": "manual"
@@ -9480,6 +9810,39 @@
     "Docker": {
       "extractionState": "manual"
     },
+    "Docker, UTM and sandboxed apps keep their data in containers macOS protects. Allow Full Disk Access, then analyze again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker, UTM, 샌드박스 앱은 macOS가 보호하는 컨테이너에 데이터를 둬요. 전체 디스크 접근을 허용한 뒤 다시 분석하세요."
+          }
+        }
+      }
+    },
+    "Docker’s command-line settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker 명령줄 설정이에요."
+          }
+        }
+      }
+    },
+    "Docker’s virtual disk: your images, containers, volumes and build cache. Shrink it with `docker system prune`, or Docker › Troubleshoot › Clean / Purge data.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker의 가상 디스크예요. 이미지, 컨테이너, 볼륨, 빌드 캐시가 들어 있어요. `docker system prune`이나 Docker › Troubleshoot › Clean / Purge data로 줄이세요."
+          }
+        }
+      }
+    },
     "Documents": {
       "extractionState": "manual",
       "localizations": {
@@ -9630,6 +9993,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "다운로드 완료"
+          }
+        }
+      }
+    },
+    "Downloaded Java dependencies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내려받은 Java 의존성이에요."
+          }
+        }
+      }
+    },
+    "Downloaded dependencies and build caches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내려받은 의존성과 빌드 캐시예요."
+          }
+        }
+      }
+    },
+    "Downloaded system assets": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내려받은 시스템 에셋"
           }
         }
       }
@@ -10964,6 +11360,17 @@
         }
       }
     },
+    "Expo’s command-line cache.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expo 명령줄 캐시예요."
+          }
+        }
+      }
+    },
     "Extension": {
       "extractionState": "manual",
       "localizations": {
@@ -10971,6 +11378,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "확장 프로그램"
+          }
+        }
+      }
+    },
+    "Extensions you installed in Cursor.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cursor에 설치한 확장이에요."
+          }
+        }
+      }
+    },
+    "Extensions you installed in VS Code.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code에 설치한 확장이에요."
           }
         }
       }
@@ -11396,6 +11825,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일·폴더는 압축하고, 압축 파일은 풀어요"
+          }
+        }
+      }
+    },
+    "Files every account on this Mac can open; some apps keep downloads and caches here too.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 Mac의 모든 계정이 열 수 있는 파일이에요. 일부 앱은 다운로드나 캐시도 여기에 둬요."
           }
         }
       }
@@ -12188,6 +12628,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "무료, 설정 없음. 글자는 Google로 보내져요."
+          }
+        }
+      }
+    },
+    "Freed %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 비움"
+          }
+        }
+      }
+    },
+    "Frees about %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "약 %@가 비워져요."
           }
         }
       }
@@ -13442,6 +13904,17 @@
         }
       }
     },
+    "Hugging Face models": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hugging Face 모델"
+          }
+        }
+      }
+    },
     "Hugo": {
       "extractionState": "manual"
     },
@@ -14039,6 +14512,17 @@
         }
       }
     },
+    "Installed for every account by apps like Adobe or Logitech. Remove them with that app’s uninstaller.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adobe나 Logitech 같은 앱이 모든 계정용으로 설치한 파일이에요. 그 앱의 제거 프로그램으로 지우세요."
+          }
+        }
+      }
+    },
     "Installing Tavi…": {
       "extractionState": "manual",
       "localizations": {
@@ -14133,6 +14617,17 @@
         }
       }
     },
+    "It comes back when it’s needed, so the next launch or build may take a little longer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "필요하면 다시 생기니까, 다음 실행이나 빌드가 조금 오래 걸릴 수 있어요."
+          }
+        }
+      }
+    },
     "It ends right away, without a chance to clean up.": {
       "extractionState": "manual",
       "localizations": {
@@ -14184,6 +14679,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "새 아이콘을 자기 막대로 숨겨요 — Orbit 달력도요. Barbee를 끄면 Orbit이 대신해요."
+          }
+        }
+      }
+    },
+    "It holds things you made or set up. Make sure you don’t need it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직접 만들거나 설정한 게 들어 있어요. 필요 없는지 확인하세요."
           }
         }
       }
@@ -14285,6 +14791,17 @@
         }
       }
     },
+    "It’s gone until you download it again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 받기 전까지는 없어요."
+          }
+        }
+      }
+    },
     "It’s removed from the vault on this Mac. This can’t be undone.": {
       "extractionState": "manual",
       "localizations": {
@@ -14292,6 +14809,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 Mac의 보관함에서 지워져요. 되돌릴 수 없어요."
+          }
+        }
+      }
+    },
+    "It’s using this data right now.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지금 이 데이터를 쓰고 있어요."
           }
         }
       }
@@ -14315,6 +14843,17 @@
     },
     "Java": {
       "extractionState": "manual"
+    },
+    "Java versions installed with SDKMAN.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SDKMAN으로 설치한 Java 버전들이에요."
+          }
+        }
+      }
     },
     "Jekyll": {
       "extractionState": "manual"
@@ -14943,6 +15482,17 @@
     "L": {
       "extractionState": "manual"
     },
+    "LM Studio models": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 모델"
+          }
+        }
+      }
+    },
     "LOGIN": {
       "extractionState": "manual"
     },
@@ -15335,6 +15885,17 @@
         }
       }
     },
+    "Left behind by deleted apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지운 앱이 남긴 것"
+          }
+        }
+      }
+    },
     "Leftovers": {
       "extractionState": "manual",
       "localizations": {
@@ -15671,6 +16232,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "링크"
+          }
+        }
+      }
+    },
+    "Linux virtual machines that run your containers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "컨테이너를 돌리는 Linux 가상 머신이에요."
           }
         }
       }
@@ -16033,6 +16605,17 @@
         }
       }
     },
+    "Logs and diagnostics macOS writes as it runs. It deletes old ones by itself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS가 돌아가면서 남기는 로그와 진단 정보예요. 오래된 건 알아서 지워요."
+          }
+        }
+      }
+    },
     "London": {
       "extractionState": "manual"
     },
@@ -16109,6 +16692,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "얼굴을 찾는 중…"
+          }
+        }
+      }
+    },
+    "Looking through System Data… %ld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 데이터 살펴보는 중… %ld%%"
           }
         }
       }
@@ -16576,6 +17170,17 @@
         }
       }
     },
+    "Measuring the biggest folders… %@ so far": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가장 큰 폴더 재는 중… 지금까지 %@"
+          }
+        }
+      }
+    },
     "Measuring… %ld%%": {
       "extractionState": "manual",
       "localizations": {
@@ -16655,6 +17260,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "사용 중인 메모리"
+          }
+        }
+      }
+    },
+    "Memory macOS moved to disk when RAM ran short, and the copy it keeps for deep sleep. Restarting shrinks the swap.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메모리가 모자랄 때 macOS가 디스크로 옮긴 내용과, 깊은 잠자기용 메모리 사본이에요. 재시동하면 스왑이 줄어요."
           }
         }
       }
@@ -16941,6 +17557,39 @@
     },
     "ModeConfigurations.json": {
       "extractionState": "manual"
+    },
+    "Models and datasets Python libraries downloaded from Hugging Face. They download again on next use.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python 라이브러리가 Hugging Face에서 받은 모델과 데이터셋이에요. 다음에 쓸 때 다시 받아요."
+          }
+        }
+      }
+    },
+    "Models you downloaded in LM Studio.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio에서 받은 모델이에요."
+          }
+        }
+      }
+    },
+    "Models you pulled with Ollama. `ollama pull` downloads one again, and `ollama rm` removes just one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama로 받은 모델이에요. `ollama pull`로 다시 받고, 하나만 지우려면 `ollama rm`을 쓰세요."
+          }
+        }
+      }
     },
     "Modify Settings": {
       "extractionState": "manual"
@@ -17278,6 +17927,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "동작 쪽으로 움직이고 — 휙 지나치거나 놓으세요"
+          }
+        }
+      }
+    },
+    "Move “%@” to the Trash?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”을(를) 휴지통으로 옮길까요?"
           }
         }
       }
@@ -18029,6 +18689,28 @@
         }
       }
     },
+    "No installed app has this ID. Probably left behind by an app you deleted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 ID를 쓰는 앱이 설치돼 있지 않아요. 지운 앱이 남긴 것 같아요."
+          }
+        }
+      }
+    },
+    "No installed app uses it, but check the name before removing it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설치된 앱 중엔 이걸 쓰는 게 없지만, 지우기 전에 이름을 한 번 확인하세요."
+          }
+        }
+      }
+    },
     "No items yet": {
       "extractionState": "manual",
       "localizations": {
@@ -18278,6 +18960,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "고른 보관함 파일 없음"
+          }
+        }
+      }
+    },
+    "Node versions installed with Volta.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volta로 설치한 Node 버전들이에요."
+          }
+        }
+      }
+    },
+    "Node versions installed with nvm.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nvm으로 설치한 Node 버전들이에요."
           }
         }
       }
@@ -19077,6 +19781,17 @@
     },
     "Ollama": {
       "extractionState": "manual"
+    },
+    "Ollama models": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama 모델"
+          }
+        }
+      }
     },
     "OmniDiskSweeper": {
       "extractionState": "manual"
@@ -20181,6 +20896,17 @@
         }
       }
     },
+    "Orbit couldn’t tell which app made this.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어떤 앱이 만든 건지 Orbit이 알아내지 못했어요."
+          }
+        }
+      }
+    },
     "Orbit does these jobs too. Turn macOS’s off to free the keys, or hand the keys to Orbit.": {
       "extractionState": "manual",
       "localizations": {
@@ -20736,6 +21462,17 @@
         }
       }
     },
+    "Other folders in your home": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈 폴더의 다른 폴더"
+          }
+        }
+      }
+    },
     "Other languages": {
       "extractionState": "manual",
       "localizations": {
@@ -20892,6 +21629,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "패키지 관리자 캐시"
+          }
+        }
+      }
+    },
+    "Packages pub downloaded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pub이 내려받은 패키지예요."
           }
         }
       }
@@ -21685,6 +22433,17 @@
         }
       }
     },
+    "Pod spec repositories.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod 스펙 저장소예요."
+          }
+        }
+      }
+    },
     "Podcast": {
       "extractionState": "manual",
       "localizations": {
@@ -22214,6 +22973,17 @@
         }
       }
     },
+    "Programs and data command-line tools installed for you, in ~/.local/bin and ~/.local/share.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "명령줄 도구가 ~/.local/bin과 ~/.local/share에 설치한 프로그램과 데이터예요."
+          }
+        }
+      }
+    },
     "Progress": {
       "extractionState": "manual",
       "localizations": {
@@ -22227,6 +22997,17 @@
     },
     "Puma": {
       "extractionState": "manual"
+    },
+    "Purgeable space": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제거 가능 공간"
+          }
+        }
+      }
     },
     "Push the pointer into a corner of the screen to run anything in Orbit.": {
       "extractionState": "manual",
@@ -22288,6 +23069,17 @@
     },
     "Python http.server": {
       "extractionState": "manual"
+    },
+    "Python versions installed with pyenv.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pyenv로 설치한 Python 버전들이에요."
+          }
+        }
+      }
     },
     "Q": {
       "extractionState": "manual"
@@ -22387,6 +23179,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 종료"
+          }
+        }
+      }
+    },
+    "Quit %@ first": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 먼저 종료하세요"
           }
         }
       }
@@ -22526,6 +23329,17 @@
     },
     "Raycast": {
       "extractionState": "manual"
+    },
+    "Re-downloadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다시 받을 수 있어요"
+          }
+        }
+      }
     },
     "Read": {
       "extractionState": "manual",
@@ -23118,6 +23932,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "삭제…"
+          }
+        }
+      }
+    },
+    "Removing it is safe, but you’ll have to download it again to use it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "지워도 괜찮지만, 다시 쓰려면 새로 받아야 해요."
           }
         }
       }
@@ -23888,6 +24713,39 @@
         }
       }
     },
+    "Rust crates, and tools you installed with cargo.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust 크레이트와 cargo로 설치한 도구예요."
+          }
+        }
+      }
+    },
+    "Rust toolchains": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust 툴체인"
+          }
+        }
+      }
+    },
+    "Rust versions rustup installed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rustup이 설치한 Rust 버전들이에요."
+          }
+        }
+      }
+    },
     "S": {
       "extractionState": "manual"
     },
@@ -24059,6 +24917,17 @@
     },
     "San Francisco": {
       "extractionState": "manual"
+    },
+    "Sandbox": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샌드박스"
+          }
+        }
+      }
     },
     "Save": {
       "extractionState": "manual",
@@ -24346,6 +25215,17 @@
         }
       }
     },
+    "Saved windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장된 윈도우"
+          }
+        }
+      }
+    },
     "Save…": {
       "extractionState": "manual",
       "localizations": {
@@ -24408,6 +25288,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "예약"
+          }
+        }
+      }
+    },
+    "Scratch files and caches apps are using right now. macOS clears ones untouched for 3 days, and restarting clears more.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱이 지금 쓰고 있는 임시 파일과 캐시예요. 3일 동안 안 쓴 건 macOS가 지우고, 재시동하면 더 지워져요."
           }
         }
       }
@@ -25358,6 +26249,17 @@
         }
       }
     },
+    "Settings for command-line tools.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "명령줄 도구의 설정이에요."
+          }
+        }
+      }
+    },
     "Settings…": {
       "extractionState": "manual",
       "localizations": {
@@ -25412,6 +26314,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "공유"
+          }
+        }
+      }
+    },
+    "Shared data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유 데이터"
+          }
+        }
+      }
+    },
+    "Shared folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유 폴더"
+          }
+        }
+      }
+    },
+    "Shared libraries simulators load quickly from. They come back on the next launch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시뮬레이터가 빨리 켜지려고 쓰는 공유 라이브러리예요. 다음 실행 때 다시 생겨요."
           }
         }
       }
@@ -26126,6 +27061,17 @@
         }
       }
     },
+    "Simulated iPhones and iPads from Xcode, with the apps and data installed in them. Xcode makes a fresh one whenever you need it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode가 만든 가상 iPhone·iPad와 그 안에 설치된 앱과 데이터예요. 필요하면 Xcode가 언제든 새로 만들어요."
+          }
+        }
+      }
+    },
     "Simulator caches": {
       "extractionState": "manual",
       "localizations": {
@@ -26133,6 +27079,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "시뮬레이터 캐시"
+          }
+        }
+      }
+    },
+    "Simulator runtimes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시뮬레이터 런타임"
           }
         }
       }
@@ -26496,6 +27453,17 @@
         }
       }
     },
+    "Some of it couldn’t be moved": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일부를 옮기지 못했어요"
+          }
+        }
+      }
+    },
     "Some paths are too long for Windows": {
       "extractionState": "manual",
       "localizations": {
@@ -26514,6 +27482,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "문제가 생겼어요"
+          }
+        }
+      }
+    },
+    "Something you made or set up. Check before removing it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "직접 만들거나 설정한 거예요. 지우기 전에 확인하세요."
           }
         }
       }
@@ -26572,6 +27551,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "스페이스"
+          }
+        }
+      }
+    },
+    "Space macOS frees on its own when an app needs it: iCloud files it can download again, old snapshots, caches. It already counts as available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱이 공간을 필요로 하면 macOS가 알아서 비우는 공간이에요. 다시 받을 수 있는 iCloud 파일, 오래된 스냅샷, 캐시 등이고, 이미 사용 가능 공간에 포함돼 있어요."
           }
         }
       }
@@ -27272,6 +28262,17 @@
     "SvelteKit": {
       "extractionState": "manual"
     },
+    "Swap and sleep image": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스왑과 잠자기 이미지"
+          }
+        }
+      }
+    },
     "Swap direction (⌘⇧S)": {
       "extractionState": "manual",
       "localizations": {
@@ -27290,6 +28291,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "스왑 사용"
+          }
+        }
+      }
+    },
+    "Swift Package Manager’s caches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager 캐시예요."
+          }
+        }
+      }
+    },
+    "Swift tools installed with Mint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mint로 설치한 Swift 도구예요."
           }
         }
       }
@@ -27424,6 +28447,17 @@
         }
       }
     },
+    "System Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 데이터"
+          }
+        }
+      }
+    },
     "System Info": {
       "extractionState": "manual"
     },
@@ -27445,6 +28479,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "시스템 설정 › 개인정보 보호 › 자동화"
+          }
+        }
+      }
+    },
+    "System image %@ · %@ · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 이미지 %1$@ · %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "System images for emulators, NDKs and build tools. Android Studio’s SDK Manager downloads them again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "에뮬레이터용 시스템 이미지, NDK, 빌드 도구예요. Android Studio의 SDK Manager에서 다시 받을 수 있어요."
+          }
+        }
+      }
+    },
+    "System logs": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 로그"
           }
         }
       }
@@ -27694,6 +28761,17 @@
         }
       }
     },
+    "Temporary files": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "임시 파일"
+          }
+        }
+      }
+    },
     "Terminal, Activity Monitor, Disk Utility…": {
       "extractionState": "manual",
       "localizations": {
@@ -27723,6 +28801,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "매우 약함"
+          }
+        }
+      }
+    },
+    "Test simulators": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "테스트용 시뮬레이터"
           }
         }
       }
@@ -28162,6 +29251,17 @@
         }
       }
     },
+    "The iOS, watchOS and visionOS versions simulators run, several GB each. Xcode › Settings › Components downloads them again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시뮬레이터가 돌리는 iOS·watchOS·visionOS 버전이에요. 하나에 몇 GB씩이고, Xcode › 설정 › 구성 요소에서 다시 받을 수 있어요."
+          }
+        }
+      }
+    },
     "The keys are sent to the app in front, as if you pressed them.": {
       "extractionState": "manual",
       "localizations": {
@@ -28578,6 +29678,17 @@
         }
       }
     },
+    "Things macOS downloads as you need them: Apple Intelligence models, voices, fonts, wallpapers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "필요할 때 macOS가 받아 두는 것들이에요. Apple Intelligence 모델, 음성, 서체, 배경화면 등이에요."
+          }
+        }
+      }
+    },
     "This Mac can't be told to stop charging": {
       "extractionState": "manual",
       "localizations": {
@@ -28706,6 +29817,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 Orbit 빌드에는 Tavi가 없어요."
+          }
+        }
+      }
+    },
+    "This can’t be undone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "되돌릴 수 없어요."
           }
         }
       }
@@ -28961,6 +30083,17 @@
         }
       }
     },
+    "Time Machine snapshots": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time Machine 스냅샷"
+          }
+        }
+      }
+    },
     "Time's Up": {
       "extractionState": "manual",
       "localizations": {
@@ -29183,6 +30316,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "분할 압축 파일이 너무 많아요. 조각 크기를 더 크게 선택해 주세요."
+          }
+        }
+      }
+    },
+    "Toolchains, package downloads and caches command-line tools keep in hidden folders in your home folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "명령줄 도구가 홈 폴더의 숨김 폴더에 두는 툴체인, 패키지 다운로드, 캐시예요."
           }
         }
       }
@@ -31123,6 +32267,17 @@
     "VPN": {
       "extractionState": "manual"
     },
+    "VS Code extensions": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code 확장"
+          }
+        }
+      }
+    },
     "VS Code extensions.": {
       "extractionState": "manual",
       "localizations": {
@@ -31255,6 +32410,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "영상"
+          }
+        }
+      }
+    },
+    "Virtual Android phones from Android Studio, with the apps and data installed in them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Android Studio가 만든 가상 Android 폰과 그 안에 설치된 앱과 데이터예요."
+          }
+        }
+      }
+    },
+    "Virtual machines & backups": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 머신과 백업"
+          }
+        }
+      }
+    },
+    "Virtual machines and their disks. Removing one deletes everything installed in it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가상 머신과 그 디스크예요. 지우면 그 안에 설치한 것도 전부 지워져요."
           }
         }
       }
@@ -31514,6 +32702,17 @@
         }
       }
     },
+    "Web data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 데이터"
+          }
+        }
+      }
+    },
     "Web · unofficial": {
       "extractionState": "manual",
       "localizations": {
@@ -31649,6 +32848,17 @@
     "What it was changed to.": {
       "extractionState": "manual"
     },
+    "What macOS and Apple’s apps keep in your Library: Spotlight, Siri, iCloud, Photos analysis and more.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS와 Apple 앱이 보관함(Library)에 두는 것들이에요. Spotlight, Siri, iCloud, 사진 분석 등이에요."
+          }
+        }
+      }
+    },
     "What shows when you click the runner in the menu bar.": {
       "extractionState": "manual",
       "localizations": {
@@ -31689,6 +32899,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "재생 중인 곡과 컨트롤, 오늘 남은 일정을 보여줘요."
+          }
+        }
+      }
+    },
+    "Whatever made it makes it again, so removing it is safe.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "만든 쪽이 다시 만들어서 지워도 괜찮아요."
+          }
+        }
+      }
+    },
+    "What’s in System Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 데이터에 뭐가 있을까"
           }
         }
       }
@@ -32281,6 +33513,28 @@
     "XProtect": {
       "extractionState": "manual"
     },
+    "Xcode archives": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 아카이브"
+          }
+        }
+      }
+    },
+    "Xcode build data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 빌드 데이터"
+          }
+        }
+      }
+    },
     "Xcode leftovers": {
       "extractionState": "manual",
       "localizations": {
@@ -32310,6 +33564,17 @@
     "Yarn": {
       "extractionState": "manual"
     },
+    "Yarn’s cache.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 캐시예요."
+          }
+        }
+      }
+    },
     "Yoink": {
       "extractionState": "manual"
     },
@@ -32320,6 +33585,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Finder 휴지통에서 되살릴 수 있어요."
+          }
+        }
+      }
+    },
+    "You can restore it from the Trash until you empty it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "휴지통을 비우기 전까지는 되살릴 수 있어요."
           }
         }
       }
@@ -32452,6 +33728,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "비밀 키는 그대로라 비상 키트도 그대로 쓸 수 있어요. 새 비밀번호만 기억하세요."
+          }
+        }
+      }
+    },
+    "Your data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내 데이터"
           }
         }
       }
@@ -33374,6 +34661,28 @@
         }
       }
     },
+    "iOS simulators": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS 시뮬레이터"
+          }
+        }
+      }
+    },
+    "iPhone and iPad backups": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone·iPad 백업"
+          }
+        }
+      }
+    },
     "iStat Menus": {
       "extractionState": "manual"
     },
@@ -33702,6 +35011,17 @@
         }
       }
     },
+    "macOS manages this itself. It’s here so you know what it is.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS가 직접 관리해요. 뭔지 알 수 있게 보여주는 거예요."
+          }
+        }
+      }
+    },
     "macOS needs this process to keep running.": {
       "extractionState": "manual",
       "localizations": {
@@ -33709,6 +35029,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS가 돌아가려면 이 프로세스가 필요해요."
+          }
+        }
+      }
+    },
+    "macOS or an app is still using it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS나 앱이 아직 쓰고 있어요."
+          }
+        }
+      }
+    },
+    "macOS puts app data, simulators, virtual machines and its own files in one number. Orbit splits it up, says what each part is and whether it’s safe to remove.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS는 앱 데이터, 시뮬레이터, 가상 머신, 시스템 파일을 하나로 묶어 보여줘요. Orbit이 나눠서 각각 뭔지, 지워도 되는지 알려줘요."
           }
         }
       }
@@ -34147,6 +35489,17 @@
         }
       }
     },
+    "npm’s download cache.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 다운로드 캐시예요."
+          }
+        }
+      }
+    },
     "of %@": {
       "extractionState": "manual",
       "localizations": {
@@ -34300,6 +35653,17 @@
     },
     "play/pause from Orbit — dropping the auto-pause": {
       "extractionState": "manual"
+    },
+    "pnpm’s package store.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 패키지 저장소예요."
+          }
+        }
+      }
     },
     "positive temperature is 50F": {
       "extractionState": "manual"
