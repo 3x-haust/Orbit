@@ -33,6 +33,11 @@ struct StoragePage: View {
                 SectionLabel("Applications")
                 AppsSection(model: model)
             }
+
+            VStack(alignment: .leading, spacing: 10) {
+                SectionLabel("System Data")
+                SystemDataSection()
+            }
         }
         .onAppear { model.loadApps() }
     }

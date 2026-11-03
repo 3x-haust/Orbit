@@ -166,6 +166,7 @@
 		B2DD31C35449CFAC6F5B9700 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97AED2AC3768F1343DE68432 /* Components.swift */; };
 		B423192D64F51FD3B937F2FC /* KeepAwake.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08DE212A220C02C6FCCCD94 /* KeepAwake.swift */; };
 		B5EF133BA2C6F410894C3972 /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C453D6B049BDC5E89C9D01E7 /* FloatingPanel.swift */; };
+		B6C5327EEA73F87C124619A0 /* SystemDataSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEDE972E99413DFBF2A77A7 /* SystemDataSection.swift */; };
 		B815E008CA00ED54EF5BCC8A /* ProcessMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C940636FD06C619EF972A1 /* ProcessMonitor.swift */; };
 		B98E4EB6CE7606D414C54944 /* MenuBarHosted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E9AEC5664C3886B8209C81 /* MenuBarHosted.swift */; };
 		B9E5D859297C72ADF1C7AC12 /* DisplayOSD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC008F374651F8B3CC0EE4C9 /* DisplayOSD.swift */; };
@@ -262,9 +263,9 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 10;
+			dstSubfolderSpec = 6;
 			files = (
-				91F840B3C051FD28BBE8E49E /* OrbitMediaRemote.dylib in Embed Dependencies */,
+				7053460C20BED1AECE46810F /* OrbitFanHelper in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -273,9 +274,9 @@
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 6;
+			dstSubfolderSpec = 10;
 			files = (
-				7053460C20BED1AECE46810F /* OrbitFanHelper in Embed Dependencies */,
+				91F840B3C051FD28BBE8E49E /* OrbitMediaRemote.dylib in Embed Dependencies */,
 			);
 			name = "Embed Dependencies";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -463,6 +464,7 @@
 		AC008F374651F8B3CC0EE4C9 /* DisplayOSD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayOSD.swift; sourceTree = "<group>"; };
 		AC3B0AE48620FA7C72BABF08 /* MenuBarItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarItems.swift; sourceTree = "<group>"; };
 		ACBC129BC60C7332FBB67A36 /* MediaRemoteBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRemoteBridge.swift; sourceTree = "<group>"; };
+		AEEDE972E99413DFBF2A77A7 /* SystemDataSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemDataSection.swift; sourceTree = "<group>"; };
 		AEFA412A301AB72A0E130D71 /* RunnerArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerArt.swift; sourceTree = "<group>"; };
 		AF44D6AA48F4A732ABD4EE60 /* HotCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotCorners.swift; sourceTree = "<group>"; };
 		B167E009A6A3666B48414731 /* NowPlayingOverlays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingOverlays.swift; sourceTree = "<group>"; };
@@ -1150,6 +1152,7 @@
 				472157B9EF67D8CC446A6B25 /* SoundPage.swift */,
 				8D01D214F9BE89F6D5CB009B /* SpellPage.swift */,
 				19B625B29CA88CF3EEFC3825 /* StoragePage.swift */,
+				AEEDE972E99413DFBF2A77A7 /* SystemDataSection.swift */,
 				49862B624EB337A69185BEFA /* SystemPage.swift */,
 				86DCC7972F2E413E448F7991 /* ToolPages.swift */,
 			);
@@ -1536,6 +1539,7 @@
 				4663717942B58BD844CBA579 /* SystemActions.swift in Sources */,
 				FDF834871AB1090684521666 /* SystemData.swift in Sources */,
 				D82DCDEB7B1340AE9AA8FC5F /* SystemDataModel.swift in Sources */,
+				B6C5327EEA73F87C124619A0 /* SystemDataSection.swift in Sources */,
 				A6E94EBE53BBF05B4A1F1FEF /* SystemInfo.swift in Sources */,
 				DD87576FE6F2246A061F5A03 /* SystemPage.swift in Sources */,
 				F89B39C38EDCCAA0F4E8C32B /* SystemVolume.swift in Sources */,
