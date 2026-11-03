@@ -116,6 +116,12 @@ enum ArchiveEngine {
     private static func extractWithLibArchive(_ archive: URL, password: String?, encoding: NameEncoding, into dest: URL, cancel: ArchiveCancel,
                                               progress: @escaping @Sendable (Double) -> Void) throws {
         guard la.available else { throw ArchiveError.unavailable }
+        // Secure-symlink extraction refuses any path through a symlink, the folder's own included:
+        // /tmp and /var are links to /private, so name the real folder. (resolvingSymlinksInPath puts /var back.)
+        let dest = realpath(dest.path, nil).map { p in
+            defer { free(p) }
+            return URL(fileURLWithPath: String(cString: p), isDirectory: true)
+        } ?? dest
         let volumes = LibArchive.volumes(for: archive)
         // ZIPs keep a directory of names at the end, so reading them all first is cheap; other
         // formats are guessed name by name.
