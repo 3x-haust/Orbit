@@ -21,6 +21,14 @@ enum DiskSize {
         return protected.contains { path == $0 || path.hasPrefix($0 + "/") }
     }
 
+    /// Other apps' containers: off-limits to the cleaner, but System Data lists them once Orbit has Full Disk Access.
+    static let appData = ["Library/Containers", "Library/Group Containers"].map { home.appendingPathComponent($0).path }
+
+    /// Protected and not an app's container: mail, messages, photos, keychains and the like.
+    static func isPersonal(path: String) -> Bool {
+        isProtected(path: path) && !appData.contains { path == $0 || path.hasPrefix($0 + "/") }
+    }
+
     /// Total allocated bytes of a file or folder. `skip` paths (and protected ones) aren't descended.
     /// Uses fts with physical traversal: never follows symlinks, and it's several times faster than URL enumeration.
     static func of(_ url: URL, skip: Set<String> = [], guarded: Bool = true) -> Int64 {

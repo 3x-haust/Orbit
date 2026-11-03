@@ -315,6 +315,9 @@ final class StorageModel {
         loadApps()
     }
 
+    /// Something else on the page freed space.
+    func diskChanged() { disk = DiskInfo.read() }
+
     func appRemoved(_ url: URL) {
         withAnimation(.spring(duration: 0.4)) { apps.removeAll { $0.url.path == url.path } }
         disk = DiskInfo.read()
