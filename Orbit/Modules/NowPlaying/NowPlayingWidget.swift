@@ -57,6 +57,25 @@ struct WidgetContent {
     }
 }
 
+/// Geometry shared by the card and its settings preview. No player state or persistence.
+enum WidgetLayout {
+    static let controlWidthFactor = 1.75
+
+    static func controlSize(preferred: Double, width: Double, showLike: Bool, alignment: WidgetStyle.Align) -> Double {
+        // Three transport buttons plus their two gaps; the outer row also spaces its
+        // alignment spacers and optional Like button. Budget every gap, even at minimum width.
+        let transport = (0.8 + 1.15 + 0.8) * controlWidthFactor + 2 * 0.45
+        let gaps = 1 + (alignment == .center ? 1 : 0) + (showLike ? 1 : 0)
+        let units = transport + (showLike ? 0.8 * controlWidthFactor : 0) + Double(gaps) * 0.45
+        return min(preferred, max(0, width) / units)
+    }
+
+    static func previewScale(content: CGSize, available: CGSize) -> CGFloat {
+        min(1, max(0, available.width - 30) / max(1, content.width),
+            max(0, available.height - 30) / max(1, content.height))
+    }
+}
+
 /// The widget itself, drawn the same on the desktop, in the notch preview and on the settings page.
 struct NowPlayingWidgetView: View {
     let style: WidgetStyle
@@ -193,27 +212,48 @@ struct NowPlayingWidgetView: View {
         artwork(style.artworkSize, corner: style.cornerRadius)
             .overlay(alignment: .bottom) {
                 if hovering {
-                    VStack(spacing: 6) {
-                        Spacer(minLength: 0)
-                        if style.showTitle {
-                            Text(content.title).font(style.font(13, .semibold)).lineLimit(1)
-                        }
+                    // A 48pt cover cannot contain the full title/transport/progress stack.
+                    // Keep the card size stable on hover, choosing content that actually fits.
+                    ViewThatFits {
+                        artworkHoverDetails
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(12)
                         if style.showControls {
-                            HStack(spacing: 4) {
-                                control("backward.fill", 13, light: true) { NowPlaying.shared.previous() }
-                                control(content.playing ? "pause.fill" : "play.fill", 18, light: true) { NowPlaying.shared.togglePlayPause() }
-                                control("forward.fill", 13, light: true) { NowPlaying.shared.next() }
-                            }
+                            compactArtworkControls
+                        } else if style.showTitle {
+                            Text(content.title).font(style.font(13, .semibold)).lineLimit(1).padding(8)
+                        } else if style.showProgress {
+                            bar(height: 3).padding(8)
                         }
-                        if style.showProgress { bar(height: 3) }
                     }
                     .foregroundStyle(.white)
-                    .padding(12)
-                    .frame(width: style.artworkSize, height: style.artworkSize)
+                    .frame(width: style.artworkSize, height: style.artworkSize, alignment: .bottom)
                     .background(LinearGradient(stops: [.init(color: .clear, location: 0.25), .init(color: .black.opacity(0.82), location: 1)], startPoint: .top, endPoint: .bottom))
                     .transition(.opacity.combined(with: .offset(y: 8)))
                 }
             }
+    }
+
+    private var compactArtworkControls: some View {
+        control(content.playing ? "pause.fill" : "play.fill", 18, light: true) { NowPlaying.shared.togglePlayPause() }
+            .padding(8)
+    }
+
+    private var artworkHoverDetails: some View {
+        VStack(spacing: 6) {
+            if style.showTitle {
+                Text(content.title).font(style.font(13, .semibold)).lineLimit(1)
+            }
+            if style.showControls {
+                HStack(spacing: 4) {
+                    control("backward.fill", 13, light: true) { NowPlaying.shared.previous() }
+                    control(content.playing ? "pause.fill" : "play.fill", 18, light: true) { NowPlaying.shared.togglePlayPause() }
+                    control("forward.fill", 13, light: true) { NowPlaying.shared.next() }
+                }
+                .fixedSize()
+            }
+            if style.showProgress { bar(height: 3) }
+        }
     }
 
     private var pill: some View {
@@ -298,12 +338,14 @@ struct NowPlayingWidgetView: View {
 
     /// Progress, then one row that shows the times — or, under the pointer, the controls.
     @ViewBuilder private func footer(controlSize: Double) -> some View {
+        let width = style.layout == .vertical ? max(style.artworkSize, style.textWidth) : style.textWidth
+        let fitted = WidgetLayout.controlSize(preferred: controlSize, width: width, showLike: style.showLike, alignment: style.align)
         VStack(alignment: style.horizontalAlignment, spacing: 4) {
             if style.showProgress { bar(height: 4) }
             let showTimes = style.showProgress && content.duration > 0
             ZStack {
                 if showTimes { times.opacity(style.showControls && controlsVisible ? 0 : 1) }
-                if style.showControls { controls(size: controlSize).opacity(controlsVisible ? 1 : 0) }
+                if style.showControls { controls(size: fitted).opacity(controlsVisible ? 1 : 0) }
             }
         }
     }
@@ -407,6 +449,51 @@ struct NowPlayingWidgetView: View {
         let minimal = size(style, hovering: false)
         var lines = ["\(full.height > minimal.height + 20 ? "PASS" : "FAIL") small cover grows to fit metadata and footer",
                      "\(abs(full.height - hover.height) < 1 && abs(full.width - hover.width) < 1 ? "PASS" : "FAIL") hover preserves metadata size"]
+        func check(_ ok: Bool, _ label: String) { lines.append("\(ok ? "PASS" : "FAIL") \(label)") }
+        func measured<V: View>(_ view: V) -> CGSize { NSHostingView(rootView: view.fixedSize()).fittingSize }
+        // Measure the actual button row, not just its enclosing card (which can hide overflow).
+        for alignment in WidgetStyle.Align.allCases {
+            for like in [false, true] {
+                for width in [120.0, 210, 380] {
+                    style.align = alignment
+                    style.showLike = like
+                    let fitted = WidgetLayout.controlSize(preferred: 20, width: width, showLike: like, alignment: alignment)
+                    let view = NowPlayingWidgetView(style: style, content: content)
+                    let row = measured(view.controls(size: fitted))
+                    check(row.width <= width + 0.5, "controls fit \(width)pt \(alignment.rawValue) like=\(like)")
+                }
+            }
+        }
+        style.layout = .artwork
+        style.artworkSize = 48
+        style.showControls = true
+        let cover = NowPlayingWidgetView(style: style, content: content)
+        let compact = measured(cover.compactArtworkControls)
+        check(compact.width <= 48 && compact.height <= 48, "compact artwork controls fit minimum cover")
+        for side in [48.0, 80, 120, 150, 320] {
+            style.artworkSize = side
+            let resting = size(style, hovering: false), hovered = size(style, hovering: true)
+            check(abs(resting.width - hovered.width) < 1 && abs(resting.height - hovered.height) < 1,
+                  "artwork hover preserves \(side)pt card bounds")
+        }
+        style = .standard
+        style.titleSize = 26
+        style.showAlbum = true
+        style.artworkSize = 320
+        style.textWidth = 380
+        for layout in WidgetStyle.Layout.allCases {
+            style.layout = layout
+            let card = size(style, hovering: true)
+            for available in [CGSize(width: 240, height: 280), CGSize(width: 480, height: 280)] {
+                let scale = WidgetLayout.previewScale(content: card, available: available)
+                check(scale > 0 && scale <= 1 && card.width * scale <= available.width - 30 + 0.5
+                      && card.height * scale <= available.height - 30 + 0.5,
+                      "preview fits measured \(layout.rawValue) card in \(available.width)pt stage")
+            }
+        }
+        check(WidgetLayout.previewScale(content: CGSize(width: 100, height: 100), available: CGSize(width: 480, height: 280)) == 1,
+              "preview does not upscale small cards")
+        check(WidgetLayout.previewScale(content: .zero, available: .zero) == 0, "zero-size preview is finite")
         let screen = CGRect(x: -1440, y: 0, width: 1440, height: 900)
         for anchor in WidgetStyle.Anchor.allCases {
             style.anchor = anchor
@@ -445,7 +532,7 @@ struct WidgetControl: View {
                 .foregroundStyle(color)
                 .contentTransition(.symbolEffect(.replace))
                 .symbolEffect(.bounce, value: bump)
-                .frame(width: size * 1.75, height: size * 1.6)
+                .frame(width: size * WidgetLayout.controlWidthFactor, height: size * 1.6)
                 .background(Circle().fill(color.opacity(hover ? 0.14 : 0)))
                 .contentShape(Rectangle())
         }

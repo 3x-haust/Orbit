@@ -221,6 +221,7 @@ struct NowPlayingPage: View {
 private struct PreviewStage: View {
     let style: WidgetStyle
     @State private var hovering = false
+    @State private var cardSize = CGSize.zero
 
     var body: some View {
         let live = WidgetContent.current()
@@ -239,12 +240,19 @@ private struct PreviewStage: View {
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                 }
-                NowPlayingWidgetView(style: style, content: live ?? .sample, hovering: hovering)
-                    .fixedSize()
-                    .onHover { hovering = $0 }
-                    .scaleEffect(scale)
             }
             .frame(height: stageHeight)
+            .overlay {
+                // An overlay cannot enlarge the stage or steal space from the settings.
+                GeometryReader { geometry in
+                    NowPlayingWidgetView(style: style, content: live ?? .sample, hovering: hovering)
+                        .fixedSize()
+                        .onGeometryChange(for: CGSize.self) { $0.size } action: { cardSize = $0 }
+                        .onHover { hovering = $0 }
+                        .scaleEffect(WidgetLayout.previewScale(content: cardSize, available: geometry.size))
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Palette.hairline, lineWidth: 1))
             .animation(.spring(duration: 0.4, bounce: 0.12), value: style)
@@ -255,12 +263,6 @@ private struct PreviewStage: View {
             }
             .padding(.leading, 4)
         }
-    }
-
-    /// Big covers are shown smaller so the whole widget fits.
-    private var scale: CGFloat {
-        let tall = style.layout == .vertical ? style.artworkSize + 150 : style.artworkSize + 40
-        return min(1, (stageHeight - 30) / max(1, tall))
     }
 
     private var stageHeight: CGFloat { 280 }
