@@ -12,6 +12,12 @@ final class MediaKeyTap {
     nonisolated(unsafe) private static var live: EventTapThread?
     /// Some keyboards send a brightness key both ways (a system event and a key code); count it once.
     private var lastKey: (DisplayManager.KeyAction, TimeInterval)?
+    /// Keys whose press Orbit kept from macOS. Only their release is Orbit's too: a release kept
+    /// back after macOS saw the press leaves the key held down, and macOS repeats it forever.
+    private var keptDown: Set<DisplayManager.KeyAction> = []
+    /// How long a key waits for the main thread before going to macOS instead. Waiting longer lets
+    /// macOS switch the tap off, and the press reaches macOS anyway.
+    private nonisolated static let patience: TimeInterval = 0.25
 
     private init() {}
 
@@ -44,6 +50,8 @@ final class MediaKeyTap {
     private nonisolated static func callback(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
         let pass = Unmanaged.passUnretained(event)
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            // Whatever was pressed meanwhile went to macOS, so its release must too.
+            DispatchQueue.main.async { MainActor.assumeIsolated { shared.keptDown.removeAll() } }
             live?.reenable()
             return pass
         }
@@ -55,8 +63,55 @@ final class MediaKeyTap {
         } else {
             return pass
         }
+        // Waking from sleep, the main thread can be busy for a second or more. Rather than hold
+        // every key that long, a key the main thread doesn't take up in time goes on to macOS.
+        let job = KeyJob()
         nonisolated(unsafe) let e = event
-        return DispatchQueue.main.sync { MainActor.assumeIsolated { shared.process(type: type, event: e) } }
+        DispatchQueue.main.async {
+            MainActor.assumeIsolated {
+                guard job.start() else { return }
+                job.finish(kept: shared.process(type: type, event: e) == nil)
+            }
+        }
+        guard let kept = job.wait(patience) else {
+            // macOS gets this one, so a release Orbit was waiting for is macOS's now too.
+            DispatchQueue.main.async { MainActor.assumeIsolated { shared.keptDown.removeAll() } }
+            return pass
+        }
+        return kept ? nil : pass
+    }
+
+    /// One key handed to the main thread: either it runs there, or the tap gave up on it first.
+    private final class KeyJob: @unchecked Sendable {
+        private let lock = NSLock()
+        private let done = DispatchSemaphore(value: 0)
+        private var started = false, abandoned = false, kept = false
+
+        func start() -> Bool {
+            lock.withLock {
+                if abandoned { return false }
+                started = true
+                return true
+            }
+        }
+
+        func finish(kept: Bool) {
+            lock.withLock { self.kept = kept }
+            done.signal()
+        }
+
+        /// The main thread's answer, or nil when it hadn't begun in time; then it never will.
+        func wait(_ seconds: TimeInterval) -> Bool? {
+            if done.wait(timeout: .now() + seconds) == .timedOut {
+                let begun = lock.withLock {
+                    if !started { abandoned = true }
+                    return started
+                }
+                guard begun else { return nil }
+                done.wait() // already running; it's quick
+            }
+            return lock.withLock { kept }
+        }
     }
 
     private func process(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -90,12 +145,20 @@ final class MediaKeyTap {
             return pass
         }
         guard let action else { return pass }
-        // Key-up of a key Orbit handled is Orbit's too, or macOS sees half a press.
-        guard isDown else { return handledRecently(action) ? nil : pass }
+        // Key-up of a key Orbit kept is Orbit's too, or macOS sees half a press; any other goes on.
+        guard isDown else { return keptDown.remove(action) != nil ? nil : pass }
         let now = ProcessInfo.processInfo.systemUptime
-        if let last = lastKey, last.0 == action, now - last.1 < 0.03 { return nil }
-        guard DisplayManager.shared.handle(action, fine: fine) else { return pass }
+        if let last = lastKey, last.0 == action, now - last.1 < 0.03 {
+            keptDown.insert(action)
+            return nil
+        }
+        guard DisplayManager.shared.handle(action, fine: fine) else {
+            keptDown.remove(action)
+            return pass
+        }
         lastKey = (action, now)
+        // The key code form (144/145) has no key-up here; only the system event's release is waited for.
+        if type.rawValue == 14 { keptDown.insert(action) }
         return nil
     }
 
@@ -107,10 +170,5 @@ final class MediaKeyTap {
               event.getIntegerValueField(subtype) == 8 else { return nil } // NX_SUBTYPE_AUX_CONTROL_BUTTONS
         let data1 = Int(event.getIntegerValueField(data1Field))
         return ((data1 & 0xFFFF_0000) >> 16, (data1 & 0xFF00) >> 8 == 0x0A)
-    }
-
-    private func handledRecently(_ action: DisplayManager.KeyAction) -> Bool {
-        guard let last = lastKey, last.0 == action else { return false }
-        return ProcessInfo.processInfo.systemUptime - last.1 < 2
     }
 }
