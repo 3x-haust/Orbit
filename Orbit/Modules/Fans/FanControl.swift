@@ -202,6 +202,30 @@ final class FanControl {
         }
     }
 
+    /// Quit-only connection and deadlines, independent of the main queue.
+    nonisolated static func setSleepDisabled(_ on: Bool) async -> Bool? {
+        let connection = NSXPCConnection(machServiceName: FanHelper.label, options: .privileged)
+        connection.remoteObjectInterface = NSXPCInterface(with: FanHelperProtocol.self)
+        connection.setCodeSigningRequirement(FanHelper.helperRequirement)
+        connection.resume()
+        defer { connection.invalidate() }
+        let version: Int? = await withCheckedContinuation { done in
+            let once = Once(done)
+            guard let helper = connection.remoteObjectProxyWithErrorHandler({ _ in once.resume(nil) }) as? FanHelperProtocol
+            else { once.resume(nil); return }
+            helper.version { v in once.resume(v) }
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2) { once.resume(nil) }
+        }
+        guard let version, version >= 2 else { return nil }
+        return await withCheckedContinuation { done in
+            let once = Once<Bool?>(done)
+            guard let helper = connection.remoteObjectProxyWithErrorHandler({ _ in once.resume(nil) }) as? FanHelperProtocol
+            else { once.resume(nil); return }
+            helper.setSleepDisabled(on) { error in once.resume(error == nil) }
+            DispatchQueue.global().asyncAfter(deadline: .now() + 5) { once.resume(nil) }
+        }
+    }
+
     /// The running helper's protocol version, or nil when it isn't reachable.
     func helperVersion() async -> Int? {
         refresh()
