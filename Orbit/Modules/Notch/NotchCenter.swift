@@ -609,6 +609,12 @@ final class NotchCenter {
         let now = ProcessInfo.processInfo.systemUptime
         guard force || now - roomsMeasuredAt > 1 else { return }
         roomsMeasuredAt = now
+        #if DEBUG
+        if let debugRoom {
+            morph { rooms = Dictionary(uniqueKeysWithValues: windows.keys.map { ($0, debugRoom) }) }
+            return
+        }
+        #endif
         let screens: [(CGDirectDisplayID, NotchRoom.Geometry)] = windows.compactMap { id, w in
             w.targetScreen.map { (id, NotchRoom.Geometry(screen: $0)) }
         }
@@ -724,6 +730,8 @@ final class NotchCenter {
     #if DEBUG
     /// Debug: slows every morph so a burst of window captures can sample it (promo frames).
     nonisolated(unsafe) static var debugSpeed: Double = 1
+    /// Fixed menu-bar space for deterministic layout checks, without moving real status items.
+    var debugRoom: CGFloat?
     var debugEarOn = false
     var debugEar: Ear?
     /// The battery level the charging ear shows in promo frames.

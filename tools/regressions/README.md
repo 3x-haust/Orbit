@@ -1,3 +1,34 @@
+# Notch recording regression
+
+Build the Debug app (including Swift type checking), then run the native regression:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-notch-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-notch-recording-tests.sh \
+  /tmp/orbit-notch-build/Build/Products/Debug /tmp/orbit-notch-results
+```
+
+The runner imports the app's Debug module/dylib and starts only its notch, recorder
+and keep-awake services in a separate process; it does not launch the app delegate
+or alter the installed app's preferences. A logged-in macOS desktop and Screen
+Recording permission are required (exit 2 means unavailable, not a pass).
+It records a blank window with microphone and system audio output disabled,
+keeps videos in the result directory, and releases its own power assertions.
+It never enables closed-lid mode or uploads anything. Append `--screenshots`
+for window-only UI evidence. Screenshot failures fail that run separately from
+the behavioral assertions; ScreenCaptureKit can return error -3811 even before
+recording starts. Omit the flag for repeatable behavioral regression runs.
+
+`debugRoom` fixes only the menu-bar space measurement to reproduce a crowded bar
+without rearranging the user's status items. The real SwiftUI view, recording
+start/stop/discard and IOKit power assertions are exercised. Coverage includes
+recording priority, automatic awake restoration, preserving the original session,
+deadline and assertion IDs, switching awake off during recording, starting with
+awake off, and the timer fallback. Real menu-bar layout timing across displays
+still needs a manual check. The existing debug animation speed is accelerated
+for stable screenshots; this does not test the spring animation itself.
+
 # Issues #14–#21: validation and publication handoff
 
 ## Baseline and ownership

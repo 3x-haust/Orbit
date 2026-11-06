@@ -230,6 +230,9 @@ struct NotchSurfaceView: View {
         .environment(\.colorScheme, .dark)
         .animation(NotchCenter.morph, value: p)
         .animation(NotchCenter.morph, value: size)
+        // Recording controls can leave a crowded-bar measurement while the phase stays idle.
+        // Observe the full lifecycle, including idle after teardown, not just the visible ear.
+        .onChange(of: Recorder.shared.state) { center.measureRooms(force: true) }
         .onChange(of: p) { model.onPhase?() }
         .onChange(of: size) { model.onPhase?() }
     }
