@@ -20,12 +20,16 @@ for window-only UI evidence. Screenshot failures fail that run separately from
 the behavioral assertions; ScreenCaptureKit can return error -3811 even before
 recording starts. Omit the flag for repeatable behavioral regression runs.
 
-`debugRoom` fixes only the menu-bar space measurement to reproduce a crowded bar
-without rearranging the user's status items. The real SwiftUI view, recording
-start/stop/discard and IOKit power assertions are exercised. Coverage includes
-recording priority, automatic awake restoration, preserving the original session,
-deadline and assertion IDs, switching awake off during recording, starting with
-awake off, and the timer fallback. Real menu-bar layout timing across displays
+`debugRoom` controls only the menu-bar space measurement to reproduce a crowded
+bar without rearranging the user's status items. It uses the real asynchronous
+measurement result path. A suspended older measurement completes after a newer
+one to verify that cancellation prevents stale results from overwriting it.
+The real SwiftUI view, recording start/stop/discard and IOKit power assertions
+are exercised. Space stays crowded during `finishing` and is freed only at `idle`,
+so restoration must include a measurement after recording teardown, not just when
+`isRecording` becomes false. Coverage also includes recording priority, preserving
+the original session, deadline and assertion IDs, switching awake off during
+recording, starting with awake off, and the timer fallback. Real menu-bar layout timing across displays
 still needs a manual check. The existing debug animation speed is accelerated
 for stable screenshots; this does not test the spring animation itself.
 

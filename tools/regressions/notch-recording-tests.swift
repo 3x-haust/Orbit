@@ -3,6 +3,30 @@ import IOKit.pwr_mgt
 import ScreenCaptureKit
 @testable import Orbit
 
+private actor DelayedRoom {
+    private var continuation: CheckedContinuation<CGFloat, Never>?
+    var started: Bool { continuation != nil }
+
+    func measure() async -> CGFloat {
+        await withCheckedContinuation { continuation = $0 }
+    }
+
+    func finish() {
+        continuation?.resume(returning: 14)
+        continuation = nil
+    }
+}
+
+@MainActor private final class RecordingRooms {
+    var measuredStates: [Recorder.State] = []
+
+    func measure() -> CGFloat {
+        let state = Recorder.shared.state
+        measuredStates.append(state)
+        return state == .idle ? 64 : 14
+    }
+}
+
 /// Runs the real recorder, keep-awake service and notch windows in a separate process.
 /// Only the menu-bar space measurement is fixed; recordings contain a blank test window.
 @main struct NotchRecordingTests {
@@ -31,7 +55,7 @@ import ScreenCaptureKit
         let center = NotchCenter.shared, recorder = Recorder.shared, awake = KeepAwake.shared
         // Keep captures outside the spring's transition frames; state changes still use real views.
         NotchCenter.debugSpeed = 100
-        center.debugRoom = 64
+        center.debugRoom = { 64 }
         center.apply()
         let window = NSWindow(contentRect: NSRect(x: screen.frame.midX - 160, y: screen.frame.midY - 100,
                                                   width: 320, height: 200),
@@ -111,6 +135,27 @@ import ScreenCaptureKit
             return idle
         }
 
+        // Complete an older measurement after a newer one, even though it was cancelled.
+        await center.debugRoomTask?.value
+        let delayed = DelayedRoom()
+        center.debugRoom = { await delayed.measure() }
+        center.measureRooms(force: true)
+        let olderMeasurement = center.debugRoomTask
+        for _ in 0..<100 {
+            if await delayed.started { break }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        check(await delayed.started, "older room measurement starts")
+        center.debugRoom = { 64 }
+        center.measureRooms(force: true)
+        await center.debugRoomTask?.value
+        check(center.room(on: center.primary) == 64, "newer room measurement completes first")
+        await delayed.finish()
+        await olderMeasurement?.value
+        check(center.room(on: center.primary) == 64, "cancelled older measurement cannot overwrite newer room")
+        center.measureRooms(force: true)
+        await center.debugRoomTask?.value
+
         awake.start(.duration(600))
         let session = awake.session, startedAt = awake.startedAt, until = awake.until, held = assertions()
         check(!held.isEmpty, "keep-awake owns power assertions")
@@ -121,13 +166,17 @@ import ScreenCaptureKit
         await snapshot("recording")
 
         // Recording's status item can shrink the available bar space below the ear threshold.
-        center.debugRoom = 14
+        let recordingRooms = RecordingRooms()
+        center.debugRoom = { await recordingRooms.measure() }
         center.measureRooms(force: true)
+        await center.debugRoomTask?.value
         check(center.currentEar == .recording && center.phase(on: center.primary) == .idle, "crowded bar hides the ear only")
-        // Removing that item frees space, but does not change the cached room until measured again.
-        center.debugRoom = 64
+        // Space stays crowded throughout finishing. Only a measurement after idle can restore it.
         check(await finish(), "recording stops")
         check(await settle { center.phase(on: center.primary) == .ears(.awake) }, "awake automatically restores after recording in a crowded bar")
+        check(recordingRooms.measuredStates.contains(.finishing), "room is measured while recording teardown is still finishing")
+        check(recordingRooms.measuredStates.contains(.idle), "room is measured again after recording teardown reaches idle")
+        center.debugRoom = { 64 }
         print("STATE after stop: awake=\(awake.isOn) ear=\(String(describing: center.currentEar)) room=\(center.room(on: center.primary)) phase=\(center.phase(on: center.primary))")
         check(awake.isOn && awake.session == session && awake.startedAt == startedAt && awake.until == until,
               "recording preserves the original awake session and deadline")
@@ -137,9 +186,10 @@ import ScreenCaptureKit
         // The fallback uses current activity state, not a saved copy of the pre-recording ear.
         check(await start(), "second recording starts")
         awake.stop()
-        center.debugRoom = 14
+        center.debugRoom = { 14 }
         center.measureRooms(force: true)
-        center.debugRoom = 64
+        await center.debugRoomTask?.value
+        center.debugRoom = { 64 }
         check(await finish(), "second recording stops")
         check(await settle { center.currentEar == nil && center.phase(on: center.primary) == .idle }, "awake disabled during recording is not restored")
         check(!awake.isOn && assertions().isEmpty, "turning awake off releases its power assertions")
@@ -153,9 +203,10 @@ import ScreenCaptureKit
         check(center.currentEar == .timer, "timer retains priority over awake")
         check(await start(), "recording with timer starts")
         check(center.currentEar == .recording, "recording retains priority over timer")
-        center.debugRoom = 14
+        center.debugRoom = { 14 }
         center.measureRooms(force: true)
-        center.debugRoom = 64
+        await center.debugRoomTask?.value
+        center.debugRoom = { 64 }
         recorder.discard()
         check(await settle { recorder.state == .idle && center.phase(on: center.primary) == .ears(.timer) }, "discard restores the active timer")
         NotchTimer.shared.stop()

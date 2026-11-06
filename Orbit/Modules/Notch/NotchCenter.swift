@@ -610,10 +610,7 @@ final class NotchCenter {
         guard force || now - roomsMeasuredAt > 1 else { return }
         roomsMeasuredAt = now
         #if DEBUG
-        if let debugRoom {
-            morph { rooms = Dictionary(uniqueKeysWithValues: windows.keys.map { ($0, debugRoom) }) }
-            return
-        }
+        let debugRoom = debugRoom
         #endif
         let screens: [(CGDirectDisplayID, NotchRoom.Geometry)] = windows.compactMap { id, w in
             w.targetScreen.map { (id, NotchRoom.Geometry(screen: $0)) }
@@ -623,10 +620,19 @@ final class NotchCenter {
         roomTask?.cancel()
         roomTask = Task.detached(priority: .utility) {
             var out: [CGDirectDisplayID: CGFloat] = [:]
+            #if DEBUG
+            if let debugRoom {
+                let room = await debugRoom()
+                out = Dictionary(uniqueKeysWithValues: screens.map { ($0.0, room) })
+            } else {
+                for (id, g) in screens { out[id] = NotchRoom.measure(g, frontPID: front, ownFrames: own) }
+            }
+            #else
             for (id, g) in screens { out[id] = NotchRoom.measure(g, frontPID: front, ownFrames: own) }
+            #endif
             await MainActor.run {
                 let c = NotchCenter.shared
-                guard out != c.rooms else { return }
+                guard !Task.isCancelled, out != c.rooms else { return }
                 c.morph { c.rooms = out }
             }
         }
@@ -730,8 +736,9 @@ final class NotchCenter {
     #if DEBUG
     /// Debug: slows every morph so a burst of window captures can sample it (promo frames).
     nonisolated(unsafe) static var debugSpeed: Double = 1
-    /// Fixed menu-bar space for deterministic layout checks, without moving real status items.
-    var debugRoom: CGFloat?
+    /// Controlled menu-bar measurement using the same asynchronous result path as real status items.
+    var debugRoom: (@Sendable () async -> CGFloat)?
+    var debugRoomTask: Task<Void, Never>? { roomTask }
     var debugEarOn = false
     var debugEar: Ear?
     /// The battery level the charging ear shows in promo frames.
