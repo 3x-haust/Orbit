@@ -181,8 +181,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         OrbitInstance.ready = false
         guard KeepAwake.shared.closedLidActive else { return .terminateNow }
-        Task {
-            await KeepAwake.shared.restoreForQuit()
+        KeepAwake.shared.restoreForQuit {
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

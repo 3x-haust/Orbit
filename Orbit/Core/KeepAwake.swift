@@ -217,9 +217,30 @@ final class KeepAwake {
     }
 
     /// Called from applicationShouldTerminate: never leave the lid switch behind.
-    func restoreForQuit() async {
+    func restoreForQuit(completion: @escaping @MainActor @Sendable () -> Void) {
         releaseAssertions()
-        if closedLidActive { await setLid(false) }
+        unwatch()
+        // terminateLater can nest AppKit's run loop inside a main-queue callback. Neither
+        // a MainActor task nor a main-queue timeout can then run until termination returns.
+        Task.detached {
+            var restored = await FanControl.setSleepDisabled(false) == true
+            if !restored {
+                restored = await Shell.runAsAdmin("/usr/bin/pmset -a disablesleep 0",
+                    prompt: "Orbit wants to restore normal sleep when the lid closes.")
+            }
+            let didRestore = restored
+            RunLoop.main.perform(inModes: [.default, .modalPanel]) {
+                MainActor.assumeIsolated {
+                    if didRestore {
+                        self.closedLidActive = false
+                        Pref.defaults.set(false, forKey: Pref.awakeLidOwned)
+                    } else {
+                        Toast.show("Couldn’t restore lid sleep", symbol: "exclamationmark.triangle.fill", detail: "Try again from Orbit › Awake")
+                    }
+                    completion()
+                }
+            }
+        }
     }
 
     // MARK: Watching end conditions
