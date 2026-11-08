@@ -18,6 +18,7 @@ final class MediaKeyTap {
     /// How long a key waits for the main thread before going to macOS instead. Waiting longer lets
     /// macOS switch the tap off, and the press reaches macOS anyway.
     private nonisolated static let patience: TimeInterval = 0.25
+    private var wakeObserver: NSObjectProtocol?
 
     private init() {}
 
@@ -35,6 +36,13 @@ final class MediaKeyTap {
             return
         }
         Self.live = EventTapThread(port: tap, name: "Orbit media keys")
+        // A key pressed as the screen sleeps or wakes may never reach the tap; forget what was held.
+        if wakeObserver == nil {
+            wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.screensDidWakeNotification,
+                                                                              object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated { MediaKeyTap.shared.keptDown.removeAll() }
+            }
+        }
         DisplaysLog.write("key tap: on")
     }
 
@@ -145,8 +153,15 @@ final class MediaKeyTap {
             return pass
         }
         guard let action else { return pass }
-        // Key-up of a key Orbit kept is Orbit's too, or macOS sees half a press; any other goes on.
-        guard isDown else { return keptDown.remove(action) != nil ? nil : pass }
+        guard isDown else {
+            let kept = keptDown.remove(action) != nil
+            // A brightness key's release always reaches macOS: on its own it changes nothing, and it
+            // ends a press macOS saw without Orbit, as when the key wakes the screen. Kept back, macOS
+            // holds that key down for good, raising the brightness and showing its banner over and over.
+            if action == .brightnessUp || action == .brightnessDown { return pass }
+            // Any other key Orbit kept is Orbit's to release, or macOS sees half a press.
+            return kept ? nil : pass
+        }
         let now = ProcessInfo.processInfo.systemUptime
         if let last = lastKey, last.0 == action, now - last.1 < 0.03 {
             keptDown.insert(action)
