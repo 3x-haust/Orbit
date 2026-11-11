@@ -1,6 +1,42 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Reference Controls": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": { "stringUnit": { "state": "translated", "value": "레퍼런스 도구" } }
+      }
+    },
+    "Move Reference": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": { "stringUnit": { "state": "translated", "value": "레퍼런스 이동" } }
+      }
+    },
+    "Work Behind Reference": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": { "stringUnit": { "state": "translated", "value": "이미지 뒤에서 작업" } }
+      }
+    },
+    "Clicks pass through the image. Use this bar to move it again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": { "stringUnit": { "state": "translated", "value": "이미지를 통과해 뒤의 창을 클릭해요. 다시 이동하려면 이 막대에서 해제하세요." } }
+      }
+    },
+    "Reading text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": { "stringUnit": { "state": "translated", "value": "글자를 읽고 있어요" } }
+      }
+    },
+    "Couldn’t recognize text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": { "stringUnit": { "state": "translated", "value": "글자를 인식하지 못했어요" } }
+      }
+    },
     "  run %d: open() %.1fms, first tick %.1fms, worst gap %.1fms, dropped %d of %d frames, per ¼s %@": {
       "extractionState": "manual"
     },

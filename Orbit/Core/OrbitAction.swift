@@ -353,7 +353,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .passwords: PasswordsPanel.shared.toggle()
         case .displays: DisplaysPanel.shared.toggle()
         case .pinLastCapture:
-            if let last = CaptureService.shared.recent.first { PinWindow.pin(last.image) }
+            if let last = CaptureService.shared.recent.first { PinWindow.pin(last.image, fileURL: last.fileURL) }
             else { Toast.show("No captures yet", symbol: "pin.slash") }
         case .keepAwake: KeepAwake.shared.toggle()
         case .settings: MainWindow.show()
