@@ -1,3 +1,25 @@
+# Capture reference regression
+
+Build the Debug app, then run the native capture-reference tests:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-reference-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-capture-reference-tests.sh \
+  /tmp/orbit-reference-build/Build/Products/Debug /tmp/orbit-reference-tests
+```
+
+The runner imports the app's Debug module without starting its app delegate.
+It uses a generated image and temporary files, restores the clipboard, and
+intercepts translation requests locally. A logged-in macOS desktop is required.
+Coverage includes preview → pin → unpin, independent references, opacity bounds,
+control-bar placement and Escape recovery, real Vision OCR, translation input and
+clipboard preservation, recognition failure, and closing during recognition.
+`--interactive` on the compiled runner opens a writing desk and the real capture
+preview for UI checks. The controls' mouse-event flags are checked automatically;
+physical click delivery to another app, multiple displays and fullscreen Spaces
+need an interactive check.
+
 # Notch recording regression
 
 Build the Debug app (including Swift type checking), then run the native regression:

@@ -175,7 +175,7 @@ final class CaptureLibrary: NSObject {
 
     func pin(_ item: Item) {
         guard item.isImage, let image = NSImage(contentsOf: item.url) else { return }
-        PinWindow.pin(image)
+        PinWindow.pin(image, fileURL: item.url)
     }
 
     func delete(_ item: Item) {
