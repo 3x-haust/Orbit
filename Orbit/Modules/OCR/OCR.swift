@@ -5,19 +5,24 @@ import CoreGraphics
 enum OCR {
     static func recognize(_ image: CGImage) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
-            let request = VNRecognizeTextRequest { request, error in
-                if let error { continuation.resume(throwing: error); return }
-                let lines = (request.results as? [VNRecognizedTextObservation] ?? [])
-                    .compactMap { $0.topCandidates(1).first?.string }
-                continuation.resume(returning: lines.joined(separator: "\n"))
-            }
-            request.recognitionLevel = .accurate
-            request.usesLanguageCorrection = true
-            request.automaticallyDetectsLanguage = true
-            request.recognitionLanguages = ["ko-KR", "en-US", "ja-JP", "zh-Hans"]
             DispatchQueue.global(qos: .userInitiated).async {
-                do { try VNImageRequestHandler(cgImage: image).perform([request]) }
-                catch { continuation.resume(throwing: error) }
+                // Vision invokes the callback on this queue before perform returns.
+                // Keep request errors, but complete only after perform has finished.
+                var requestError: Error?
+                let request = VNRecognizeTextRequest { _, error in requestError = error }
+                request.recognitionLevel = .accurate
+                request.usesLanguageCorrection = true
+                request.automaticallyDetectsLanguage = true
+                request.recognitionLanguages = ["ko-KR", "en-US", "ja-JP", "zh-Hans"]
+                let result = Result<String, Error> {
+                    do { try VNImageRequestHandler(cgImage: image).perform([request]) }
+                    catch { throw requestError ?? error }
+                    if let requestError { throw requestError }
+                    let lines = (request.results ?? [])
+                        .compactMap { $0.topCandidates(1).first?.string }
+                    return lines.joined(separator: "\n")
+                }
+                continuation.resume(with: result)
             }
         }
     }

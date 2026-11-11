@@ -1,3 +1,18 @@
+# OCR regression
+
+```sh
+bash tools/regressions/run-ocr-tests.sh /tmp/orbit-ocr-tests
+```
+
+The standalone runner compiles the production OCR source without launching Orbit.
+Each error case runs in its own process and replaces only Vision's `perform`
+method: callback error plus thrown error, callback error alone, thrown error alone,
+and a successful callback followed by a thrown error. It checks error identity,
+request settings, background execution, and real recognition after a failure.
+Real Vision checks cover English line order, Korean, a blank image, and concurrent
+requests. Images are generated locally; no clipboard, network or installed app
+state is used. A continuation trap makes the runner exit unsuccessfully.
+
 # Capture reference regression
 
 Build the Debug app, then run the native capture-reference tests:
