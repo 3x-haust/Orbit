@@ -11,7 +11,9 @@ final class ClipboardStore {
     private(set) var items: [ClipItem] = []
     private(set) var paused = false
 
-    private var lastChange = NSPasteboard.general.changeCount
+    private let pasteboard: NSPasteboard
+    private let historyURL: URL
+    private var lastChange: Int
     private var ownChange: Int?
     private var timer: Timer?
     private var saveWork: DispatchWorkItem?
@@ -24,22 +26,26 @@ final class ClipboardStore {
         "Pasteboard generator type", "net.antelle.keeweb",
     ]
 
-    private init() {
-        items = Storage.load([ClipItem].self, from: "clipboard.json") ?? []
+    init(pasteboard: NSPasteboard = .general,
+         historyURL: URL = Storage.root.appendingPathComponent("clipboard.json")) {
+        self.pasteboard = pasteboard
+        self.historyURL = historyURL
+        lastChange = pasteboard.changeCount
+        items = (try? JSONDecoder().decode([ClipItem].self, from: Data(contentsOf: historyURL))) ?? []
     }
 
     func start() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { _ in
-            MainActor.assumeIsolated { ClipboardStore.shared.poll() }
+        timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.poll() }
         }
         timer?.tolerance = 0.2
     }
 
     // MARK: Capture
 
-    private func poll() {
-        let pb = NSPasteboard.general
+    func poll() {
+        let pb = pasteboard
         guard pb.changeCount != lastChange else { return }
         lastChange = pb.changeCount
         if ownChange == pb.changeCount { return }
@@ -89,6 +95,8 @@ final class ClipboardStore {
     }
 
     private func classify(_ s: String) -> ClipItem.Kind {
+        // Large payloads are text, not candidates for color regexes or URL parsing.
+        guard s.utf8.count <= 8_192 else { return .text }
         let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
         if t.range(of: #"^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"#, options: .regularExpression) != nil, t.hasPrefix("#") { return .color }
         if !t.contains(" "), !t.contains("\n"), let url = URL(string: t), let scheme = url.scheme,
@@ -138,7 +146,7 @@ final class ClipboardStore {
     // MARK: Actions
 
     func copy(_ item: ClipItem, plain: Bool = false) {
-        let pb = NSPasteboard.general
+        let pb = pasteboard
         pb.clearContents()
         switch item.kind {
         case .text, .link, .color:
@@ -162,7 +170,7 @@ final class ClipboardStore {
 
     /// Records our own pasteboard writes so the monitor doesn't re-add them.
     func markOwnWrite() {
-        ownChange = NSPasteboard.general.changeCount
+        ownChange = pasteboard.changeCount
         lastChange = ownChange!
     }
 
@@ -227,7 +235,11 @@ final class ClipboardStore {
     private func scheduleSave() {
         saveWork?.cancel()
         let snapshot = items
-        let work = DispatchWorkItem { Storage.save(snapshot, to: "clipboard.json") }
+        let url = historyURL
+        let work = DispatchWorkItem {
+            guard let data = try? JSONEncoder().encode(snapshot) else { return }
+            try? data.write(to: url, options: .atomic)
+        }
         saveWork = work
         DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.5, execute: work)
     }

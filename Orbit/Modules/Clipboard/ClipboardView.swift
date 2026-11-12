@@ -5,7 +5,7 @@ struct ClipboardView: View {
     @Bindable var model: ClipboardViewModel
     let onPaste: (ClipItem, Bool) -> Void
     @FocusState private var searchFocused: Bool
-    private var store: ClipboardStore { .shared }
+    private var store: ClipboardStore { model.store }
 
     var body: some View {
         let results = model.results
@@ -111,7 +111,7 @@ struct ClipboardView: View {
         Button("Copy") { store.copy(item); Toast.show("Copied") }
         Divider()
         Button(item.pinned ? "Unpin" : "Pin") { store.togglePin(item) }
-        if item.kind == .link, let url = URL(string: item.text ?? "") {
+        if item.kind == .link, item.linkHost != nil, let url = URL(string: item.text ?? "") {
             Button("Open Link") { NSWorkspace.shared.open(url) }
         }
         if item.kind == .file, let path = item.filePaths?.first {
@@ -190,7 +190,7 @@ struct ClipCard: View {
     private var content: some View {
         switch item.kind {
         case .text:
-            Text(item.text ?? "")
+            Text(item.previewText)
                 .font(item.looksLikeCode ? .system(size: 11, design: .monospaced) : .orbitBody)
                 .lineLimit(item.looksLikeCode ? 9 : 7)
                 .foregroundStyle(.primary.opacity(0.9))
@@ -199,8 +199,8 @@ struct ClipCard: View {
             VStack(alignment: .leading, spacing: Space.tight) {
                 Image(systemName: "globe").font(.system(size: 22, weight: .light)).foregroundStyle(Palette.ink)
                 Spacer(minLength: 0)
-                Text(URL(string: item.text ?? "")?.host() ?? "").font(.orbitBodyEmphasized).lineLimit(1)
-                Text(item.text ?? "").font(.orbitCaption).foregroundStyle(.secondary).lineLimit(3)
+                Text(item.linkHost ?? "").font(.orbitBodyEmphasized).lineLimit(1)
+                Text(item.previewText).font(.orbitCaption).foregroundStyle(.secondary).lineLimit(3)
             }
             .padding(10)
         case .image:
@@ -225,7 +225,7 @@ struct ClipCard: View {
         case .color:
             ZStack(alignment: .bottomLeading) {
                 Color(nsColor: item.color ?? .gray)
-                Text(item.text ?? "")
+                Text(item.previewText)
                     .font(.system(size: 15, weight: .semibold, design: .monospaced))
                     .foregroundStyle(.white)
                     .shadow(radius: 2)

@@ -6,13 +6,16 @@ import Observation
 final class ClipboardViewModel {
     enum Filter: Hashable { case all, pinned, kind(ClipItem.Kind) }
 
+    let store: ClipboardStore
+
+    init(store: ClipboardStore? = nil) { self.store = store ?? .shared }
+
     var query = "" { didSet { selection = 0 } }
     var filter: Filter = .all { didSet { selection = 0 } }
     var selection = 0
     var focusToken = 0
 
     var results: [ClipItem] {
-        let store = ClipboardStore.shared
         switch filter {
         case .all: return store.search(query)
         case .pinned: return store.search(query, pinnedOnly: true)
@@ -43,7 +46,12 @@ final class ClipboardViewModel {
 final class ClipboardPanel {
     static let shared = ClipboardPanel()
 
-    private let model = ClipboardViewModel()
+    private let model: ClipboardViewModel
+
+    init(store: ClipboardStore? = nil) {
+        model = ClipboardViewModel(store: store)
+    }
+
     private let router = KeyRouter()
     private lazy var panel: FloatingPanel = {
         let p = FloatingPanel(contentRect: .zero)
@@ -97,20 +105,20 @@ final class ClipboardPanel {
             if !model.query.isEmpty { model.query = "" } else { hide() }
         case .enter(let shift, let command):
             guard let item = model.selected else { return true }
-            if command { ClipboardStore.shared.copy(item, plain: shift); hide(); Toast.show("Copied") }
+            if command { model.store.copy(item, plain: shift); hide(); Toast.show("Copied") }
             else { paste(item, plain: shift) }
         case .commandDigit(let d):
             let r = model.results
             if r.indices.contains(d - 1) { paste(r[d - 1], plain: false) }
         case .command("c"):
             guard let item = model.selected else { return false }
-            ClipboardStore.shared.copy(item)
+            model.store.copy(item)
             hide()
             Toast.show("Copied")
         case .command("p"):
-            if let item = model.selected { ClipboardStore.shared.togglePin(item) }
+            if let item = model.selected { model.store.togglePin(item) }
         case .commandDelete:
-            if let item = model.selected { ClipboardStore.shared.delete(item); model.move(0) }
+            if let item = model.selected { model.store.delete(item); model.move(0) }
         case .command(","):
             hide()
             MainWindow.show(.clipboard)
@@ -120,7 +128,7 @@ final class ClipboardPanel {
     }
 
     func paste(_ item: ClipItem, plain: Bool) {
-        ClipboardStore.shared.copy(item, plain: plain)
+        model.store.copy(item, plain: plain)
         guard Pref.defaults.bool(forKey: Pref.pasteDirectly) else { hide(); Toast.show("Copied"); return }
         // From the launcher the panel isn't open; then it's the app the user was last in.
         let into = panel.isVisible ? target : nil

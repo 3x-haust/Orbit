@@ -43,9 +43,28 @@ struct ClipItem: Codable, Identifiable, Hashable {
     var imageURL: URL? { imageFile.map { ClipboardStore.dir.appendingPathComponent($0) } }
     var rtfURL: URL? { rtfFile.map { ClipboardStore.dir.appendingPathComponent($0) } }
 
+    /// Bound work before grapheme segmentation: one Character can contain millions of scalars.
+    /// Only presentation is shortened; persistence, search and copying keep the original text.
+    static func preview(_ text: String) -> String {
+        var scalars = Array(text.unicodeScalars.prefix(2_049))
+        guard scalars.count > 2_048 else { return text }
+        scalars.removeLast()
+        var result = String(String.UnicodeScalarView(scalars))
+        // Drop the possibly incomplete final grapheme from the already bounded copy.
+        result.removeLast()
+        return result + "…"
+    }
+
+    var previewText: String { Self.preview(text ?? "") }
+
+    var linkHost: String? {
+        guard let text, text.utf8.count <= 8_192 else { return nil }
+        return URL(string: text)?.host()
+    }
+
     var title: String {
         switch kind {
-        case .text, .link, .color: (text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        case .text, .link, .color: previewText.trimmingCharacters(in: .whitespacesAndNewlines)
         case .image: "Image %ld × %ld".loc(Int(imageSize?.width ?? 0), Int(imageSize?.height ?? 0))
         case .file: filePaths?.map { ($0 as NSString).lastPathComponent }.joined(separator: ", ") ?? "Files"
         }
@@ -59,24 +78,29 @@ struct ClipItem: Codable, Identifiable, Hashable {
         switch kind {
         case .text:
             let t = text ?? ""
+            if t.utf8.count > 8_192 {
+                return ByteCountFormatter.string(fromByteCount: Int64(t.utf8.count), countStyle: .file)
+            }
             let lines = t.split(separator: "\n", omittingEmptySubsequences: false).count
             return lines > 1 ? "%ld characters · %ld lines".loc(t.count, lines) : "%ld characters".loc(t.count)
-        case .link: return URL(string: text ?? "")?.host() ?? "Link"
+        case .link: return linkHost ?? "Link"
         case .image: return "\(Int(imageSize?.width ?? 0)) × \(Int(imageSize?.height ?? 0)) px"
         case .file: return filePaths.map { $0.count == 1 ? "1 file".loc : "%ld files".loc($0.count) } ?? ""
-        case .color: return text ?? ""
+        case .color: return previewText
         }
     }
 
     /// Heuristic used to render text previews in a monospaced face.
     var looksLikeCode: Bool {
-        guard kind == .text, let t = text else { return false }
+        guard kind == .text else { return false }
+        let t = previewText
         let markers = ["{", "}", ";", "=>", "func ", "const ", "import ", "</", "def ", "let "]
         return markers.filter { t.contains($0) }.count >= 2
     }
 
     var color: NSColor? {
-        guard kind == .color, var hex = text?.trimmingCharacters(in: .whitespaces) else { return nil }
+        guard kind == .color, let text, text.utf8.count <= 64 else { return nil }
+        var hex = text.trimmingCharacters(in: .whitespaces)
         if hex.hasPrefix("#") { hex.removeFirst() }
         guard let v = UInt64(hex, radix: 16) else { return nil }
         if hex.count == 3 {
