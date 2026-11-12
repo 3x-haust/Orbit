@@ -1,3 +1,37 @@
+# Clipboard regression
+
+Build the Debug app with testability enabled, then run the native regression:
+
+```sh
+bash tools/regressions/run-clipboard-tests.sh \
+  /tmp/orbit-clipboard-build/Build/Products/Debug /tmp/orbit-clipboard-tests
+```
+
+The runner imports the Debug module with `@testable import Orbit`, without
+starting the app delegate. It links `Orbit.app/Contents/MacOS/Orbit.debug.dylib`
+by default. For builds that provide a separately linked test library, set
+`ORBIT_TEST_LIBRARY=/absolute/path/to/libOrbitTests.dylib` before the command.
+A logged-in macOS desktop is required for the named pasteboard.
+
+The 86 assertions cover scalar/grapheme preview boundaries (including a single
+1 MiB grapheme), unchanged small previews and footnotes, bounded code/host/size
+metadata, old JSON decoding without new fields, polling and classification,
+duplicate identity and pin preservation, own-write suppression, exact-byte
+normal/plain copying, full-payload tail search, kind/pin filtering, view-model
+navigation, and asynchronous save/reload. Large fixtures are each 1 MiB.
+Correctness checks have no performance thresholds; saving polls for the expected
+snapshot with a two-second deadline rather than waiting a fixed delay.
+
+Only a uniquely named `NSPasteboard` and a unique history directory under the
+supplied scratch directory are used. The general pasteboard and real clipboard
+history are never accessed. History limit, ignored apps, and pause state are
+overridden in the volatile argument domain and restored afterward; persistent
+preferences are not changed. Scratch histories remain available for inspection.
+These fixtures cover strings only: the injected history URL does not relocate
+image/RTF attachments, which still use Orbit's Clips directory. Attachment tests
+must isolate that directory separately before using this runner.
+Repeat the same command three times to check repeatability.
+
 # OCR regression
 
 ```sh

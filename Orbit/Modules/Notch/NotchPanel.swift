@@ -578,16 +578,16 @@ private struct NotchClipRow: View {
 
     private var text: String {
         switch item.kind {
-        case .image: item.ocrText.map { $0.replacingOccurrences(of: "\n", with: " ") } ?? "Image".loc
+        case .image: item.ocrText.map { ClipItem.preview($0).replacingOccurrences(of: "\n", with: " ") } ?? "Image".loc
         case .file: (item.filePaths ?? []).map { ($0 as NSString).lastPathComponent }.joined(separator: ", ")
-        default: (item.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\n", with: " ")
+        default: item.title.replacingOccurrences(of: "\n", with: " ")
         }
     }
 
     @ViewBuilder private var thumb: some View {
         if item.kind == .image, let url = item.imageURL, let img = NSImage(contentsOf: url) {
             Image(nsImage: img).resizable().aspectRatio(contentMode: .fill).clipShape(RoundedRectangle(cornerRadius: 4))
-        } else if item.kind == .color, let hex = item.text, let c = NSColor(hexString: hex) {
+        } else if item.kind == .color, let c = item.color {
             RoundedRectangle(cornerRadius: 4).fill(Color(nsColor: c))
         } else {
             Image(systemName: item.kind.symbol).font(.system(size: 11)).foregroundStyle(.white.opacity(0.6))
@@ -600,14 +600,5 @@ private struct NotchClipRow: View {
         NotchCenter.shared.close()
         let front = NSWorkspace.shared.frontmostApplication
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { _ = Paster.paste(into: front) }
-    }
-}
-
-private extension NSColor {
-    convenience init?(hexString: String) {
-        var s = hexString.trimmingCharacters(in: .whitespaces)
-        if s.hasPrefix("#") { s.removeFirst() }
-        guard s.count == 6, let v = UInt32(s, radix: 16) else { return nil }
-        self.init(srgbRed: CGFloat((v >> 16) & 0xFF) / 255, green: CGFloat((v >> 8) & 0xFF) / 255, blue: CGFloat(v & 0xFF) / 255, alpha: 1)
     }
 }
