@@ -8,17 +8,36 @@ bash tools/regressions/run-file-tools-tests.sh \
 ```
 
 The runner imports the real Debug module without starting the app delegate. Its
-19 test groups create PDFs and PNGs in unique scratch directories and use only a
+20 test groups create PDFs and PNGs in unique scratch directories and use only a
 private pasteboard. They check JPG pixels, page order and rotation, original and
 name-collision preservation, damaged/locked/unreadable/oversized inputs, retained
 completed pages after failure, pre-cancellation, file filtering, ring geometry,
-and cropped/backdrop output pixels at 1×/2× for every canvas ratio. Source PNGs
+and cropped/backdrop output pixels at 1×/2× for every canvas ratio. Entering
+background editing must exit crop mode while preserving the committed crop.
+Source PNGs
 are decoded and checked before editing; decoded outputs are normalized to sRGB
 before comparing channel values. `ORBIT_TEST_LIBRARY` can override the dylib.
 
 Cancellation between completed pages, actual Finder drag + Shift delivery,
 copy-only AppKit drop negotiation, and editor preview/crop pointer interaction
 need an interactive check. The unit runner does not claim to cover these.
+Use `ORBIT_FILE_TEST_FILTER` with a regular expression to run only matching test
+groups, for example `ORBIT_FILE_TEST_FILTER='entering background|cancelled before'`.
+
+To check result-window lifecycle against the real Debug module:
+
+```sh
+bash tools/regressions/build-file-tools-workflow-tests.sh \
+  /tmp/orbit-files-build/Build/Products/Debug /tmp/orbit-files-workflow
+```
+
+Launch the resulting `Orbit File Workflow Tests.app` on a logged-in macOS desktop.
+It does not start Orbit's app delegate. Its eight checks verify that editing a
+completed page retains the other pages and failure information, and that a result
+window closed during conversion reopens when conversion stops. Fixtures and
+`workflow.log` stay in the supplied scratch folder; `workflow.exit` contains the
+failure count. The app stays open for inspecting the real result window.
+
 Completed pages are retained when a later page fails or conversion is cancelled;
 conversion stops at that point. External-file edits save a new PNG beside the
 source, never overwrite it, and do not offer the capture editor's Trash action.

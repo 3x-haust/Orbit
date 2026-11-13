@@ -187,6 +187,7 @@ final class FileTools {
             result = await task.value
             busy = false
             conversion = nil
+            if resultWindow?.isVisible != true { showResults() }
         }
     }
 
@@ -195,7 +196,7 @@ final class FileTools {
             Toast.show("Saved", symbol: "arrow.down.circle.fill", detail: url.lastPathComponent)
             return
         }
-        result = .init(files: [url])
+        if !result.files.contains(url) { result.files.append(url) }
         showResults()
     }
 
