@@ -1,3 +1,28 @@
+# File tools regression
+
+Build the Debug app, then run:
+
+```sh
+bash tools/regressions/run-file-tools-tests.sh \
+  /tmp/orbit-files-build/Build/Products/Debug /tmp/orbit-files-tests
+```
+
+The runner imports the real Debug module without starting the app delegate. Its
+19 test groups create PDFs and PNGs in unique scratch directories and use only a
+private pasteboard. They check JPG pixels, page order and rotation, original and
+name-collision preservation, damaged/locked/unreadable/oversized inputs, retained
+completed pages after failure, pre-cancellation, file filtering, ring geometry,
+and cropped/backdrop output pixels at 1×/2× for every canvas ratio. Source PNGs
+are decoded and checked before editing; decoded outputs are normalized to sRGB
+before comparing channel values. `ORBIT_TEST_LIBRARY` can override the dylib.
+
+Cancellation between completed pages, actual Finder drag + Shift delivery,
+copy-only AppKit drop negotiation, and editor preview/crop pointer interaction
+need an interactive check. The unit runner does not claim to cover these.
+Completed pages are retained when a later page fails or conversion is cancelled;
+conversion stops at that point. External-file edits save a new PNG beside the
+source, never overwrite it, and do not offer the capture editor's Trash action.
+
 # Clipboard regression
 
 Build the Debug app with testability enabled, then run the native regression:
