@@ -669,7 +669,12 @@ final class EditorModel {
         return NSImage(cgImage: out, size: total)
     }
 
+    func beginBackgroundEditing() {
+        if tool == .crop { tool = .select }
+    }
+
     func setBackdrop(_ b: Backdrop?) {
+        beginBackgroundEditing()
         guard b != backdrop else { return }
         record()
         backdrop = b
@@ -677,6 +682,7 @@ final class EditorModel {
 
     /// Changes the backdrop while a slider is being dragged, without an undo step per tick.
     func adjustBackdrop(_ change: (inout Backdrop) -> Void) {
+        beginBackgroundEditing()
         guard var b = backdrop else { return }
         change(&b)
         backdrop = b

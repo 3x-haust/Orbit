@@ -881,6 +881,7 @@ private struct BackgroundPane: View {
                     .font(.orbitCaption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
         }
+        .onAppear { model.beginBackgroundEditing() }
     }
 
     private func slider(_ title: String, value: CGFloat, in range: ClosedRange<CGFloat>, set: @escaping (CGFloat) -> Void) -> some View {

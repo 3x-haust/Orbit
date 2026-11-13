@@ -25,6 +25,8 @@ private final class Suite {
     }
 
     func run(_ name: String, _ body: @MainActor (URL) async throws -> Void) async {
+        if let filter = ProcessInfo.processInfo.environment["ORBIT_FILE_TEST_FILTER"],
+           name.range(of: filter, options: .regularExpression) == nil { return }
         do {
             let folder = root.appendingPathComponent(UUID().uuidString, isDirectory: true)
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -370,6 +372,33 @@ struct FileToolsTests {
             }
             try expect(FileTools.index(at: CGPoint(x: c + 96, y: c + 0.01), count: 2) == 0, "Upper side of two-sector boundary must select top")
             try expect(FileTools.index(at: CGPoint(x: c + 96, y: c - 0.01), count: 2) == 1, "Lower side of two-sector boundary must select bottom")
+        }
+
+        await suite.run("entering background editing commits the crop preview for every ratio") { folder in
+            let source = folder.appendingPathComponent("crop-background.png")
+            _ = try png(at: source)
+            let image = try unwrap(NSImage(contentsOf: source), "Cannot load image")
+            let model = EditorModel(image: image, fileURL: source)
+            model.tool = .crop
+            model.dragChanged(from: CGPoint(x: 10, y: 8), to: CGPoint(x: 90, y: 68))
+            model.dragEnded(at: CGPoint(x: 90, y: 68), start: CGPoint(x: 10, y: 8))
+            let crop = CGRect(x: 10, y: 8, width: 80, height: 60)
+            try expect(model.crop == crop, "Crop gesture must commit the selected rectangle")
+            for aspect in Backdrop.Aspect.allCases {
+                model.tool = .crop
+                var background = Backdrop()
+                background.padding = 6
+                background.aspect = aspect
+                model.setBackdrop(background)
+                try expect(model.tool == .select && model.crop == crop, "Background editing must leave crop mode without losing the crop")
+                let previewSize = background.canvasSize(for: model.tool == .crop ? model.size : model.crop!.size)
+                let output = model.render()
+                try expect(abs(output.size.width - previewSize.width) <= 1 && abs(output.size.height - previewSize.height) <= 1,
+                           "Background preview and export must use the same cropped canvas: \(aspect)")
+            }
+            model.tool = .crop
+            model.adjustBackdrop { $0.padding = 8 }
+            try expect(model.tool == .select && model.crop == crop, "Backdrop slider must keep the committed crop preview")
         }
 
         await suite.run("all backdrop ratios expand only the canvas in portrait and landscape") { _ in
