@@ -211,6 +211,27 @@ struct Backdrop: Equatable {
     var style = 0
     var radius: CGFloat = 12
     var shadow = true
+    var aspect: Aspect = .auto
+
+    enum Aspect: String, CaseIterable {
+        case auto, square, wide, standard
+        var title: String {
+            switch self { case .auto: "Auto"; case .square: "1:1"; case .wide: "16:9"; case .standard: "4:3" }
+        }
+        var ratio: CGFloat? {
+            switch self { case .auto: nil; case .square: 1; case .wide: 16 / 9; case .standard: 4 / 3 }
+        }
+    }
+
+    /// Expand the background, never stretch or crop the picture to fill a chosen ratio.
+    func canvasSize(for image: CGSize) -> CGSize {
+        let minimum = CGSize(width: image.width + padding * 2, height: image.height + padding * 2)
+        guard let ratio = aspect.ratio else { return minimum }
+        if minimum.width / minimum.height < ratio {
+            return CGSize(width: minimum.height * ratio, height: minimum.height)
+        }
+        return CGSize(width: minimum.width, height: minimum.width / ratio)
+    }
 
     static let styles: [[Color]] = [
         [Color(red: 0.98, green: 0.55, blue: 0.24), Color(red: 0.93, green: 0.27, blue: 0.43)],
@@ -273,6 +294,7 @@ final class EditorModel {
     var selectedID: UUID? { didSet { adoptSelectedStyle() } }
     var crop: CGRect?
     var backdrop: Backdrop?
+    var showBackgroundControls = false
     var editingText: (point: CGPoint, text: String)?
 
     // View state.
@@ -665,7 +687,7 @@ final class EditorModel {
     // MARK: Output
 
     /// The picture with its marks and crop, without the backdrop.
-    private func renderMarks() -> NSImage {
+    func renderMarks() -> NSImage {
         let scale = max(1, pixelScale)
         let renderer = ImageRenderer(content: AnnotatedImage(model: self, scale: 1, exporting: true).frame(width: size.width, height: size.height))
         renderer.scale = scale
@@ -680,8 +702,7 @@ final class EditorModel {
     func render() -> NSImage {
         let marked = renderMarks()
         guard let backdrop else { return marked }
-        let pad = backdrop.padding
-        let size = CGSize(width: marked.size.width + pad * 2, height: marked.size.height + pad * 2)
+        let size = backdrop.canvasSize(for: marked.size)
         let renderer = ImageRenderer(content: BackdropView(image: marked, backdrop: backdrop).frame(width: size.width, height: size.height))
         renderer.scale = max(1, pixelScale)
         guard let cg = renderer.cgImage else { return marked }
@@ -695,13 +716,15 @@ struct BackdropView: View {
     let backdrop: Backdrop
 
     var body: some View {
+        let canvas = backdrop.canvasSize(for: image.size)
         ZStack {
             Rectangle().fill(backdrop.fill)
             Image(nsImage: image)
                 .resizable()
+                .frame(width: image.size.width, height: image.size.height)
                 .clipShape(RoundedRectangle(cornerRadius: backdrop.radius, style: .continuous))
                 .shadow(color: .black.opacity(backdrop.shadow ? 0.35 : 0), radius: backdrop.padding * 0.35, y: backdrop.padding * 0.12)
-                .padding(backdrop.padding)
         }
+        .frame(width: canvas.width, height: canvas.height)
     }
 }

@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 final class EditorWindow: NSWindow, NSWindowDelegate {
     private static var open: Set<EditorWindow> = []
     private let model: EditorModel
+    private let externalFile: Bool
     private var monitors: [Any] = []
     private var onClose: (() -> Void)?
 
@@ -13,6 +14,23 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
     static func open(image: NSImage, fileURL: URL?, onClose: (() -> Void)? = nil) {
         let window = EditorWindow(model: EditorModel(image: image, fileURL: fileURL))
         window.onClose = onClose
+        open.insert(window)
+        watchHelpers()
+        window.bringToFront()
+    }
+
+    static func openFile(_ url: URL, action: FileTools.Action) throws {
+        guard FileConversion.kind(of: url) == .image, let image = NSImage(contentsOf: url),
+              image.cgImage(forProposedRect: nil, context: nil, hints: nil) != nil else {
+            throw FileConversion.Failure.unreadable
+        }
+        let model = EditorModel(image: image, fileURL: url)
+        model.tool = action == .crop ? .crop : .select
+        if action == .background {
+            model.backdrop = Backdrop()
+            model.showBackgroundControls = true
+        }
+        let window = EditorWindow(model: model, externalFile: true)
         open.insert(window)
         watchHelpers()
         window.bringToFront()
@@ -83,8 +101,9 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
         })
     }
 
-    private init(model: EditorModel) {
+    private init(model: EditorModel, externalFile: Bool = false) {
         self.model = model
+        self.externalFile = externalFile
         let screen = NSScreen.active.visibleFrame
         let chrome = CGSize(width: 80, height: 140)
         let fit = min(1, (screen.width * 0.85 - chrome.width) / model.size.width, (screen.height * 0.85 - chrome.height) / model.size.height)
@@ -102,7 +121,7 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
             copy: { [weak self] in self?.copyImage() },
             save: { [weak self] in self?.saveImage(ask: false) },
             pin: { [weak self] in self?.pinImage() },
-            delete: model.fileURL == nil ? nil : { [weak self] in self?.deleteCapture() }
+            delete: model.fileURL == nil || externalFile ? nil : { [weak self] in self?.deleteCapture() }
         ))))
         installKeys()
     }
@@ -133,6 +152,17 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
     private func saveImage(ask: Bool) {
         model.commitText()
         let image = model.render()
+        if externalFile, let source = model.fileURL {
+            do {
+                guard let data = image.pngData else { throw FileConversion.Failure.encoding }
+                let suffix = model.backdrop != nil ? " (Background)" : model.crop != nil ? " (Cropped)" : " (Edited)"
+                let url = try FileConversion.save(data, beside: source, suffix: suffix, extension: "png")
+                FileTools.shared.saved(url)
+            } catch {
+                Toast.show("Couldn’t save the image", symbol: "exclamationmark.triangle", detail: error.localizedDescription)
+            }
+            return
+        }
         guard let data = image.pngData else { return }
         let folder = URL(fileURLWithPath: Pref.defaults.string(forKey: Pref.captureSaveFolder) ?? NSHomeDirectory())
         let name = model.fileURL?.deletingPathExtension().lastPathComponent.appending(" (Annotated).png") ?? "Orbit Annotated.png"
@@ -273,6 +303,9 @@ struct EditorView: View {
         }
         .background(Color(white: 0.13))
         .ignoresSafeArea()
+        .onAppear {
+            if model.showBackgroundControls { canvasTab = .background; canvasOpen = true }
+        }
         .onDrop(of: [.fileURL, .image], isTargeted: $dropTargeted) { providers in
             loadDropped(providers)
             return true
@@ -284,8 +317,9 @@ struct EditorView: View {
     private var canvasArea: some View {
         GeometryReader { geo in
             let pad: CGFloat = 32
-            let frame = model.backdrop?.padding ?? 0
-            let outer = CGSize(width: model.size.width + frame * 2, height: model.size.height + frame * 2)
+            let crop = model.tool == .crop ? nil : model.crop
+            let contentSize = crop?.size ?? model.size
+            let outer = model.backdrop?.canvasSize(for: contentSize) ?? contentSize
             let fit = min(1, (geo.size.width - pad * 2) / outer.width, (geo.size.height - pad * 2) / outer.height)
             let scale = fit * model.zoom
             let shown = CGSize(width: model.size.width * scale, height: model.size.height * scale)
@@ -297,6 +331,10 @@ struct EditorView: View {
                         .shadow(color: .black.opacity(0.35), radius: 18, y: 8)
                 }
                 picture(scale: scale, shown: shown)
+                    .offset(x: crop.map { (model.size.width / 2 - $0.midX) * scale } ?? 0,
+                            y: crop.map { (model.size.height / 2 - $0.midY) * scale } ?? 0)
+                    .frame(width: contentSize.width * scale, height: contentSize.height * scale)
+                    .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: (model.backdrop?.radius ?? 6) * (model.backdrop == nil ? 1 : scale), style: .continuous))
                     .shadow(color: .black.opacity(model.backdrop.map { $0.shadow ? 0.35 : 0 } ?? 0.35),
                             radius: model.backdrop.map { $0.padding * 0.35 * scale } ?? 18, y: model.backdrop.map { $0.padding * 0.12 * scale } ?? 8)
@@ -828,6 +866,11 @@ private struct BackgroundPane: View {
                         }
                         .buttonStyle(.plain)
                     }
+                }
+                Picker("Ratio", selection: Binding(get: { b.aspect }, set: { value in
+                    var next = b; next.aspect = value; model.setBackdrop(next)
+                })) {
+                    ForEach(Backdrop.Aspect.allCases, id: \.self) { Text($0.title.loc).tag($0) }
                 }
                 slider("Padding", value: b.padding, in: 0...160) { v in model.adjustBackdrop { $0.padding = v } }
                 slider("Corners", value: b.radius, in: 0...40) { v in model.adjustBackdrop { $0.radius = v } }

@@ -1,42 +1,6 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Reference Controls": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": { "stringUnit": { "state": "translated", "value": "레퍼런스 도구" } }
-      }
-    },
-    "Move Reference": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": { "stringUnit": { "state": "translated", "value": "레퍼런스 이동" } }
-      }
-    },
-    "Work Behind Reference": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": { "stringUnit": { "state": "translated", "value": "이미지 뒤에서 작업" } }
-      }
-    },
-    "Clicks pass through the image. Use this bar to move it again.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": { "stringUnit": { "state": "translated", "value": "이미지를 통과해 뒤의 창을 클릭해요. 다시 이동하려면 이 막대에서 해제하세요." } }
-      }
-    },
-    "Reading text": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": { "stringUnit": { "state": "translated", "value": "글자를 읽고 있어요" } }
-      }
-    },
-    "Couldn’t recognize text": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": { "stringUnit": { "state": "translated", "value": "글자를 인식하지 못했어요" } }
-      }
-    },
     "  run %d: open() %.1fms, first tick %.1fms, worst gap %.1fms, dropped %d of %d frames, per ¼s %@": {
       "extractionState": "manual"
     },
@@ -580,6 +544,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일 %ld개"
+          }
+        }
+      }
+    },
+    "%ld files saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일 %ld개를 저장했어요"
           }
         }
       }
@@ -6512,6 +6487,28 @@
         }
       }
     },
+    "Choose an action": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동작 선택"
+          }
+        }
+      }
+    },
+    "Choose an action, then save a separate file beside the original.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동작을 고른 뒤 원본 폴더에 별도 파일로 저장해요."
+          }
+        }
+      }
+    },
     "Choose an animated GIF, or several PNG frames in order.": {
       "extractionState": "manual",
       "localizations": {
@@ -6530,6 +6527,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "응용 프로그램에서 선택…"
+          }
+        }
+      }
+    },
+    "Choose one PDF or image file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF나 이미지 파일 하나를 선택해 주세요."
           }
         }
       }
@@ -7070,6 +7078,17 @@
         }
       }
     },
+    "Clicks pass through the image. Use this bar to move it again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지를 통과해 뒤의 창을 클릭해요. 다시 이동하려면 이 막대에서 해제하세요."
+          }
+        }
+      }
+    },
     "Clipboard": {
       "extractionState": "manual",
       "localizations": {
@@ -7520,6 +7539,17 @@
         }
       }
     },
+    "Completed pages stay saved if you cancel.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "취소해도 변환을 마친 페이지는 남아요."
+          }
+        }
+      }
+    },
     "Compress": {
       "extractionState": "manual",
       "localizations": {
@@ -7718,6 +7748,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "단위 변환"
+          }
+        }
+      }
+    },
+    "Conversion cancelled": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변환을 취소했어요"
+          }
+        }
+      }
+    },
+    "Conversion complete": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변환을 마쳤어요"
+          }
+        }
+      }
+    },
+    "Conversion stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변환을 중단했어요"
+          }
+        }
+      }
+    },
+    "Converting to JPG…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JPG로 변환 중…"
           }
         }
       }
@@ -8377,6 +8451,17 @@
         }
       }
     },
+    "Couldn’t open the image": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지를 열지 못했어요"
+          }
+        }
+      }
+    },
     "Couldn’t reach %@’s spell checker.": {
       "extractionState": "manual",
       "localizations": {
@@ -8454,6 +8539,17 @@
         }
       }
     },
+    "Couldn’t recognize text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글자를 인식하지 못했어요"
+          }
+        }
+      }
+    },
     "Couldn’t replace Orbit": {
       "extractionState": "manual",
       "localizations": {
@@ -8494,6 +8590,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "키체인에 저장하지 못했어요."
+          }
+        }
+      }
+    },
+    "Couldn’t save the image": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지를 저장하지 못했어요"
           }
         }
       }
@@ -10190,6 +10297,17 @@
         }
       }
     },
+    "Drag one PDF or image and press Shift. Drop on an action to convert or edit. Originals stay unchanged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF나 이미지 하나를 끌며 Shift를 누르세요. 원하는 동작에 놓으면 변환하거나 편집해요. 원본은 그대로 남아요."
+          }
+        }
+      }
+    },
     "Drag out, or double-click to open": {
       "extractionState": "manual",
       "localizations": {
@@ -10406,6 +10524,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "여기로 끌어 놓으세요"
+          }
+        }
+      }
+    },
+    "Drop to apply": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "놓아서 실행"
           }
         }
       }
@@ -11817,6 +11946,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일"
+          }
+        }
+      }
+    },
+    "File Tools": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일 도구"
           }
         }
       }
@@ -14860,6 +15000,9 @@
         }
       }
     },
+    "JPG": {
+      "extractionState": "manual"
+    },
     "JPY": {
       "extractionState": "manual"
     },
@@ -17802,6 +17945,17 @@
         }
       }
     },
+    "Move Reference": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레퍼런스 이동"
+          }
+        }
+      }
+    },
     "Move Tavi.app to Trash": {
       "extractionState": "manual",
       "localizations": {
@@ -20382,6 +20536,17 @@
         }
       }
     },
+    "Open a file": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일 열기"
+          }
+        }
+      }
+    },
     "Open apps": {
       "extractionState": "manual",
       "localizations": {
@@ -21601,6 +21766,17 @@
     "PATH": {
       "extractionState": "manual"
     },
+    "PDF to JPG, image cropping and backgrounds. Needs Accessibility for drags from other apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF를 JPG로 바꾸고 이미지를 자르거나 배경을 넣어요. 다른 앱에서 끌어오려면 손쉬운 사용 권한이 필요해요."
+          }
+        }
+      }
+    },
     "PERCENT:": {
       "extractionState": "manual"
     },
@@ -21687,6 +21863,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "여백"
+          }
+        }
+      }
+    },
+    "Page %ld: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld쪽: %@"
           }
         }
       }
@@ -23432,6 +23619,17 @@
         }
       }
     },
+    "Reading text": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글자를 읽고 있어요"
+          }
+        }
+      }
+    },
     "Reads and writes app settings.": {
       "extractionState": "manual",
       "localizations": {
@@ -23808,6 +24006,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "다시 실행 · ⇧⌘Z"
+          }
+        }
+      }
+    },
+    "Reference Controls": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "레퍼런스 도구"
           }
         }
       }
@@ -26460,6 +26669,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "셸 스크립트…"
+          }
+        }
+      }
+    },
+    "Shift while dragging": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "드래그하며 Shift 누르기"
           }
         }
       }
@@ -29298,6 +29518,17 @@
         }
       }
     },
+    "The image could not be saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지를 저장하지 못했어요."
+          }
+        }
+      }
+    },
     "The keys are sent to the app in front, as if you pressed them.": {
       "extractionState": "manual",
       "localizations": {
@@ -29901,6 +30132,17 @@
         }
       }
     },
+    "This file is damaged, locked, or could not be read.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일이 손상되었거나 잠겨 있어 읽을 수 없어요."
+          }
+        }
+      }
+    },
     "This file isn’t an archive Orbit can open.": {
       "extractionState": "manual",
       "localizations": {
@@ -29930,6 +30172,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이 로그인은 %@용인데 지금 페이지는 %@예요. 그래도 넣으려면 ⌥↩를 누르세요."
+          }
+        }
+      }
+    },
+    "This page is too large to convert.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "페이지가 너무 커서 변환할 수 없어요."
           }
         }
       }
@@ -33379,6 +33632,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "업무"
+          }
+        }
+      }
+    },
+    "Work Behind Reference": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지 뒤에서 작업"
           }
         }
       }

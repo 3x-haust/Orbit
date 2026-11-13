@@ -325,7 +325,15 @@ final class NotchCenter {
     /// The pointer moved (or a shape changed under it): each window takes the mouse only while it's
     /// over that window's shape, and that's also what hovering means — a drag included, so files
     /// can be dropped on the notch.
+    func suspendForFileTools() {
+        close()
+        dropTargeted = false
+        hovering.removeAll()
+        windows.values.forEach { $0.ignoresMouseEvents = true }
+    }
+
     func pointerMoved(_ p: NSPoint) {
+        guard !FileTools.shared.isDraggingRing else { return }
         if config.hideFullScreen, !hiddenFor.isEmpty, ProcessInfo.processInfo.systemUptime - lastFullScreenCheck > 1,
            let s = NSScreen.screens.first(where: { $0.frame.contains(p) }), p.y >= s.frame.maxY - 2 {
             checkFullScreen("top edge")
@@ -338,6 +346,7 @@ final class NotchCenter {
     }
 
     func hover(_ inside: Bool, on display: CGDirectDisplayID) {
+        guard !FileTools.shared.isDraggingRing else { return }
         #if DEBUG
         if debugEarOn { return } // promo frames: the real pointer doesn't open or close it
         #endif
@@ -363,6 +372,7 @@ final class NotchCenter {
     /// shortcut); everything else lands on Home — unless the setting says the last tab, or the
     /// pointer slipped off and came straight back (a hover open within 1.5s of closing).
     func open(on display: CGDirectDisplayID? = nil, tab: Tab? = nil, byHover: Bool = false) {
+        guard !FileTools.shared.isDraggingRing else { return }
         guard Self.enabled, !config.tabs.isEmpty else { return }
         let display = display ?? (windows[NSScreen.active.displayID] != nil ? NSScreen.active.displayID : primary)
         guard windows[display] != nil, canOpen(display) else { return }
@@ -514,6 +524,7 @@ final class NotchCenter {
     // MARK: Drops
 
     func setDropTargeted(_ on: Bool, on display: CGDirectDisplayID) {
+        guard !FileTools.shared.isDraggingRing else { return }
         dropTargeted = on
         if on {
             guard shelfAvailable else { return }
@@ -524,7 +535,7 @@ final class NotchCenter {
     }
 
     func drop(_ providers: [NSItemProvider]) -> Bool {
-        guard shelfAvailable else { return false }
+        guard shelfAvailable, !FileTools.shared.isDraggingRing else { return false }
         tab = .shelf
         return Shelf.shared.accept(providers)
     }
