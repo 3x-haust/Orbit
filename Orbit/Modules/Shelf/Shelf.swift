@@ -225,6 +225,7 @@ final class Shelf {
 
     /// Accepts files, images and text from any drag.
     func accept(_ providers: [NSItemProvider]) -> Bool {
+        guard !FileTools.shared.isDraggingRing else { return false }
         for p in providers {
             if p.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
                 _ = p.loadObject(ofClass: URL.self) { url, _ in
@@ -276,7 +277,15 @@ final class Shelf {
         }) { monitors.append(m) }
     }
 
+    func suspendForFileTools() {
+        hideWork?.cancel()
+        layout.out = false
+        panel.orderOut(nil)
+        edgeSince = nil
+    }
+
     private func dragMoved() {
+        guard !FileTools.shared.isDraggingRing else { return }
         guard !isVisible, NSPasteboard(name: .drag).changeCount != dragCountAtMouseDown else { edgeSince = nil; return }
         let p = NSEvent.mouseLocation
         guard let screen = NSScreen.screens.first(where: { NSMouseInRect(p, $0.frame, false) }) else { return }

@@ -86,6 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Gestures.shared.start() // each source only while a rule needs it
         AppsCatalog.shared.start()
         Shelf.shared.startEdgeReveal()
+        FileTools.shared.start()
         KeepAwake.shared.recoverIfNeeded()
         TranslateController.shared.start()
         AudioMixer.shared.start()
@@ -166,6 +167,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         OrbitInstance.ready = false
         guard !duplicateInstance else { return }
+        FileTools.shared.stop()
         AudioMixer.shared.shutdown() // never leave an app's audio muted behind a dead tap
     }
 
