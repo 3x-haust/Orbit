@@ -69,10 +69,15 @@ enum FileConversion {
                 let output = try autoreleasepool {
                     guard let page = document.page(at: index) else { throw Failure.unreadable }
                     let data = try jpeg(page)
+                    try Task<Never, Never>.checkCancellation()
                     let suffix = document.numberOfPages == 1 ? "" : " - \(index)"
                     return try save(data, beside: source, suffix: suffix, extension: "jpg")
                 }
                 result.files.append(output)
+                if Task<Never, Never>.isCancelled { result.cancelled = true; break }
+            } catch is CancellationError {
+                result.cancelled = true
+                break
             } catch {
                 result.failure = "Page %ld: %@".loc(index, error.localizedDescription)
                 break
