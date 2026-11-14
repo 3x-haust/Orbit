@@ -79,6 +79,7 @@ struct FileToolsTests {
         await test("metadata removal drops GPS and camera data, keeps pixels and orientation", stripMetadata)
         await test("names never collide and originals are untouched", collisions)
         await test("cancelling stops before writing anything more", cancellation)
+        await test("progress card: × cancels at once and keeps nothing; dragging moves it and it stays there", cards)
         await test("background canvas follows ratio and padding; corners show the backdrop", background)
         await test("redaction covers only the chosen boxes", redact)
         await test("crop keeps the box measured from the top left, in the original's format", crop)
@@ -483,6 +484,61 @@ struct FileToolsTests {
         let folder = dir.appendingPathComponent("long")
         let written = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
         try expect(written.count == collector.outputs.count && written.count < 30, "stopped early: \(written.count) written")
+    }
+
+    @MainActor
+    static func cards(_ dir: URL) async throws {
+        UserDefaults.standard.removeObject(forKey: "files.hudAnchor")
+        defer { UserDefaults.standard.removeObject(forKey: "files.hudAnchor") }
+        let clip = dir.appendingPathComponent("long.mov")
+        try await makeVideo(clip, seconds: 8)
+        let tools = FileTools.shared
+        tools.perform(.convert(.gif), on: [clip])
+        let job = try unwrap(tools.jobs.last, "a card")
+        let hud = try unwrap(NSApp.windows.first { $0.isVisible && $0.level == .statusBar }, "card window")
+        hud.contentView?.layoutSubtreeIfNeeded()
+        try await Task.sleep(for: .milliseconds(150))
+        try expect(job.state == .running, "still running: \(job.state)")
+
+        /// A click or drag sent straight to the card window; the real pointer never moves.
+        func mouse(_ type: NSEvent.EventType, _ point: CGPoint) {
+            let event = NSEvent.mouseEvent(with: type, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                           windowNumber: hud.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
+            hud.sendEvent(event)
+        }
+        let inset: CGFloat = 24, width: CGFloat = 360, height: CGFloat = 74
+
+        // Drag by the card's body: the stack follows, and the next layout keeps the spot.
+        let before = hud.frame.origin
+        // Like real events: the pointer's screen position, measured from wherever the window is now.
+        let grab = hud.convertPoint(toScreen: CGPoint(x: inset + 120, y: inset + height / 2))
+        func at(_ dx: CGFloat, _ dy: CGFloat) -> CGPoint { hud.convertPoint(fromScreen: CGPoint(x: grab.x + dx, y: grab.y + dy)) }
+        mouse(.leftMouseDown, at(0, 0))
+        mouse(.leftMouseDragged, at(40, 30))
+        mouse(.leftMouseDragged, at(80, 60))
+        mouse(.leftMouseUp, at(80, 60))
+        let moved = hud.frame.origin
+        try expect(abs(moved.x - before.x - 80) < 1 && abs(moved.y - before.y - 60) < 1, "moved by the drag: \(before) → \(moved)")
+        try expect(UserDefaults.standard.string(forKey: "files.hudAnchor") != nil, "spot remembered")
+
+        // × on the card, one click: cancelled right away.
+        let x = CGPoint(x: inset + width - 8 - 16, y: inset + height / 2)
+        mouse(.leftMouseDown, x)
+        mouse(.leftMouseUp, x)
+        try expect(job.state == .cancelled, "× cancels at once: \(job.state)")
+
+        // A second card stacks on the remembered spot instead of jumping back to the bottom.
+        let png = dir.appendingPathComponent("p.png")
+        try write(try bitmap(10, 10), png, type: .png)
+        tools.perform(.convert(.jpg), on: [png])
+        try expect(abs(hud.frame.midX - (moved.x + hud.frame.width / 2)) < 1 && abs(hud.frame.minY - moved.y) < 1, "kept the spot: \(hud.frame)")
+
+        let deadline = ContinuousClock.now + .seconds(20)
+        while tools.jobs.contains(where: { $0 === job }), ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(50)) }
+        try await Task.sleep(for: .milliseconds(300))
+        let left = try FileManager.default.contentsOfDirectory(atPath: dir.path).filter { $0.hasSuffix(".gif") }
+        try expect(left.isEmpty, "nothing kept after cancel: \(left)")
+        for other in tools.jobs { tools.dismiss(other) }
     }
 
     static func background(_ dir: URL) throws {
