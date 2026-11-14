@@ -1,510 +1,609 @@
 import AppKit
+import AVFoundation
+import CoreText
 import ImageIO
 import PDFKit
 import UniformTypeIdentifiers
 @testable import Orbit
 
-private struct CheckFailure: Error, CustomStringConvertible {
-    let description: String
+/// File ring regressions against the real Debug module. Every fixture is made here, in a fresh folder;
+/// outputs are decoded again with ImageIO, PDFKit, AppKit's text system or AVFoundation, never trusted by name.
+private struct Failure: Error, CustomStringConvertible { let description: String }
+
+private func expect(_ condition: Bool, _ message: @autoclosure () throws -> String) throws {
+    if !condition { throw Failure(description: (try? message()) ?? "check failed") }
 }
 
-private struct Skipped: Error {
-    let reason: String
+private func unwrap<T>(_ value: T?, _ message: String) throws -> T {
+    guard let value else { throw Failure(description: message) }
+    return value
 }
 
 @MainActor
-private final class Suite {
-    let root: URL
-    var passed = 0
-    var failed = 0
-    var skipped = 0
+private final class Collector: @unchecked Sendable {
+    var outputs: [URL] = []
+}
 
-    init(scratch: URL) throws {
+/// Stands in for AppKit's dragging session at a point in the ring panel.
+private final class FakeDrag: NSObject, NSDraggingInfo {
+    let pasteboard: NSPasteboard
+    let point: CGPoint
+    let mask: NSDragOperation
+    init(_ pasteboard: NSPasteboard, at point: CGPoint, mask: NSDragOperation = [.copy, .move, .generic]) {
+        self.pasteboard = pasteboard
+        self.point = point
+        self.mask = mask
+    }
+    var draggingDestinationWindow: NSWindow? { nil }
+    var draggingSourceOperationMask: NSDragOperation { mask }
+    var draggingLocation: NSPoint { point }
+    var draggedImageLocation: NSPoint { point }
+    var draggedImage: NSImage? { nil }
+    var draggingPasteboard: NSPasteboard { pasteboard }
+    var draggingSource: Any? { nil }
+    var draggingSequenceNumber: Int { 1 }
+    func slideDraggedImage(to screenPoint: NSPoint) {}
+    var draggingFormation: NSDraggingFormation { get { .default } set {} }
+    var animatesToDestination: Bool { get { false } set {} }
+    var numberOfValidItemsForDrop: Int { get { 1 } set {} }
+    func enumerateDraggingItems(options: NSDraggingItemEnumerationOptions = [], for view: NSView?, classes: [AnyClass],
+                                searchOptions: [NSPasteboard.ReadingOptionKey: Any] = [:],
+                                using block: (NSDraggingItem, Int, UnsafeMutablePointer<ObjCBool>) -> Void) {}
+    var springLoadingHighlight: NSSpringLoadingHighlight { .none }
+    func resetSpringLoading() {}
+}
+
+@main @MainActor
+struct FileToolsTests {
+    static var root: URL!
+    static var passed = 0, failed = 0
+
+    static func main() async throws {
+        _ = NSApplication.shared
+        let scratch = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first ?? NSTemporaryDirectory())
         root = scratch.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+
+        await test("menus offer what each kind can become, never its own format", menus)
+        await test("ring geometry maps the hub, slots and tabs", geometry)
+        await test("dropping on a slot runs it; Shift flips modes; only copies are accepted", dropPath)
+        await test("PNG with transparency → JPG is white where it was clear", pngToJPG)
+        await test("rotated JPEG converts upright", orientation)
+        await test("pictures → one PDF, a page each at their own size", imagesToPDF)
+        await test("PDF → JPG: one page beside it, several in a folder in order", pdfToImages)
+        await test("PDF → TXT, DOCX and RTF carry the text", pdfToText)
+        await test("PDF without text says so instead of saving an empty file", pdfNoText)
+        await test("PDF split, merge and compress keep every page", pdfTools)
+        await test("documents convert to Word, text, HTML and paginated PDF", documents)
+        await test("compress makes a smaller copy or reports there was nothing to gain", compress)
+        await test("metadata removal drops GPS and camera data, keeps pixels and orientation", stripMetadata)
+        await test("names never collide and originals are untouched", collisions)
+        await test("cancelling stops before writing anything more", cancellation)
+        await test("background canvas follows ratio and padding; corners show the backdrop", background)
+        await test("redaction covers only the chosen boxes", redact)
+        await test("crop keeps the box measured from the top left, in the original's format", crop)
+        await test("video → MP4, GIF; mute removes sound; silent video has no M4A", video)
+        await test("audio → M4A, WAV, AIFF keep the length", audio)
+
+        print("\(passed) passed, \(failed) failed")
+        exit(failed == 0 ? 0 : 1)
     }
 
-    func run(_ name: String, _ body: @MainActor (URL) async throws -> Void) async {
+    static func test(_ name: String, _ body: @MainActor (URL) async throws -> Void) async {
         if let filter = ProcessInfo.processInfo.environment["ORBIT_FILE_TEST_FILTER"],
            name.range(of: filter, options: .regularExpression) == nil { return }
+        let folder = root.appendingPathComponent(UUID().uuidString, isDirectory: true)
         do {
-            let folder = root.appendingPathComponent(UUID().uuidString, isDirectory: true)
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             try await body(folder)
             passed += 1
             print("PASS \(name)")
-        } catch let skip as Skipped {
-            skipped += 1
-            print("SKIP \(name): \(skip.reason)")
         } catch {
             failed += 1
             print("FAIL \(name): \(error)")
         }
         fflush(stdout)
     }
-}
 
-@main @MainActor
-struct FileToolsTests {
-    private struct Page {
-        var width = 80
-        var height = 60
-        var rotation = 0
-        var blank = false
+    /// Runs one ring action the way the app does and returns what it saved.
+    static func run(_ action: FileAction, _ files: [URL]) async throws -> (outputs: [URL], note: String?) {
+        let collector = Collector()
+        let note = try await FileEngine.run(action, files: files, progress: { _ in }, saved: { url in
+            DispatchQueue.main.async { collector.outputs.append(url) }
+        })
+        await Task.yield()
+        try await Task.sleep(for: .milliseconds(20))
+        return (collector.outputs, note?.text)
     }
 
-    private static let red: [CGFloat] = [1, 0, 0]
-    private static let green: [CGFloat] = [0, 1, 0]
-    private static let blue: [CGFloat] = [0, 0, 1]
-    private static let yellow: [CGFloat] = [1, 1, 0]
-    private static let white: [CGFloat] = [1, 1, 1]
+    // MARK: Fixtures
 
-    private static func expect(_ condition: Bool, _ message: String) throws {
-        guard condition else { throw CheckFailure(description: message) }
+    static func bitmap(_ w: Int, _ h: Int, alpha: Bool = false, noise: Bool = false, draw: ((CGContext) -> Void)? = nil) throws -> CGImage {
+        let context = try unwrap(CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                           space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                           bitmapInfo: (alpha ? CGImageAlphaInfo.premultipliedLast : .noneSkipLast).rawValue), "context")
+        if !alpha {
+            context.setFillColor(CGColor(srgbRed: 0.2, green: 0.5, blue: 0.9, alpha: 1))
+            context.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        }
+        if noise, let data = context.data {
+            let bytes = data.bindMemory(to: UInt8.self, capacity: context.bytesPerRow * h)
+            var seed: UInt32 = 7
+            for i in 0..<(context.bytesPerRow * h) where i % 4 != 3 {
+                seed = seed &* 1_664_525 &+ 1_013_904_223
+                bytes[i] = UInt8(truncatingIfNeeded: seed >> 24)
+            }
+        }
+        draw?(context)
+        return try unwrap(context.makeImage(), "image")
     }
 
-    private static func unwrap<T>(_ value: T?, _ message: String) throws -> T {
-        guard let value else { throw CheckFailure(description: message) }
-        return value
+    static func write(_ image: CGImage, _ url: URL, type: UTType, properties: [CFString: Any] = [:]) throws {
+        let destination = try unwrap(CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil), "destination")
+        CGImageDestinationAddImage(destination, image, properties as CFDictionary)
+        try expect(CGImageDestinationFinalize(destination), "fixture \(url.lastPathComponent)")
     }
 
-    // A small vector PDF allows oversized page boxes without allocating oversized bitmaps.
-    private static func pdf(_ pages: [Page], at url: URL) throws {
-        let kids = pages.indices.map { "\(3 + $0 * 2) 0 R" }.joined(separator: " ")
-        var objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Count \(pages.count) /Kids [\(kids)] >>"]
-        for (index, page) in pages.enumerated() {
-            let w = page.width, h = page.height
-            let stream = page.blank ? "" : """
-            1 0 0 rg 0 \(h / 2) \(w / 2) \(h / 2) re f
-            0 1 0 rg \(w / 2) \(h / 2) \(w / 2) \(h / 2) re f
-            0 0 1 rg 0 0 \(w / 2) \(h / 2) re f
-            1 1 0 rg \(w / 2) 0 \(w / 2) \(h / 2) re f
-            """
-            objects.append("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 \(w) \(h)] /Rotate \(page.rotation) /Resources << >> /Contents \(4 + index * 2) 0 R >>")
-            objects.append("<< /Length \(stream.utf8.count) >>\nstream\n\(stream)\nendstream")
-        }
-        var data = Data("%PDF-1.4\n".utf8)
-        var offsets = [Int]()
-        for (index, object) in objects.enumerated() {
-            offsets.append(data.count)
-            data.append(Data("\(index + 1) 0 obj\n\(object)\nendobj\n".utf8))
-        }
-        let xref = data.count
-        data.append(Data("xref\n0 \(objects.count + 1)\n0000000000 65535 f \n".utf8))
-        for offset in offsets { data.append(Data(String(format: "%010d 00000 n \n", offset).utf8)) }
-        data.append(Data("trailer\n<< /Size \(objects.count + 1) /Root 1 0 R >>\nstartxref\n\(xref)\n%%EOF\n".utf8))
-        try data.write(to: url)
-        let document = try unwrap(CGPDFDocument(url as CFURL), "PDF fixture must decode")
-        try expect(document.numberOfPages == pages.count, "PDF fixture must contain every requested page")
+    static func decode(_ url: URL) throws -> (image: CGImage, type: String, props: [CFString: Any]) {
+        let source = try unwrap(CGImageSourceCreateWithURL(url as CFURL, nil), "decode \(url.lastPathComponent)")
+        let image = try unwrap(CGImageSourceCreateImageAtIndex(source, 0, nil), "pixels \(url.lastPathComponent)")
+        let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] ?? [:]
+        return (image, CGImageSourceGetType(source) as String? ?? "", props)
     }
 
-    private static func decode(_ url: URL, type: UTType, width: Int, height: Int) throws -> NSBitmapImageRep {
-        let source = try unwrap(CGImageSourceCreateWithURL(url as CFURL, nil), "Cannot decode \(url.lastPathComponent)")
-        try expect(CGImageSourceGetType(source) as String? == type.identifier, "\(url.lastPathComponent) must encode \(type.identifier), not merely use its extension")
-        try expect(CGImageSourceGetCount(source) == 1, "Each output must contain one image")
-        let image = try unwrap(CGImageSourceCreateImageAtIndex(source, 0, nil), "Missing encoded pixels")
-        try expect(image.width == width && image.height == height,
-                   "\(url.lastPathComponent): expected \(width)x\(height), got \(image.width)x\(image.height)")
-        let context = try unwrap(CGContext(data: nil, width: width, height: height, bitsPerComponent: 8,
-                                           bytesPerRow: width * 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                                           bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue), "Cannot normalize decoded pixels")
-        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
-        return NSBitmapImageRep(cgImage: try unwrap(context.makeImage(), "Cannot read normalized pixels"))
+    /// RGBA 0…255 at (x, y) with y from the top.
+    static func pixel(_ image: CGImage, _ x: Int, _ y: Int) throws -> [Int] {
+        let context = try unwrap(CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: image.width * 4,
+                                           space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                           bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue), "read context")
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        let bytes = try unwrap(context.data, "read data").bindMemory(to: UInt8.self, capacity: image.width * image.height * 4)
+        let i = (y * image.width + x) * 4 // bitmap rows run top to bottom
+        return (0..<4).map { Int(bytes[i + $0]) }
     }
 
-    private static func color(_ bitmap: NSBitmapImageRep, x: Int, y: Int, equals expected: [CGFloat], tolerance: CGFloat = 0.08) throws {
-        // decode already normalizes to sRGB. colorAt labels these channel values as calibrated RGB;
-        // converting that label again would apply a second, incorrect color transform.
-        let sample = try unwrap(bitmap.colorAt(x: x, y: y), "Missing pixel at \(x),\(y)")
-        let actual = [sample.redComponent, sample.greenComponent, sample.blueComponent]
-        try expect(zip(actual, expected).allSatisfy { abs($0 - $1) <= tolerance } && sample.alphaComponent > 0.98,
-                   "Pixel \(x),\(y): expected opaque \(expected), got \(actual), alpha \(sample.alphaComponent)")
+    static func close(_ a: [Int], _ b: [Int], _ tolerance: Int = 12) -> Bool {
+        zip(a, b).allSatisfy { abs($0 - $1) <= tolerance }
     }
 
-    private static func quadrants(_ bitmap: NSBitmapImageRep, _ colors: [[CGFloat]]) throws {
-        let w = bitmap.pixelsWide, h = bitmap.pixelsHigh
-        for (index, point) in [(w / 4, h / 4), (w * 3 / 4, h / 4), (w / 4, h * 3 / 4), (w * 3 / 4, h * 3 / 4)].enumerated() {
-            try color(bitmap, x: point.0, y: point.1, equals: colors[index])
+    /// A PDF with real, extractable text on each page.
+    static func textPDF(_ pages: [String], _ url: URL, size: CGSize = CGSize(width: 300, height: 200)) throws {
+        var box = CGRect(origin: .zero, size: size)
+        let context = try unwrap(CGContext(url as CFURL, mediaBox: &box, nil), "pdf context")
+        for text in pages {
+            context.beginPage(mediaBox: &box)
+            if !text.isEmpty {
+                let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: [.font: NSFont.systemFont(ofSize: 18)]))
+                context.textPosition = CGPoint(x: 20, y: size.height / 2)
+                CTLineDraw(line, context)
+            } else {
+                context.setFillColor(CGColor(gray: 0.3, alpha: 1))
+                context.fill(CGRect(x: 20, y: 20, width: 100, height: 100))
+            }
+            context.endPage()
+        }
+        context.closePDF()
+    }
+
+    static func data(_ url: URL) throws -> Data { try Data(contentsOf: url) }
+
+    // MARK: Tests
+
+    static func menus(_ dir: URL) throws {
+        let png = dir.appendingPathComponent("a.png"), png2 = dir.appendingPathComponent("b.png")
+        try write(try bitmap(8, 8), png, type: .png)
+        try write(try bitmap(8, 8), png2, type: .png)
+        let pdf = dir.appendingPathComponent("c.pdf")
+        try textPDF(["x"], pdf)
+        let rtf = dir.appendingPathComponent("d.rtf")
+        try data(of: "Hi", as: .rtf).write(to: rtf)
+
+        let convert = FileMenu.menu(for: [png], mode: .convert)
+        try expect(!convert.outer.contains(.convert(.png)), "PNG must not offer PNG")
+        try expect(convert.outer.contains(.convert(.jpg)) && convert.hub == .convert(.pdf), "PNG: JPG around, PDF in the middle")
+        let tools = FileMenu.menu(for: [png], mode: .tools)
+        try expect(tools.outer == [.crop, .background, .compress, .stripMetadata, .redact] && tools.hub == .annotate, "image tools \(tools)")
+        let many = FileMenu.menu(for: [png, png2], mode: .tools)
+        try expect(!many.outer.contains(.crop) && many.hub == nil, "windows open for one picture only")
+        try expect(FileMenu.menu(for: [pdf], mode: .convert).hub == .convert(.txt), "PDF hub is TXT")
+        try expect(!FileMenu.menu(for: [pdf], mode: .tools).outer.contains(.merge), "merge needs two PDFs")
+        try expect(FileMenu.menu(for: [pdf, pdf], mode: .tools).outer.contains(.merge), "two PDFs can merge")
+        let doc = FileMenu.menu(for: [rtf], mode: .convert)
+        try expect(!doc.outer.contains(.convert(.rtf)) && doc.hub == .convert(.pdf), "RTF menu \(doc)")
+        try expect(FileMenu.menu(for: [png, pdf], mode: .convert).isEmpty, "mixed kinds offer nothing")
+        try expect(FileMenu.menu(for: [dir], mode: .convert).isEmpty, "folders offer nothing")
+    }
+
+    static func data(of text: String, as format: FileFormat) throws -> Data {
+        try FileEngine.data(of: NSAttributedString(string: text), as: format)
+    }
+
+    static func geometry(_ dir: URL) throws {
+        let menu = FileMenu(outer: [.convert(.jpg), .convert(.png), .convert(.heic), .convert(.tiff)], hub: .convert(.pdf))
+        let c = FileTools.ringSize / 2
+        try expect(FileTools.slot(at: CGPoint(x: c, y: c), menu: menu) == .hub, "center is the hub")
+        try expect(FileTools.slot(at: CGPoint(x: c, y: c + 100), menu: menu) == .outer(0), "up is slot 0")
+        try expect(FileTools.slot(at: CGPoint(x: c + 100, y: c), menu: menu) == .outer(1), "right is slot 1")
+        try expect(FileTools.slot(at: CGPoint(x: c, y: c - 100), menu: menu) == .outer(2), "down is slot 2")
+        try expect(FileTools.slot(at: CGPoint(x: c, y: c + 48), menu: menu) == nil, "gap between hub and slots")
+        try expect(FileTools.slot(at: CGPoint(x: 2, y: 2), menu: menu) == nil, "corner is outside")
+        try expect(FileTools.slot(at: CGPoint(x: c, y: c), menu: FileMenu(outer: menu.outer)) == nil, "no hub action, no hub slot")
+        try expect(FileTools.tab(at: CGPoint(x: 40, y: FileTools.ringSize + 10)) == .convert, "left tab")
+        try expect(FileTools.tab(at: CGPoint(x: FileTools.ringSize - 40, y: FileTools.ringSize + 10)) == .tools, "right tab")
+        try expect(FileTools.tab(at: CGPoint(x: c, y: c)) == nil, "ring is not a tab")
+    }
+
+    static func dropPath(_ dir: URL) async throws {
+        let png = dir.appendingPathComponent("drop.png")
+        try write(try bitmap(12, 12), png, type: .png)
+        let pasteboard = NSPasteboard.withUniqueName()
+        pasteboard.writeObjects([png as NSURL])
+        let tools = FileTools.shared
+        tools.show([png], dragging: true)
+        defer { tools.closeRing() }
+        let window = try unwrap(NSApp.windows.first { $0.isVisible && $0.frame.size == FileTools.panelSize }, "ring panel")
+        let drop = try unwrap(window.contentView as? FileDropView, "drop view")
+        let c = FileTools.ringSize / 2
+        try expect(tools.mode == .convert, "opens on Convert")
+
+        // A move-only drag (⌘ in Finder) is refused so Finder can never delete the original.
+        let move = FakeDrag(pasteboard, at: CGPoint(x: c, y: c + 100), mask: .move)
+        try expect(drop.draggingUpdated(move) == [], "move refused")
+
+        // Hovering the Tools tab switches; Shift does the same.
+        _ = drop.draggingUpdated(FakeDrag(pasteboard, at: CGPoint(x: FileTools.ringSize - 40, y: FileTools.ringSize + 12)))
+        try expect(tools.mode == .tools, "tab hover → Tools")
+        tools.toggleMode()
+        try expect(tools.mode == .convert, "Shift → Convert")
+
+        let top = FakeDrag(pasteboard, at: CGPoint(x: c, y: c + 100))
+        try expect(drop.draggingUpdated(top) == .copy && tools.selection == .outer(0), "top slot targeted")
+        try expect(tools.action(for: .outer(0)) == .convert(.jpg), "top is JPG")
+        try expect(drop.performDragOperation(top), "drop accepted")
+        let deadline = ContinuousClock.now + .seconds(5)
+        while !FileManager.default.fileExists(atPath: dir.appendingPathComponent("drop.jpg").path), ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        try expect(try decode(dir.appendingPathComponent("drop.jpg")).type == UTType.jpeg.identifier, "drop made a JPEG")
+        let job = try unwrap(tools.jobs.last, "a progress card")
+        while job.state == .running, ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(20)) }
+        try expect(job.state == .done && job.outputs.map(\.lastPathComponent) == ["drop.jpg"], "card shows the result: \(job.state) \(job.outputs)")
+        tools.dismiss(job)
+    }
+
+    static func pngToJPG(_ dir: URL) async throws {
+        let png = dir.appendingPathComponent("clear.png")
+        try write(try bitmap(40, 20, alpha: true) { ctx in
+            ctx.setFillColor(CGColor(srgbRed: 1, green: 0, blue: 0, alpha: 1))
+            ctx.fill(CGRect(x: 0, y: 0, width: 20, height: 20))
+        }, png, type: .png)
+        let (outputs, _) = try await run(.convert(.jpg), [png])
+        try expect(outputs.map(\.lastPathComponent) == ["clear.jpg"], "outputs \(outputs)")
+        let out = try decode(outputs[0])
+        try expect(out.type == UTType.jpeg.identifier, "really a JPEG: \(out.type)")
+        try expect(close(try pixel(out.image, 30, 10), [255, 255, 255, 255]), "clear became white: \(try pixel(out.image, 30, 10))")
+        try expect(close(try pixel(out.image, 5, 10), [255, 0, 0, 255], 30), "red stays red")
+    }
+
+    static func orientation(_ dir: URL) async throws {
+        let jpg = dir.appendingPathComponent("turned.jpg")
+        try write(try bitmap(60, 20), jpg, type: .jpeg, properties: [kCGImagePropertyOrientation: 6])
+        let (outputs, _) = try await run(.convert(.png), [jpg])
+        let out = try decode(try unwrap(outputs.first, "no output"))
+        try expect(out.image.width == 20 && out.image.height == 60, "upright size \(out.image.width)x\(out.image.height)")
+        try expect((out.props[kCGImagePropertyOrientation] as? Int ?? 1) == 1, "no leftover orientation tag")
+    }
+
+    static func imagesToPDF(_ dir: URL) async throws {
+        let a = dir.appendingPathComponent("a.png"), b = dir.appendingPathComponent("b.png")
+        try write(try bitmap(144, 72), a, type: .png, properties: [kCGImagePropertyDPIWidth: 144, kCGImagePropertyDPIHeight: 144])
+        try write(try bitmap(50, 100), b, type: .png)
+        let (outputs, _) = try await run(.convert(.pdf), [a, b])
+        try expect(outputs.count == 1, "one PDF")
+        let pdf = try unwrap(PDFDocument(url: outputs[0]), "PDF decodes")
+        try expect(pdf.pageCount == 2, "two pages")
+        let first = pdf.page(at: 0)!.bounds(for: .mediaBox).size, second = pdf.page(at: 1)!.bounds(for: .mediaBox).size
+        try expect(first == CGSize(width: 72, height: 36) && second == CGSize(width: 50, height: 100), "page sizes \(first) \(second)")
+    }
+
+    static func pdfToImages(_ dir: URL) async throws {
+        let one = dir.appendingPathComponent("one.pdf"), three = dir.appendingPathComponent("three.pdf")
+        try textPDF(["only"], one)
+        try textPDF(["", "", ""], three, size: CGSize(width: 100, height: 50))
+        let single = try await run(.convert(.jpg), [one]).outputs
+        try expect(single.map(\.lastPathComponent) == ["one.jpg"], "single \(single)")
+        let pages = try await run(.convert(.png), [three]).outputs
+        try expect(pages.map(\.lastPathComponent) == ["Page 1.png", "Page 2.png", "Page 3.png"], "pages \(pages.map(\.lastPathComponent))")
+        try expect(pages.allSatisfy { $0.deletingLastPathComponent().lastPathComponent == "three" }, "in a folder named after the PDF")
+        let image = try decode(pages[0])
+        try expect(image.image.width == 200 && image.image.height == 100, "2× page \(image.image.width)x\(image.image.height)")
+        // The fixture's square sits 20 pt from the bottom left: at 2× it fills x ≥ 40 and the top 60 rows.
+        try expect(close(try pixel(image.image, 20, 90), [255, 255, 255, 255]), "white paper")
+        try expect(close(try pixel(image.image, 60, 30), [77, 77, 77, 255], 20), "drawn content \(try pixel(image.image, 60, 30))")
+    }
+
+    static func pdfToText(_ dir: URL) async throws {
+        let pdf = dir.appendingPathComponent("words.pdf")
+        try textPDF(["Hello Orbit", "Second page"], pdf)
+        let txt = try await run(.convert(.txt), [pdf]).outputs
+        let text = try String(contentsOf: txt[0], encoding: .utf8)
+        try expect(text.contains("Hello Orbit") && text.contains("Second page"), "txt \(text)")
+        for format in [FileFormat.docx, .rtf] {
+            let out = try await run(.convert(format), [pdf]).outputs
+            try expect(out.first?.pathExtension == format.ext, "\(format) extension")
+            let read = try NSAttributedString(url: out[0], options: [:], documentAttributes: nil).string
+            try expect(read.contains("Hello Orbit") && read.contains("Second page"), "\(format) text \(read)")
         }
     }
 
-    private static func png(at url: URL) throws -> Data {
-        let context = try unwrap(CGContext(data: nil, width: 120, height: 80, bitsPerComponent: 8,
-                                           bytesPerRow: 480, space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                                           bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue), "Cannot allocate PNG fixture")
-        for (index, rgb) in [red, green, blue, yellow].enumerated() {
-            context.setFillColor(CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: rgb + [1])!)
-            context.fill(CGRect(x: index % 2 * 60, y: index < 2 ? 40 : 0, width: 60, height: 40))
+    static func pdfNoText(_ dir: URL) async throws {
+        let pdf = dir.appendingPathComponent("scan.pdf")
+        try textPDF([""], pdf)
+        do {
+            _ = try await run(.convert(.txt), [pdf])
+            throw Failure(description: "an empty text file was made")
+        } catch let error as FileToolError {
+            try expect(error == .noText, "error \(error)")
         }
-        let image = try unwrap(context.makeImage(), "Cannot render PNG fixture")
-        let buffer = NSMutableData()
-        let destination = try unwrap(CGImageDestinationCreateWithData(buffer, UTType.png.identifier as CFString, 1, nil), "Cannot encode PNG fixture")
-        CGImageDestinationAddImage(destination, image, nil)
-        try expect(CGImageDestinationFinalize(destination), "Cannot finish PNG fixture")
-        let data = buffer as Data
-        try data.write(to: url)
-        // Verify the source independently before asking the editor to transform it.
-        try quadrants(decode(url, type: .png, width: 120, height: 80), [red, green, blue, yellow])
-        return data
+        let left = try FileManager.default.contentsOfDirectory(atPath: dir.path)
+        try expect(left == ["scan.pdf"], "nothing written: \(left)")
     }
 
-    private static func export(_ model: EditorModel, beside source: URL, suffix: String) throws -> URL {
-        let image = model.render()
-        let cg = try unwrap(image.cgImage(forProposedRect: nil, context: nil, hints: nil), "Editor render has no pixels")
-        let data = try unwrap(NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]), "Cannot encode rendered PNG")
-        return try FileConversion.save(data, beside: source, suffix: suffix, extension: "png")
+    static func pdfTools(_ dir: URL) async throws {
+        let a = dir.appendingPathComponent("a.pdf"), b = dir.appendingPathComponent("b.pdf")
+        try textPDF(["A1", "A2"], a)
+        try textPDF(["B1"], b)
+        let split = try await run(.split, [a]).outputs
+        try expect(split.count == 2 && split.allSatisfy { PDFDocument(url: $0)?.pageCount == 1 }, "split \(split)")
+        try expect(PDFDocument(url: split[1])?.string?.contains("A2") == true, "page order")
+        let merged = try await run(.merge, [b, a]).outputs
+        let doc = try unwrap(PDFDocument(url: merged[0]), "merged")
+        try expect(doc.pageCount == 3 && doc.page(at: 0)?.string?.contains("B1") == true, "merged in drag order")
+        try expect(merged[0].lastPathComponent == "b Merged.pdf", "name \(merged[0].lastPathComponent)")
+        // A text-only PDF can't shrink: the run reports that and keeps no copy.
+        let (compressed, note) = try await run(.compress, [b])
+        try expect(compressed.isEmpty || (PDFDocument(url: compressed[0])?.pageCount == 1), "compressed keeps pages")
+        try expect(!compressed.isEmpty || note != nil, "an empty result explains itself")
     }
 
-    private static func contents(_ folder: URL) throws -> Set<String> {
-        Set(try FileManager.default.contentsOfDirectory(atPath: folder.path))
+    static func documents(_ dir: URL) async throws {
+        let rtf = dir.appendingPathComponent("letter.rtf")
+        let long = (1...400).map { "Line \($0) of the letter." }.joined(separator: "\n")
+        try FileEngine.data(of: NSAttributedString(string: "Dear Orbit\n" + long, attributes: [.font: NSFont.systemFont(ofSize: 13)]), as: .rtf).write(to: rtf)
+        for format in [FileFormat.docx, .txt, .html, .odt] {
+            let out = try await run(.convert(format), [rtf]).outputs
+            try expect(out.first?.lastPathComponent == "letter.\(format.ext)", "\(format) name")
+            let read = try NSAttributedString(url: out[0], options: [:], documentAttributes: nil).string
+            try expect(read.contains("Dear Orbit") && read.contains("Line 400"), "\(format) keeps the text")
+        }
+        let pdf = try await run(.convert(.pdf), [rtf]).outputs
+        let doc = try unwrap(PDFDocument(url: pdf[0]), "PDF decodes")
+        try expect(doc.pageCount > 3, "paginated: \(doc.pageCount) pages")
+        try expect(doc.page(at: 0)?.string?.contains("Dear Orbit") == true, "first page starts the letter")
+        try expect(doc.string?.contains("Line 400") == true, "last line made it")
     }
 
-    static func main() async throws {
-        guard CommandLine.arguments.count == 2 else {
-            fputs("Usage: file-tools-tests <scratch directory>\n", stderr)
-            exit(2)
-        }
-        let suite = try Suite(scratch: URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true))
-        _ = NSApplication.shared
-        NSApp.setActivationPolicy(.accessory)
-        print("Fixtures and outputs: \(suite.root.path)")
+    static func compress(_ dir: URL) async throws {
+        let big = dir.appendingPathComponent("noise.png")
+        try write(try bitmap(600, 400, noise: true), big, type: .png)
+        let (outputs, note) = try await run(.compress, [big])
+        try expect(outputs.map(\.lastPathComponent) == ["noise Compressed.jpg"], "outputs \(outputs)")
+        try expect(FileEngine.size(of: outputs[0]) < FileEngine.size(of: big), "smaller")
+        try expect(note?.contains("→") == true, "reports sizes: \(note ?? "nil")")
 
-        await suite.run("single Korean PDF preserves source and existing same-stem JPGs") { folder in
-            let source = folder.appendingPathComponent("한글 문서.pdf")
-            try pdf([Page()], at: source)
-            let original = try Data(contentsOf: source)
-            let existing = folder.appendingPathComponent("한글 문서.jpg")
-            let numbered = folder.appendingPathComponent("한글 문서 (2).jpg")
-            let sentinel = Data("Existing image bytes must survive".utf8)
-            try sentinel.write(to: existing)
-            try sentinel.write(to: numbered)
-            for number in [3, 4] {
-                let result = FileConversion.convertPDF(source)
-                let expected = folder.appendingPathComponent("한글 문서 (\(number)).jpg")
-                try expect(result.files == [expected] && result.failure == nil && !result.cancelled,
-                           "Single-page conversion must select the next collision-free adjacent JPG: \(result)")
-                try quadrants(decode(expected, type: .jpeg, width: 160, height: 120), [red, green, blue, yellow])
-            }
-            try expect(Data(contentsOf: source) == original, "PDF source bytes changed")
-            try expect(Data(contentsOf: existing) == sentinel && Data(contentsOf: numbered) == sentinel, "Existing JPG bytes changed")
-        }
+        let tiny = dir.appendingPathComponent("tiny.jpg")
+        try write(try bitmap(16, 16), tiny, type: .jpeg, properties: [kCGImageDestinationLossyCompressionQuality: 0.1])
+        let (none, why) = try await run(.compress, [tiny])
+        try expect(none.isEmpty && why != nil, "nothing gained → no file, a note")
+        try expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("tiny Compressed.jpg").path), "bigger copy removed")
+    }
 
-        await suite.run("every PDF page becomes a correctly ordered JPG with a white blank page") { folder in
-            let source = folder.appendingPathComponent("pages.pdf")
-            try pdf([Page(), Page(width: 100, height: 40), Page(width: 30, height: 50, blank: true)], at: source)
-            let original = try Data(contentsOf: source)
-            let result = FileConversion.convertPDF(source)
-            let expected = (1...3).map { folder.appendingPathComponent("pages - \($0).jpg") }
-            try expect(result.files == expected && result.failure == nil && !result.cancelled, "Expected three successful ordered outputs: \(result)")
-            try quadrants(decode(expected[0], type: .jpeg, width: 160, height: 120), [red, green, blue, yellow])
-            try quadrants(decode(expected[1], type: .jpeg, width: 200, height: 80), [red, green, blue, yellow])
-            try quadrants(decode(expected[2], type: .jpeg, width: 60, height: 100), [white, white, white, white])
-            try expect(Data(contentsOf: source) == original, "Multi-page PDF source bytes changed")
+    static func stripMetadata(_ dir: URL) async throws {
+        let gps: [CFString: Any] = [kCGImagePropertyGPSLatitude: 37.5, kCGImagePropertyGPSLatitudeRef: "N",
+                                    kCGImagePropertyGPSLongitude: 127.0, kCGImagePropertyGPSLongitudeRef: "E"]
+        // ImageIO clears metadata differently per format; each one must come out clean.
+        for (type, ext) in [(UTType.jpeg, "jpg"), (.png, "png"), (.tiff, "tiff"), (.heic, "heic")] {
+            let file = dir.appendingPathComponent("trip.\(ext)")
+            try write(try bitmap(30, 10), file, type: type, properties: [
+                kCGImagePropertyOrientation: 6,
+                kCGImagePropertyGPSDictionary: gps,
+                kCGImagePropertyExifDictionary: [kCGImagePropertyExifLensModel: "Test Lens"],
+                kCGImagePropertyTIFFDictionary: [kCGImagePropertyTIFFModel: "Test Camera"],
+            ])
+            try expect(!FileEngine.isClean(try data(file)), "\(ext) fixture carries metadata")
+            let out = try await run(.stripMetadata, [file]).outputs
+            try expect(out.map(\.lastPathComponent) == ["trip No Metadata.\(ext)"], "\(ext) name \(out)")
+            let after = try decode(out[0])
+            try expect(after.props[kCGImagePropertyGPSDictionary] == nil, "\(ext): GPS gone")
+            let exif = after.props[kCGImagePropertyExifDictionary] as? [CFString: Any]
+            try expect(exif?[kCGImagePropertyExifLensModel] == nil, "\(ext): lens gone")
+            let tiff = after.props[kCGImagePropertyTIFFDictionary] as? [CFString: Any]
+            try expect(tiff?[kCGImagePropertyTIFFModel] == nil, "\(ext): camera gone")
+            try expect(after.props[kCGImagePropertyOrientation] as? Int == 6, "\(ext): orientation kept")
+            try expect(after.image.width == 30 && after.image.height == 10, "\(ext): same pixels")
         }
-
-        for (rotation, colors) in [(90, [blue, red, yellow, green]), (180, [yellow, blue, green, red]), (270, [green, yellow, red, blue])] {
-            await suite.run("PDF rotation \(rotation) preserves dimensions and quadrant orientation") { folder in
-                let source = folder.appendingPathComponent("rotated.pdf")
-                try pdf([Page(rotation: rotation)], at: source)
-                let original = try Data(contentsOf: source)
-                let result = FileConversion.convertPDF(source)
-                try expect(result.files.count == 1 && result.failure == nil && !result.cancelled, "Rotated PDF conversion failed: \(result)")
-                let sideways = rotation != 180
-                try quadrants(decode(result.files[0], type: .jpeg, width: sideways ? 120 : 160, height: sideways ? 160 : 120), colors)
-                try expect(Data(contentsOf: source) == original, "Rotated source bytes changed")
-            }
+        // An animation keeps every frame.
+        let gif = dir.appendingPathComponent("loop.gif")
+        let destination = try unwrap(CGImageDestinationCreateWithURL(gif as CFURL, UTType.gif.identifier as CFString, 3, nil), "gif")
+        for _ in 0..<3 {
+            CGImageDestinationAddImage(destination, try bitmap(8, 8), [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.2]] as CFDictionary)
         }
+        try expect(CGImageDestinationFinalize(destination), "gif fixture")
+        let cleaned = try await run(.stripMetadata, [gif]).outputs
+        let frames = CGImageSourceGetCount(try unwrap(CGImageSourceCreateWithURL(cleaned[0] as CFURL, nil), "gif out"))
+        try expect(frames == 3, "all frames kept: \(frames)")
+    }
 
-        await suite.run("oversized second page retains the completed first page and stops before the third") { folder in
-            let source = folder.appendingPathComponent("partial.pdf")
-            try pdf([Page(), Page(width: 4000, height: 4000), Page()], at: source)
-            let original = try Data(contentsOf: source)
-            let result = FileConversion.convertPDF(source)
-            let first = folder.appendingPathComponent("partial - 1.jpg")
-            try expect(result.files == [first] && result.failure?.isEmpty == false && !result.cancelled,
-                       "Expected a page failure with exactly the completed page retained: \(result)")
-            try quadrants(decode(first, type: .jpeg, width: 160, height: 120), [red, green, blue, yellow])
-            try expect(contents(folder) == ["partial.pdf", "partial - 1.jpg"], "Failure must not create later or incomplete output files")
-            try expect(Data(contentsOf: source) == original, "Partial conversion modified the source")
+    static func collisions(_ dir: URL) async throws {
+        let png = dir.appendingPathComponent("photo.png")
+        try write(try bitmap(10, 10), png, type: .png)
+        let original = try data(png)
+        try Data("taken".utf8).write(to: dir.appendingPathComponent("photo.jpg"))
+        let out = try await run(.convert(.jpg), [png]).outputs
+        try expect(out.map(\.lastPathComponent) == ["photo 2.jpg"], "free name \(out)")
+        try expect(try String(contentsOf: dir.appendingPathComponent("photo.jpg"), encoding: .utf8) == "taken", "existing file untouched")
+        try expect(try data(png) == original, "original untouched")
+        try FileManager.default.createDirectory(at: dir.appendingPathComponent("many"), withIntermediateDirectories: false)
+        let pdf = dir.appendingPathComponent("many.pdf")
+        try textPDF(["1", "2"], pdf)
+        let pages = try await run(.convert(.jpg), [pdf]).outputs
+        try expect(pages.first?.deletingLastPathComponent().lastPathComponent == "many 2", "folder name taken → next one")
+
+        // A broken symlink holds its name too (and must not make naming spin forever).
+        let link = dir.appendingPathComponent("linked.png")
+        try write(try bitmap(10, 10), link, type: .png)
+        try FileManager.default.createSymbolicLink(atPath: dir.appendingPathComponent("linked.jpg").path, withDestinationPath: "/nonexistent/x.jpg")
+        let viaLink = try await run(.convert(.jpg), [link]).outputs
+        try expect(viaLink.map(\.lastPathComponent) == ["linked 2.jpg"], "skips the dangling link: \(viaLink)")
+
+        // Two jobs racing for one name each get their own file (writers that can't write exclusively).
+        let clip = dir.appendingPathComponent("race.pdf")
+        try textPDF(["x"], clip)
+        async let a = run(.split, [clip])
+        async let b = run(.split, [clip])
+        let (ra, rb) = try await (a, b)
+        try expect(Set(ra.outputs + rb.outputs).count == 2, "two separate results")
+    }
+
+    static func cancellation(_ dir: URL) async throws {
+        let pdf = dir.appendingPathComponent("long.pdf")
+        try textPDF(Array(repeating: "", count: 30), pdf)
+        let collector = Collector()
+        let task = Task {
+            try await FileEngine.run(.convert(.jpg), files: [pdf], progress: { _ in }, saved: { url in
+                DispatchQueue.main.async { collector.outputs.append(url) }
+            })
         }
+        task.cancel()
+        do {
+            _ = try await task.value
+            throw Failure(description: "finished despite cancel")
+        } catch is CancellationError {}
+        try await Task.sleep(for: .milliseconds(20))
+        let folder = dir.appendingPathComponent("long")
+        let written = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
+        try expect(written.count == collector.outputs.count && written.count < 30, "stopped early: \(written.count) written")
+    }
 
-        await suite.run("oversized first page fails without creating an output") { folder in
-            let source = folder.appendingPathComponent("large.pdf")
-            try pdf([Page(width: 4000, height: 4000), Page()], at: source)
-            let original = try Data(contentsOf: source)
-            let result = FileConversion.convertPDF(source)
-            try expect(result.files.isEmpty && result.failure?.isEmpty == false && !result.cancelled, "Oversized first page must fail: \(result)")
-            try expect(contents(folder) == ["large.pdf"], "Oversized page left an output")
-            try expect(Data(contentsOf: source) == original, "Oversized source bytes changed")
+    static func background(_ dir: URL) throws {
+        let image = try bitmap(200, 100)
+        var backdrop = StudioBackdrop()
+        backdrop.padding = 0.1
+        try expect(StudioRenderer.canvas(for: CGSize(width: 200, height: 100), backdrop: backdrop) == CGSize(width: 240, height: 140), "padding")
+        backdrop.ratio = .square
+        try expect(StudioRenderer.canvas(for: CGSize(width: 200, height: 100), backdrop: backdrop) == CGSize(width: 240, height: 240), "1:1 grows")
+        backdrop.ratio = .story
+        let story = StudioRenderer.canvas(for: CGSize(width: 200, height: 100), backdrop: backdrop)
+        try expect(abs(story.width / story.height - 9.0 / 16) < 0.01, "9:16 \(story)")
+
+        backdrop = StudioBackdrop(fill: StudioBackdrop.gradients.count + 8, padding: 0.1, corners: 0.15, shadow: 0, ratio: .auto) // solid black
+        let out = try unwrap(StudioRenderer.background(image, backdrop: backdrop, image: nil), "render")
+        try expect(out.width == 240 && out.height == 140, "size")
+        try expect(close(try pixel(out, 2, 2), [0, 0, 0, 255]), "backdrop at the edge")
+        try expect(close(try pixel(out, 21, 21), [0, 0, 0, 255]), "rounded corner shows the backdrop")
+        try expect(close(try pixel(out, 120, 70), [51, 128, 230, 255], 16), "picture in the middle \(try pixel(out, 120, 70))")
+    }
+
+    static func redact(_ dir: URL) throws {
+        let image = try bitmap(100, 100, noise: true)
+        let black = try unwrap(StudioRenderer.redact(image, rects: [CGRect(x: 10, y: 10, width: 20, height: 20)], style: .black), "black")
+        try expect(close(try pixel(black, 15, 15), [0, 0, 0, 255], 0), "covered")
+        try expect(try pixel(black, 60, 60) == (try pixel(image, 60, 60)), "rest untouched")
+        let blurred = try unwrap(StudioRenderer.redact(image, rects: [CGRect(x: 50, y: 0, width: 50, height: 100)], style: .blur), "blur")
+        try expect(try pixel(blurred, 10, 50) == (try pixel(image, 10, 50)), "outside untouched")
+        let a = try pixel(blurred, 70, 50), b = try pixel(blurred, 71, 50)
+        try expect(close(a, b, 10), "inside smoothed \(a) \(b)")
+    }
+
+    static func crop(_ dir: URL) throws {
+        let image = try bitmap(40, 40) { ctx in
+            ctx.setFillColor(CGColor(srgbRed: 1, green: 0, blue: 0, alpha: 1))
+            ctx.fill(CGRect(x: 0, y: 20, width: 40, height: 20)) // the top half
         }
+        let top = try unwrap(image.cropping(to: CGRect(x: 0, y: 0, width: 40, height: 20)), "crop")
+        try expect(close(try pixel(top, 5, 5), [255, 0, 0, 255]), "top half is red")
+        let jpeg = dir.appendingPathComponent("shot.jpeg")
+        try write(image, jpeg, type: .jpeg)
+        let out = try ImageStudio.write(top, like: jpeg, "%@ Cropped")
+        try expect(out.lastPathComponent == "shot Cropped.jpeg", "name \(out.lastPathComponent)")
+        let decoded = try decode(out)
+        try expect(decoded.type == UTType.jpeg.identifier && decoded.image.width == 40 && decoded.image.height == 20, "JPEG 40×20")
+        let webp = dir.appendingPathComponent("odd.gif")
+        try write(image, webp, type: .gif)
+        try expect(try ImageStudio.write(top, like: webp, "%@ Cropped").pathExtension == "gif", "GIF stays GIF")
+    }
 
-        await suite.run("damaged and empty PDFs fail without outputs or source changes") { folder in
-            for (name, data) in [("damaged.pdf", Data("%PDF-1.4\nnot a document".utf8)), ("empty.pdf", Data())] {
-                let source = folder.appendingPathComponent(name)
-                try data.write(to: source)
-                let before = try contents(folder)
-                let result = FileConversion.convertPDF(source)
-                try expect(result.files.isEmpty && result.failure?.isEmpty == false && !result.cancelled, "Invalid PDF must report failure: \(name)")
-                try expect(contents(folder) == before && Data(contentsOf: source) == data, "Invalid PDF conversion wrote files")
-            }
+    static func makeVideo(_ url: URL, seconds: Double = 1) async throws {
+        let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
+        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [AVVideoCodecKey: AVVideoCodecType.h264,
+                                                                            AVVideoWidthKey: 64, AVVideoHeightKey: 48])
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: nil)
+        writer.add(input)
+        try expect(writer.startWriting(), "writer")
+        writer.startSession(atSourceTime: .zero)
+        for frame in 0..<Int(seconds * 10) {
+            while !input.isReadyForMoreMediaData { try await Task.sleep(for: .milliseconds(5)) }
+            var buffer: CVPixelBuffer?
+            CVPixelBufferCreate(nil, 64, 48, kCVPixelFormatType_32BGRA, nil, &buffer)
+            let pixels = try unwrap(buffer, "pixel buffer")
+            CVPixelBufferLockBaseAddress(pixels, [])
+            memset(CVPixelBufferGetBaseAddress(pixels), Int32(frame * 20 % 255), CVPixelBufferGetDataSize(pixels))
+            CVPixelBufferUnlockBaseAddress(pixels, [])
+            adaptor.append(pixels, withPresentationTime: CMTime(value: CMTimeValue(frame), timescale: 10))
         }
+        input.markAsFinished()
+        await writer.finishWriting()
+        try expect(writer.status == .completed, "video fixture: \(String(describing: writer.error))")
+    }
 
-        await suite.run("password-locked PDF is rejected without modifying it") { folder in
-            let plain = folder.appendingPathComponent("plain.pdf"), locked = folder.appendingPathComponent("locked.pdf")
-            try pdf([Page()], at: plain)
-            let plainData = try Data(contentsOf: plain)
-            let document = try unwrap(PDFDocument(url: plain), "Cannot load PDF encryption fixture")
-            try expect(document.write(to: locked, withOptions: [.userPasswordOption: "fixture-user", .ownerPasswordOption: "fixture-owner"]), "Cannot write encrypted fixture")
-            let encrypted = try unwrap(CGPDFDocument(locked as CFURL), "Cannot open encrypted fixture")
-            try expect(encrypted.isEncrypted && !encrypted.isUnlocked, "Fixture must actually require a password")
-            let original = try Data(contentsOf: locked)
-            let result = FileConversion.convertPDF(locked)
-            try expect(result.files.isEmpty && result.failure?.isEmpty == false && !result.cancelled, "Locked PDF must report failure")
-            try expect(contents(folder) == ["plain.pdf", "locked.pdf"], "Locked PDF produced output")
-            try expect(Data(contentsOf: locked) == original && Data(contentsOf: plain) == plainData, "Encryption/conversion changed a source")
+    static func makeTone(_ url: URL, seconds: Double = 1) throws {
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 2)!
+        let file = try AVAudioFile(forWriting: url, settings: format.settings)
+        let frames = AVAudioFrameCount(44_100 * seconds)
+        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames)!
+        buffer.frameLength = frames
+        for channel in 0..<2 {
+            for i in 0..<Int(frames) { buffer.floatChannelData![channel][i] = sin(Float(i) * 0.06) * 0.3 }
         }
+        try file.write(from: buffer)
+    }
 
-        await suite.run("unreadable PDF is rejected without output") { folder in
-            let source = folder.appendingPathComponent("unreadable.pdf")
-            try pdf([Page()], at: source)
-            let original = try Data(contentsOf: source)
-            try FileManager.default.setAttributes([.posixPermissions: 0], ofItemAtPath: source.path)
-            defer { try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: source.path) }
-            guard !FileManager.default.isReadableFile(atPath: source.path) else {
-                throw Skipped(reason: "This process can read mode-000 files; permission rejection is unverified")
-            }
-            let result = FileConversion.convertPDF(source)
-            try expect(result.files.isEmpty && result.failure?.isEmpty == false && !result.cancelled, "Unreadable PDF must report failure")
-            try expect(contents(folder) == ["unreadable.pdf"], "Unreadable PDF created output")
-            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: source.path)
-            try expect(Data(contentsOf: source) == original, "Unreadable source bytes changed")
-        }
+    static func video(_ dir: URL) async throws {
+        let clip = dir.appendingPathComponent("clip.mov")
+        try await makeVideo(clip)
+        let mp4 = try await run(.convert(.mp4), [clip]).outputs
+        let asset = AVURLAsset(url: mp4[0])
+        try expect(try await !asset.loadTracks(withMediaType: .video).isEmpty, "MP4 has video")
+        try expect(abs(try await asset.load(.duration).seconds - 1) < 0.15, "MP4 length")
 
-        await suite.run("a task cancelled before conversion deterministically saves no pages") { folder in
-            let source = folder.appendingPathComponent("cancelled.pdf")
-            try pdf([Page(), Page()], at: source)
-            let original = try Data(contentsOf: source)
-            let result = await Task.detached {
-                withUnsafeCurrentTask { $0?.cancel() }
-                return FileConversion.convertPDF(source)
-            }.value
-            try expect(result.cancelled && result.failure == nil && result.files.isEmpty, "Pre-cancellation must be reported independently of failure: \(result)")
-            try expect(contents(folder) == ["cancelled.pdf"] && Data(contentsOf: source) == original, "Cancelled conversion wrote files")
-        }
+        let gif = try await run(.convert(.gif), [clip]).outputs
+        let source = try unwrap(CGImageSourceCreateWithURL(gif[0] as CFURL, nil), "GIF decodes")
+        try expect(CGImageSourceGetType(source) as String? == UTType.gif.identifier && CGImageSourceGetCount(source) > 5, "animated GIF")
 
-        await suite.run("save creates distinct adjacent files and preserves the original even with an empty suffix") { folder in
-            let source = folder.appendingPathComponent("그림.png")
-            let original = try png(at: source)
-            let replacement = Data("new output".utf8)
-            let first = try FileConversion.save(replacement, beside: source, suffix: "", extension: "png")
-            let second = try FileConversion.save(replacement, beside: source, suffix: "", extension: "png")
-            try expect(first == folder.appendingPathComponent("그림 (2).png") && second == folder.appendingPathComponent("그림 (3).png"), "Same-extension saves must not overwrite the source or previous result")
-            try expect(Data(contentsOf: source) == original, "save overwrote source bytes")
-            try expect(Data(contentsOf: first) == replacement && Data(contentsOf: second) == replacement, "save changed payload bytes")
-            let absent = folder.appendingPathComponent("absent/source.png")
-            var failed = false
-            do {
-                _ = try FileConversion.save(replacement, beside: absent, suffix: " - crop", extension: "png")
-            } catch { failed = true }
-            try expect(failed, "Saving beside a missing parent must propagate a filesystem error")
-            try expect(!FileManager.default.fileExists(atPath: absent.deletingLastPathComponent().path), "Failed save created an unexpected directory")
-        }
-
-        await suite.run("file actions reject directories, missing files, unsupported types and remote URLs") { folder in
-            let document = folder.appendingPathComponent("document.pdf"), image = folder.appendingPathComponent("image.png")
-            let text = folder.appendingPathComponent("text.txt"), directory = folder.appendingPathComponent("directory.pdf", isDirectory: true)
-            try pdf([Page()], at: document)
-            _ = try png(at: image)
-            try Data("text".utf8).write(to: text)
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
-            try expect(FileTools.actions(for: document) == [.jpg], "PDF must offer only JPG conversion")
-            try expect(FileTools.actions(for: image) == [.crop, .background], "Images must offer crop and background")
-            for rejected in [text, directory, folder.appendingPathComponent("missing.pdf"), URL(string: "https://example.invalid/file.pdf")!] {
-                try expect(FileTools.actions(for: rejected).isEmpty, "Unsupported input offered actions: \(rejected)")
-                let result = FileConversion.convertPDF(rejected)
-                try expect(result.files.isEmpty && result.failure != nil && !result.cancelled, "Unsupported conversion must report failure")
-            }
-            let imageResult = FileConversion.convertPDF(image)
-            try expect(imageResult.files.isEmpty && imageResult.failure != nil, "Image cannot enter PDF conversion")
-        }
-
-        await suite.run("a private pasteboard accepts exactly one supported file, never multiple files or plain text") { folder in
-            let document = folder.appendingPathComponent("one.pdf"), image = folder.appendingPathComponent("two.png")
-            let text = folder.appendingPathComponent("text.txt")
-            try pdf([Page()], at: document)
-            _ = try png(at: image)
-            try Data("text".utf8).write(to: text)
-            let pasteboard = NSPasteboard.withUniqueName()
-            defer { pasteboard.releaseGlobally() }
-            try expect(FileTools.file(from: pasteboard) == nil, "Empty pasteboard must be rejected")
-            for accepted in [document, image] {
-                pasteboard.clearContents()
-                try expect(pasteboard.writeObjects([accepted as NSURL]), "Cannot write private pasteboard fixture")
-                try expect(FileTools.file(from: pasteboard) == accepted, "Single supported URL must be accepted")
-            }
-            for rejected in [[document, image], [document, text], [text], [folder]] {
-                pasteboard.clearContents()
-                try expect(pasteboard.writeObjects(rejected.map { $0 as NSURL }), "Cannot write rejected pasteboard fixture")
-                try expect(FileTools.file(from: pasteboard) == nil, "Unsupported or multi-file pasteboard must be rejected")
-            }
-            pasteboard.clearContents()
-            pasteboard.setString(document.path, forType: .string)
-            try expect(FileTools.file(from: pasteboard) == nil, "Plain text that looks like a path is not a file drag")
-        }
-
-        await suite.run("ring hit testing excludes its hub and exterior and orders sectors from the top") { _ in
-            let c = FileTools.size / 2
-            for count in [1, 2, 3, 4] {
-                for radius in [CGFloat(0), 47.999, 144.001, 300] {
-                    try expect(FileTools.index(at: CGPoint(x: c, y: c + radius), count: count) == nil, "Radius \(radius) must reject a drop for \(count) actions")
-                }
-                for radius in [CGFloat(48), 96, 144] {
-                    try expect(FileTools.index(at: CGPoint(x: c, y: c + radius), count: count) == 0, "Top of accepted annulus must be slot zero")
-                }
-                for index in 0..<count {
-                    let angle = CGFloat(index) * 2 * .pi / CGFloat(count)
-                    let point = CGPoint(x: c + sin(angle) * 96, y: c + cos(angle) * 96)
-                    try expect(FileTools.index(at: point, count: count) == index, "Sector \(index) of \(count) must map clockwise from the top")
-                }
-            }
-            for count in [0, -1] {
-                try expect(FileTools.index(at: CGPoint(x: c, y: c + 96), count: count) == nil, "No actions means no target")
-            }
-            try expect(FileTools.index(at: CGPoint(x: c + 96, y: c + 0.01), count: 2) == 0, "Upper side of two-sector boundary must select top")
-            try expect(FileTools.index(at: CGPoint(x: c + 96, y: c - 0.01), count: 2) == 1, "Lower side of two-sector boundary must select bottom")
+        do {
+            _ = try await run(.convert(.m4a), [clip])
+            throw Failure(description: "silent video made an M4A")
+        } catch let error as FileToolError {
+            try expect(error == .noSound, "error \(error)")
         }
 
-        await suite.run("entering background editing commits the crop preview for every ratio") { folder in
-            let source = folder.appendingPathComponent("crop-background.png")
-            _ = try png(at: source)
-            let image = try unwrap(NSImage(contentsOf: source), "Cannot load image")
-            let model = EditorModel(image: image, fileURL: source)
-            model.tool = .crop
-            model.dragChanged(from: CGPoint(x: 10, y: 8), to: CGPoint(x: 90, y: 68))
-            model.dragEnded(at: CGPoint(x: 90, y: 68), start: CGPoint(x: 10, y: 8))
-            let crop = CGRect(x: 10, y: 8, width: 80, height: 60)
-            try expect(model.crop == crop, "Crop gesture must commit the selected rectangle")
-            for aspect in Backdrop.Aspect.allCases {
-                model.tool = .crop
-                var background = Backdrop()
-                background.padding = 6
-                background.aspect = aspect
-                model.setBackdrop(background)
-                try expect(model.tool == .select && model.crop == crop, "Background editing must leave crop mode without losing the crop")
-                let previewSize = background.canvasSize(for: model.tool == .crop ? model.size : model.crop!.size)
-                let output = model.render()
-                try expect(abs(output.size.width - previewSize.width) <= 1 && abs(output.size.height - previewSize.height) <= 1,
-                           "Background preview and export must use the same cropped canvas: \(aspect)")
-            }
-            model.tool = .crop
-            model.adjustBackdrop { $0.padding = 8 }
-            try expect(model.tool == .select && model.crop == crop, "Backdrop slider must keep the committed crop preview")
-        }
+        let muted = try await run(.mute, [clip]).outputs
+        let mutedAsset = AVURLAsset(url: muted[0])
+        try expect(try await mutedAsset.loadTracks(withMediaType: .audio).isEmpty, "no sound")
+        try expect(try await !mutedAsset.loadTracks(withMediaType: .video).isEmpty, "picture kept")
+        try expect(muted[0].lastPathComponent == "clip Muted.mov", "name \(muted[0].lastPathComponent)")
+    }
 
-        await suite.run("all backdrop ratios expand only the canvas in portrait and landscape") { _ in
-            for size in [CGSize(width: 80, height: 60), CGSize(width: 20, height: 80), CGSize(width: 200, height: 20)] {
-                for aspect in Backdrop.Aspect.allCases {
-                    var backdrop = Backdrop()
-                    backdrop.padding = 6
-                    backdrop.aspect = aspect
-                    let actual = backdrop.canvasSize(for: size)
-                    let minimum = CGSize(width: size.width + 12, height: size.height + 12)
-                    let ratio: CGFloat? = switch aspect {
-                    case .auto: nil
-                    case .square: 1
-                    case .wide: 16.0 / 9.0
-                    case .standard: 4.0 / 3.0
-                    }
-                    if let ratio {
-                        try expect(abs(actual.width / actual.height - ratio) < 0.000001, "Wrong \(aspect) canvas ratio: \(actual)")
-                        try expect(abs(actual.width - minimum.width) < 0.000001 || abs(actual.height - minimum.height) < 0.000001, "Ratio must expand only the necessary axis")
-                    } else {
-                        try expect(actual == minimum, "Auto must use only image dimensions plus padding")
-                    }
-                    try expect(actual.width >= minimum.width && actual.height >= minimum.height, "Backdrop must not shrink or crop the picture")
-                }
-            }
+    static func audio(_ dir: URL) async throws {
+        let tone = dir.appendingPathComponent("tone.caf")
+        try makeTone(tone)
+        for format in [FileFormat.m4a, .wav, .aiff] {
+            let out = try await run(.convert(format), [tone]).outputs
+            try expect(out.first?.pathExtension == format.ext, "\(format) extension")
+            let file = try AVAudioFile(forReading: out[0])
+            let seconds = Double(file.length) / file.fileFormat.sampleRate
+            try expect(abs(seconds - 1) < 0.1, "\(format) length \(seconds)")
+            try expect(file.fileFormat.channelCount == 2, "\(format) stereo")
         }
-
-        await suite.run("rounded backdrop clips only picture corners and retains its centered content") { folder in
-            let source = folder.appendingPathComponent("rounded.png")
-            let original = try png(at: source)
-            let image = try unwrap(NSImage(contentsOf: source), "Cannot load rounded-corner fixture")
-            image.size = CGSize(width: 120, height: 80)
-            let model = EditorModel(image: image, fileURL: source)
-            model.crop = CGRect(x: 10, y: 8, width: 80, height: 60)
-            var backdrop = Backdrop()
-            backdrop.padding = 6
-            backdrop.radius = 12
-            backdrop.shadow = false
-            backdrop.style = 6
-            model.backdrop = backdrop
-            let output = try export(model, beside: source, suffix: " - corners")
-            let bitmap = try decode(output, type: .png, width: 92, height: 72)
-            for point in [(7, 7), (84, 7), (7, 64), (84, 64)] {
-                try color(bitmap, x: point.0, y: point.1, equals: white)
-            }
-            try color(bitmap, x: 26, y: 26, equals: red)
-            try color(bitmap, x: 76, y: 26, equals: green)
-            try color(bitmap, x: 26, y: 56, equals: blue)
-            try color(bitmap, x: 76, y: 56, equals: yellow)
-            try expect(Data(contentsOf: source) == original, "Rounded backdrop modified source bytes")
-        }
-
-        for scale in [CGFloat(1), 2] {
-            await suite.run("crop and every backdrop ratio export real unchanged-shape pixels at scale \(Int(scale))") { folder in
-                let source = folder.appendingPathComponent("원본.png")
-                let original = try png(at: source)
-                let image = try unwrap(NSImage(contentsOf: source), "Cannot load PNG into editor")
-                image.size = CGSize(width: 120 / scale, height: 80 / scale)
-                let model = EditorModel(image: image, fileURL: source)
-                try expect(model.pixelScale == scale, "Fixture must exercise the intended pixel scale")
-                model.crop = CGRect(x: 10 / scale, y: 8 / scale, width: 80 / scale, height: 60 / scale)
-                let cropped = try export(model, beside: source, suffix: " - crop")
-                let croppedPixels = try decode(cropped, type: .png, width: 80, height: 60)
-                try color(croppedPixels, x: 10, y: 10, equals: red)
-                try color(croppedPixels, x: 70, y: 10, equals: green)
-                try color(croppedPixels, x: 10, y: 50, equals: blue)
-                try color(croppedPixels, x: 70, y: 50, equals: yellow)
-                // These offsets distinguish the requested crop from a resized full source.
-                try color(croppedPixels, x: 45, y: 25, equals: red)
-                try color(croppedPixels, x: 55, y: 25, equals: green)
-                try color(croppedPixels, x: 45, y: 35, equals: blue)
-                for (aspect, width, height) in [(Backdrop.Aspect.auto, 92, 72), (.square, 92, 92), (.wide, 128, 72), (.standard, 96, 72)] {
-                    var backdrop = Backdrop()
-                    backdrop.padding = 6 / scale
-                    backdrop.radius = 0
-                    backdrop.shadow = false
-                    backdrop.style = 6
-                    backdrop.aspect = aspect
-                    model.backdrop = backdrop
-                    let output = try export(model, beside: source, suffix: " - \(aspect.rawValue)")
-                    let bitmap = try decode(output, type: .png, width: width, height: height)
-                    let left = (width - 80) / 2, top = (height - 60) / 2
-                    try color(bitmap, x: 0, y: 0, equals: white)
-                    try color(bitmap, x: left - 2, y: height / 2, equals: white)
-                    try color(bitmap, x: width / 2, y: top - 2, equals: white)
-                    // Match the entire interior to the independently generated crop, including its asymmetric split.
-                    for y in 1..<59 where abs(y - 32) > 1 {
-                        for x in 1..<79 where abs(x - 50) > 1 {
-                            let expected = y < 32 ? (x < 50 ? red : green) : (x < 50 ? blue : yellow)
-                            try color(bitmap, x: left + x, y: top + y, equals: expected, tolerance: 0.04)
-                        }
-                    }
-                    try color(bitmap, x: left + 81, y: height / 2, equals: white)
-                    try color(bitmap, x: width / 2, y: top + 61, equals: white)
-                }
-                try expect(model.image === image && model.image.size == CGSize(width: 120 / scale, height: 80 / scale), "Export mutated the source image")
-                try expect(Data(contentsOf: source) == original, "Crop/backdrop export modified original PNG bytes")
-                model.crop = nil
-                model.backdrop = nil
-                let restored = try export(model, beside: source, suffix: " - restored")
-                try quadrants(decode(restored, type: .png, width: 120, height: 80), [red, green, blue, yellow])
-            }
-        }
-
-        print("UNVERIFIED cancellation between completed pages: convertPDF exposes no deterministic per-page cancellation seam")
-        print("file-tools: \(suite.passed) passed, \(suite.failed) failed, \(suite.skipped) skipped")
-        exit(suite.failed == 0 ? 0 : 1)
     }
 }
