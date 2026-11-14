@@ -120,17 +120,27 @@ struct FileRunNote: Sendable {
 enum FileEngine {
     typealias Saved = @Sendable (URL) -> Void
     typealias Progress = @Sendable (Double) -> Void
+    /// What the card says it's on: the file being worked on, or that it's still downloading.
+    typealias Status = @Sendable (String) -> Void
 
-    static func run(_ action: FileAction, files: [URL], progress: @escaping Progress, saved: @escaping Saved) async throws -> FileRunNote? {
+    static func run(_ action: FileAction, files: [URL], progress: @escaping Progress, saved: @escaping Saved,
+                    status: @escaping Status = { _ in }) async throws -> FileRunNote? {
+        try await ensureLocal(files, status: status)
+        /// "photo.png", or "2/5 · photo.png" when there are several.
+        func on(_ i: Int) {
+            let name = files[i].lastPathComponent
+            status(files.count > 1 ? "\(i + 1)/\(files.count) · \(name)" : name)
+        }
         switch action {
         case .convert(let format):
             guard let kind = files.first.flatMap(FileKind.of) else { throw FileToolError.unsupported }
             if kind == .image, format == .pdf {
-                try imagesToPDF(files, saved: saved)
+                try imagesToPDF(files, progress: progress, status: on, saved: saved)
                 return nil
             }
             for (i, file) in files.enumerated() {
                 try Task.checkCancellation()
+                on(i)
                 let part: Progress = { progress((Double(i) + $0) / Double(files.count)) }
                 switch kind {
                 case .image: saved(try convertImage(file, to: format))
@@ -146,6 +156,7 @@ enum FileEngine {
             var skipped = 0
             for (i, file) in files.enumerated() {
                 try Task.checkCancellation()
+                on(i)
                 let part: Progress = { progress((Double(i) + $0) / Double(files.count)) }
                 let output: URL
                 switch FileKind.of(file) {
@@ -178,6 +189,7 @@ enum FileEngine {
         case .stripMetadata:
             for (i, file) in files.enumerated() {
                 try Task.checkCancellation()
+                on(i)
                 saved(try stripMetadata(file))
                 progress(Double(i + 1) / Double(files.count))
             }
@@ -185,21 +197,43 @@ enum FileEngine {
         case .split:
             for (i, file) in files.enumerated() {
                 try Task.checkCancellation()
-                try splitPDF(file, saved: saved)
-                progress(Double(i + 1) / Double(files.count))
+                on(i)
+                try splitPDF(file, progress: { progress((Double(i) + $0) / Double(files.count)) }, saved: saved)
             }
             return nil
         case .merge:
-            saved(try mergePDFs(files))
+            saved(try mergePDFs(files, progress: progress))
             return nil
         case .mute:
             for (i, file) in files.enumerated() {
                 try Task.checkCancellation()
+                on(i)
                 saved(try await muteVideo(file, progress: { progress((Double(i) + $0) / Double(files.count)) }))
             }
             return nil
         case .crop, .background, .annotate, .redact:
             throw FileToolError.unsupported // these open a window
+        }
+    }
+
+    /// Files in iCloud Drive may be only in the cloud. Reading one would quietly block until it arrives;
+    /// waiting here instead keeps Cancel working and lets the card say what's going on.
+    static func ensureLocal(_ files: [URL], status: Status) async throws {
+        for file in files {
+            var url = file
+            let keys: Set<URLResourceKey> = [.isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey]
+            guard let values = try? url.resourceValues(forKeys: keys), values.isUbiquitousItem == true,
+                  values.ubiquitousItemDownloadingStatus == .notDownloaded else { continue }
+            // If asking fails, reading the file still brings it down, just without the status.
+            guard (try? FileManager.default.startDownloadingUbiquitousItem(at: file)) != nil else { continue }
+            status("Downloading from iCloud…".loc)
+            while true {
+                try await Task.sleep(for: .milliseconds(200))
+                url.removeAllCachedResourceValues()
+                let now = try? url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey, .ubiquitousItemDownloadingErrorKey])
+                if let error = now?.ubiquitousItemDownloadingError { throw FileToolError.exportFailed(error.localizedDescription) }
+                if let state = now?.ubiquitousItemDownloadingStatus, state != .notDownloaded { break }
+            }
         }
     }
 
@@ -279,13 +313,14 @@ enum FileEngine {
     }
 
     /// One page per picture, in the order they were dragged; each page is the picture's own size.
-    static func imagesToPDF(_ files: [URL], saved: Saved) throws {
+    static func imagesToPDF(_ files: [URL], progress: Progress = { _ in }, status: (Int) -> Void = { _ in }, saved: Saved) throws {
         guard let first = files.first else { return }
         let data = NSMutableData()
         guard let consumer = CGDataConsumer(data: data as CFMutableData),
               let context = CGContext(consumer: consumer, mediaBox: nil, nil) else { throw FileToolError.encoding }
-        for file in files {
+        for (i, file) in files.enumerated() {
             try Task.checkCancellation()
+            status(i)
             try autoreleasepool {
                 let src = try source(file)
                 let image = try uprightImage(src)
@@ -296,8 +331,10 @@ enum FileEngine {
                 context.draw(image, in: box)
                 context.endPage()
             }
+            progress(Double(i + 1) / Double(files.count) * 0.95)
         }
         context.closePDF()
+        try Task.checkCancellation()
         saved(try FileOutput.write(data as Data, beside: first, files.count > 1 ? "%@ and More" : nil, ext: "pdf"))
     }
 
@@ -414,7 +451,13 @@ enum FileEngine {
             }
         case .txt:
             let pdf = try document(url)
-            let text = (0..<pdf.pageCount).compactMap { pdf.page(at: $0)?.string }.joined(separator: "\n\n")
+            var pages: [String] = []
+            for index in 0..<pdf.pageCount {
+                try Task.checkCancellation()
+                if let page = pdf.page(at: index)?.string { pages.append(page) }
+                progress(Double(index + 1) / Double(pdf.pageCount))
+            }
+            let text = pages.joined(separator: "\n\n")
             guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw FileToolError.noText }
             saved(try FileOutput.write(Data(text.utf8), beside: url, ext: "txt"))
         case .docx, .rtf:
@@ -422,6 +465,7 @@ enum FileEngine {
             let text = NSMutableAttributedString()
             for index in 0..<pdf.pageCount {
                 try Task.checkCancellation()
+                progress(Double(index + 1) / Double(pdf.pageCount) * 0.9)
                 guard let page = pdf.page(at: index)?.attributedString, page.length > 0 else { continue }
                 if text.length > 0 { text.append(NSAttributedString(string: "\n\n")) }
                 text.append(page)
@@ -464,7 +508,7 @@ enum FileEngine {
         return try FileOutput.place(temp, beside: url, "%@ Compressed", ext: "pdf")
     }
 
-    static func splitPDF(_ url: URL, saved: Saved) throws {
+    static func splitPDF(_ url: URL, progress: Progress = { _ in }, saved: Saved) throws {
         let pdf = try document(url)
         let folder = try FileOutput.folder(beside: url, "%@ Pages")
         for index in 0..<pdf.pageCount {
@@ -474,21 +518,24 @@ enum FileEngine {
             single.insert(page, at: 0)
             guard let data = single.dataRepresentation() else { throw FileToolError.encoding }
             saved(try FileOutput.write(data, in: folder, stem: FileOutput.pageName(index + 1, of: pdf.pageCount), ext: "pdf"))
+            progress(Double(index + 1) / Double(pdf.pageCount))
         }
     }
 
     /// Pages in the order the files were dragged.
-    static func mergePDFs(_ files: [URL]) throws -> URL {
+    static func mergePDFs(_ files: [URL], progress: Progress = { _ in }) throws -> URL {
         guard let first = files.first else { throw FileToolError.unsupported }
         let merged = PDFDocument()
-        for file in files {
+        for (i, file) in files.enumerated() {
             try Task.checkCancellation()
             let pdf = try document(file)
             for index in 0..<pdf.pageCount {
                 guard let page = pdf.page(at: index)?.copy() as? PDFPage else { throw FileToolError.unreadable }
                 merged.insert(page, at: merged.pageCount)
             }
+            progress(Double(i + 1) / Double(files.count) * 0.9)
         }
+        try Task.checkCancellation()
         guard let data = merged.dataRepresentation() else { throw FileToolError.encoding }
         return try FileOutput.write(data, beside: first, "%@ Merged", ext: "pdf")
     }
