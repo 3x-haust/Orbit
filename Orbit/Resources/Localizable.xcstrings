@@ -175,6 +175,39 @@
     "%7.3f ": {
       "extractionState": "manual"
     },
+    "%@ Annotated": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (주석)"
+          }
+        }
+      }
+    },
+    "%@ Compressed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (압축)"
+          }
+        }
+      }
+    },
+    "%@ Cropped": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (자름)"
+          }
+        }
+      }
+    },
     "%@ Hz": {
       "extractionState": "manual",
       "localizations": {
@@ -186,6 +219,72 @@
         }
       }
     },
+    "%@ Merged": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (합침)"
+          }
+        }
+      }
+    },
+    "%@ Muted": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (음소거)"
+          }
+        }
+      }
+    },
+    "%@ No Metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (메타데이터 없음)"
+          }
+        }
+      }
+    },
+    "%@ Pages": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 페이지"
+          }
+        }
+      }
+    },
+    "%@ Redacted": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (가림)"
+          }
+        }
+      }
+    },
+    "%@ With Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (배경)"
+          }
+        }
+      }
+    },
     "%@ also does %@. Both will happen.": {
       "extractionState": "manual",
       "localizations": {
@@ -193,6 +292,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@은(는) macOS의 %@에도 쓰여요. 둘 다 실행돼요."
+          }
+        }
+      }
+    },
+    "%@ and More": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 외"
           }
         }
       }
@@ -417,6 +527,17 @@
         }
       }
     },
+    "%@ — %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        }
+      }
+    },
     "%@ — macOS keeps this one in place": {
       "extractionState": "manual",
       "localizations": {
@@ -435,6 +556,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ — 아직 정해진 동작이 없어요"
+          }
+        }
+      }
+    },
+    "%@ → %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ → %@"
           }
         }
       }
@@ -819,6 +951,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Orbit과 겹치는 게 %ld개 있어요"
+          }
+        }
+      }
+    },
+    "%ld were already as small as they get.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ld개는 이미 충분히 작아요."
           }
         }
       }
@@ -2326,6 +2469,17 @@
         }
       }
     },
+    "Add Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배경 넣기"
+          }
+        }
+      }
+    },
     "Add Field": {
       "extractionState": "manual",
       "localizations": {
@@ -2949,6 +3103,17 @@
         }
       }
     },
+    "Allow Accessibility": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "손쉬운 사용 허용"
+          }
+        }
+      }
+    },
     "Allow Accessibility to expand keywords": {
       "extractionState": "manual",
       "localizations": {
@@ -3223,6 +3388,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "거의 다 됐어요"
+          }
+        }
+      }
+    },
+    "Already as small as it gets.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미 충분히 작아요."
           }
         }
       }
@@ -4286,6 +4462,17 @@
         }
       }
     },
+    "Aspect ratio": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비율"
+          }
+        }
+      }
+    },
     "Assertions.json": {
       "extractionState": "manual"
     },
@@ -4308,6 +4495,17 @@
     },
     "Auckland": {
       "extractionState": "manual"
+    },
+    "Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오디오"
+          }
+        }
+      }
     },
     "Audio Service": {
       "extractionState": "manual",
@@ -4812,6 +5010,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bitwarden 명령줄 도구에 로그인되어 있지 않아요. 터미널에서 “bw login”을 한 번 실행하고 다시 시도하세요."
+          }
+        }
+      }
+    },
+    "Black": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "검정"
           }
         }
       }
@@ -5569,6 +5778,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "취소했어요"
+          }
+        }
+      }
+    },
+    "Cancelled — %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "취소했어요 · %@"
           }
         }
       }
@@ -6432,6 +6652,17 @@
         }
       }
     },
+    "Choose Files…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일 선택…"
+          }
+        }
+      }
+    },
     "Choose File…": {
       "extractionState": "manual",
       "localizations": {
@@ -6487,28 +6718,6 @@
         }
       }
     },
-    "Choose an action": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "동작 선택"
-          }
-        }
-      }
-    },
-    "Choose an action, then save a separate file beside the original.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "동작을 고른 뒤 원본 폴더에 별도 파일로 저장해요."
-          }
-        }
-      }
-    },
     "Choose an animated GIF, or several PNG frames in order.": {
       "extractionState": "manual",
       "localizations": {
@@ -6520,6 +6729,17 @@
         }
       }
     },
+    "Choose files to convert or edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변환하거나 편집할 파일을 고르세요"
+          }
+        }
+      }
+    },
     "Choose from Applications…": {
       "extractionState": "manual",
       "localizations": {
@@ -6527,17 +6747,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "응용 프로그램에서 선택…"
-          }
-        }
-      }
-    },
-    "Choose one PDF or image file.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "PDF나 이미지 파일 하나를 선택해 주세요."
           }
         }
       }
@@ -7056,6 +7265,17 @@
         }
       }
     },
+    "Click to remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "눌러서 지우기"
+          }
+        }
+      }
+    },
     "Click to trim · right-click for more": {
       "extractionState": "manual",
       "localizations": {
@@ -7539,17 +7759,6 @@
         }
       }
     },
-    "Completed pages stay saved if you cancel.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "취소해도 변환을 마친 페이지는 남아요."
-          }
-        }
-      }
-    },
     "Compress": {
       "extractionState": "manual",
       "localizations": {
@@ -7571,6 +7780,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "압축됨"
+          }
+        }
+      }
+    },
+    "Compressing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "압축 중"
           }
         }
       }
@@ -7752,46 +7972,101 @@
         }
       }
     },
-    "Conversion cancelled": {
+    "Convert": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "변환을 취소했어요"
+            "value": "변환"
           }
         }
       }
     },
-    "Conversion complete": {
+    "Convert Files": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "변환을 마쳤어요"
+            "value": "파일 변환"
           }
         }
       }
     },
-    "Conversion stopped": {
+    "Convert and edit pictures, PDFs, documents, video and audio right where you drag them.": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "변환을 중단했어요"
+            "value": "사진, PDF, 문서, 영상, 오디오를 끌어다 놓는 자리에서 바로 변환하고 편집해요."
           }
         }
       }
     },
-    "Converting to JPG…": {
+    "Convert between M4A, WAV and AIFF.": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "JPG로 변환 중…"
+            "value": "M4A, WAV, AIFF 사이에서 바꿔요."
+          }
+        }
+      }
+    },
+    "Convert to JPG, PNG, HEIC, TIFF, BMP or one PDF. Crop, add a background, compress, remove metadata, redact or annotate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JPG, PNG, HEIC, TIFF, BMP나 PDF 한 개로 바꿔요. 자르기, 배경 넣기, 압축, 메타데이터 지우기, 가리기, 주석을 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "Convert to MP4, MOV or GIF, or take out the sound as M4A. Compress or mute.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MP4, MOV, GIF로 바꾸거나 소리만 M4A로 꺼내요. 압축하거나 소리를 뺄 수 있어요."
+          }
+        }
+      }
+    },
+    "Convert to Word, JPG, PNG, RTF or plain text. Compress, split into pages, or merge several into one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Word, JPG, PNG, RTF, 텍스트로 바꿔요. 압축하거나 페이지별로 나누고, 여러 개를 하나로 합칠 수 있어요."
+          }
+        }
+      }
+    },
+    "Converted to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@로 변환했어요"
+          }
+        }
+      }
+    },
+    "Converting to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@로 변환 중"
           }
         }
       }
@@ -8893,6 +9168,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "자르기"
+          }
+        }
+      }
+    },
+    "Crop Image": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이미지 자르기"
           }
         }
       }
@@ -10231,6 +10517,28 @@
         }
       }
     },
+    "Drag and press Shift": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "끌면서 Shift 누르기"
+          }
+        }
+      }
+    },
+    "Drag files anywhere and press Shift: the ring opens under the pointer. Press Shift again for Tools, then drop on what you want.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일을 끌면서 Shift를 누르면 포인터 아래에 링이 열려요. Shift를 한 번 더 누르면 도구로 바뀌고, 원하는 칸에 놓으면 돼요."
+          }
+        }
+      }
+    },
     "Drag from the spot to where the lens goes.": {
       "extractionState": "manual",
       "localizations": {
@@ -10297,17 +10605,6 @@
         }
       }
     },
-    "Drag one PDF or image and press Shift. Drop on an action to convert or edit. Originals stay unchanged.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "PDF나 이미지 하나를 끌며 Shift를 누르세요. 원하는 동작에 놓으면 변환하거나 편집해요. 원본은 그대로 남아요."
-          }
-        }
-      }
-    },
     "Drag out, or double-click to open": {
       "extractionState": "manual",
       "localizations": {
@@ -10315,6 +10612,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "끌어서 꺼내거나 더블클릭해서 열기"
+          }
+        }
+      }
+    },
+    "Drag over the picture to cover an area. Click a box to remove it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진 위를 끌어 가릴 곳을 정해요. 상자를 누르면 지워져요."
           }
         }
       }
@@ -10524,17 +10832,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "여기로 끌어 놓으세요"
-          }
-        }
-      }
-    },
-    "Drop to apply": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "놓아서 실행"
           }
         }
       }
@@ -11313,6 +11610,17 @@
         }
       }
     },
+    "Everything runs on this Mac. Originals stay as they are — every result is a new file beside them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 작업은 이 Mac 안에서 처리돼요. 원본은 그대로 두고, 결과는 원본 옆에 새 파일로 저장해요."
+          }
+        }
+      }
+    },
     "Everything stays on this Mac. Allow only what you’ll use — you can do it later, too.": {
       "extractionState": "manual",
       "localizations": {
@@ -11759,6 +12067,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "FaceTime, Zoom, Teams, Discord 같은 통화 앱."
+          }
+        }
+      }
+    },
+    "Faces": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "얼굴"
           }
         }
       }
@@ -12815,6 +13134,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 비움"
+          }
+        }
+      }
+    },
+    "Freeform": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자유"
           }
         }
       }
@@ -17565,6 +17895,28 @@
     "Menubar": {
       "extractionState": "manual"
     },
+    "Merge": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "합치기"
+          }
+        }
+      }
+    },
+    "Merging PDFs": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF 합치는 중"
+          }
+        }
+      }
+    },
     "Messages.": {
       "extractionState": "manual",
       "localizations": {
@@ -17572,6 +17924,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "메시지."
+          }
+        }
+      }
+    },
+    "Metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메타데이터"
+          }
+        }
+      }
+    },
+    "Metadata removed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메타데이터를 지웠어요"
           }
         }
       }
@@ -18465,6 +18839,17 @@
         }
       }
     },
+    "Needed to notice Shift while you drag from Finder and other apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder나 다른 앱에서 끄는 동안 Shift를 알아채려면 필요해요."
+          }
+        }
+      }
+    },
     "Needs Accessibility": {
       "extractionState": "manual",
       "localizations": {
@@ -18864,6 +19249,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "연결된 외장 모니터가 없어요"
+          }
+        }
+      }
+    },
+    "No faces found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "얼굴을 찾지 못했어요"
           }
         }
       }
@@ -19599,6 +19995,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "가져올 항목이 없어요."
+          }
+        }
+      }
+    },
+    "Nothing to save.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장할 결과가 없어요."
           }
         }
       }
@@ -20536,17 +20943,6 @@
         }
       }
     },
-    "Open a file": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "파일 열기"
-          }
-        }
-      }
-    },
     "Open apps": {
       "extractionState": "manual",
       "localizations": {
@@ -21027,6 +21423,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Orbit이 아직 키를 못 받아요"
+          }
+        }
+      }
+    },
+    "Orbit can’t convert these files": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit에서 변환할 수 없는 파일이에요"
           }
         }
       }
@@ -21627,6 +22034,17 @@
         }
       }
     },
+    "Original": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "원본"
+          }
+        }
+      }
+    },
     "Osaka": {
       "extractionState": "manual"
     },
@@ -21766,13 +22184,13 @@
     "PATH": {
       "extractionState": "manual"
     },
-    "PDF to JPG, image cropping and backgrounds. Needs Accessibility for drags from other apps.": {
+    "PDFs merged": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "PDF를 JPG로 바꾸고 이미지를 자르거나 배경을 넣어요. 다른 앱에서 끌어오려면 손쉬운 사용 권한이 필요해요."
+            "value": "PDF를 합쳤어요"
           }
         }
       }
@@ -21867,13 +22285,24 @@
         }
       }
     },
-    "Page %ld: %@": {
+    "Page %@": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "%ld쪽: %@"
+            "value": "페이지 %@"
+          }
+        }
+      }
+    },
+    "Pages split": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "페이지를 나눴어요"
           }
         }
       }
@@ -22287,6 +22716,17 @@
         }
       }
     },
+    "Pick a format or a tool from the ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "링에서 형식이나 도구를 고르세요"
+          }
+        }
+      }
+    },
     "Pick a larger area for a scrolling capture": {
       "extractionState": "manual",
       "localizations": {
@@ -22342,6 +22782,17 @@
         }
       }
     },
+    "Pick pictures, PDFs, documents, videos or audio of one kind.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "같은 종류의 사진, PDF, 문서, 영상, 오디오를 골라 주세요."
+          }
+        }
+      }
+    },
     "Pick to Combine": {
       "extractionState": "manual",
       "localizations": {
@@ -22387,7 +22838,15 @@
       }
     },
     "Pictures": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진"
+          }
+        }
+      }
     },
     "Pill": {
       "extractionState": "manual",
@@ -23985,6 +24444,17 @@
         }
       }
     },
+    "Redact": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "가리기"
+          }
+        }
+      }
+    },
     "Redis": {
       "extractionState": "manual"
     },
@@ -24188,6 +24658,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "지워도 괜찮지만, 다시 쓰려면 새로 받아야 해요."
+          }
+        }
+      }
+    },
+    "Removing metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메타데이터 지우는 중"
+          }
+        }
+      }
+    },
+    "Removing sound": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "소리 빼는 중"
           }
         }
       }
@@ -25390,6 +25882,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일로 저장"
+          }
+        }
+      }
+    },
+    "Save with Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배경 넣어 저장"
           }
         }
       }
@@ -26673,13 +27176,13 @@
         }
       }
     },
-    "Shift while dragging": {
+    "Shift opens the file ring": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "드래그하며 Shift 누르기"
+            "value": "Shift로 파일 링 열기"
           }
         }
       }
@@ -27797,6 +28300,17 @@
         }
       }
     },
+    "Sound removed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "소리를 뺐어요"
+          }
+        }
+      }
+    },
     "SoundSource": {
       "extractionState": "manual"
     },
@@ -27880,6 +28394,17 @@
         }
       }
     },
+    "Split": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나누기"
+          }
+        }
+      }
+    },
     "Split into parts": {
       "extractionState": "manual",
       "localizations": {
@@ -27898,6 +28423,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "창 분할"
+          }
+        }
+      }
+    },
+    "Splitting pages": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "페이지 나누는 중"
           }
         }
       }
@@ -29518,17 +30054,6 @@
         }
       }
     },
-    "The image could not be saved.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이미지를 저장하지 못했어요."
-          }
-        }
-      }
-    },
     "The keys are sent to the app in front, as if you pressed them.": {
       "extractionState": "manual",
       "localizations": {
@@ -29646,6 +30171,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "녹화가 너무 짧아요"
+          }
+        }
+      }
+    },
+    "The result couldn’t be saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "결과를 저장하지 못했어요."
           }
         }
       }
@@ -29879,6 +30415,17 @@
         }
       }
     },
+    "There’s no text to take out — it may be a scan.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "꺼낼 글자가 없어요. 스캔한 문서일 수 있어요."
+          }
+        }
+      }
+    },
     "Thermal state": {
       "extractionState": "manual",
       "localizations": {
@@ -30055,6 +30602,17 @@
         }
       }
     },
+    "This PDF is password-protected.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "암호로 잠긴 PDF예요."
+          }
+        }
+      }
+    },
     "This app.": {
       "extractionState": "manual",
       "localizations": {
@@ -30132,13 +30690,24 @@
         }
       }
     },
-    "This file is damaged, locked, or could not be read.": {
+    "This file has no picture.": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "파일이 손상되었거나 잠겨 있어 읽을 수 없어요."
+            "value": "화면이 없는 파일이에요."
+          }
+        }
+      }
+    },
+    "This file is damaged or couldn’t be read.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일이 손상되었거나 읽을 수 없어요."
           }
         }
       }
@@ -30216,6 +30785,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "지금 버전"
+          }
+        }
+      }
+    },
+    "This video has no sound.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "소리가 없는 영상이에요."
           }
         }
       }
@@ -32334,6 +32914,17 @@
         }
       }
     },
+    "Use a picture as the background": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진을 배경으로 쓰기"
+          }
+        }
+      }
+    },
     "Use accent color": {
       "extractionState": "manual",
       "localizations": {
@@ -33123,6 +33714,17 @@
         }
       }
     },
+    "What it can do": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "할 수 있는 일"
+          }
+        }
+      }
+    },
     "What it does": {
       "extractionState": "manual",
       "localizations": {
@@ -33603,6 +34205,17 @@
         }
       }
     },
+    "Word, RTF, text, HTML and OpenDocument to PDF or to each other.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Word, RTF, 텍스트, HTML, OpenDocument를 PDF나 서로 다른 형식으로 바꿔요."
+          }
+        }
+      }
+    },
     "Wording": {
       "extractionState": "manual",
       "localizations": {
@@ -33643,6 +34256,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "이미지 뒤에서 작업"
+          }
+        }
+      }
+    },
+    "Working…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "작업 중…"
           }
         }
       }
@@ -35197,6 +35821,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS에서는 “화면 및 시스템 오디오 녹음”이라고 불러요. Orbit은 스크린샷을 찍거나 글자를 복사할 때만 화면을 읽고, 아무것도 녹화하거나 업로드하지 않아요.\n\n허용한 뒤 macOS가 Orbit을 다시 열라고 할 수 있어요."
+          }
+        }
+      }
+    },
+    "macOS can’t convert this file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS에서 변환할 수 없는 파일이에요."
           }
         }
       }

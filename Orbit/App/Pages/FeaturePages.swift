@@ -21,7 +21,6 @@ struct CapturePage: View {
     @AppStorage(Pref.recordOpen) private var openAfter = "none"
     @AppStorage(Pref.timedCaptureSeconds) private var timerSeconds = 5
     @AppStorage(Pref.captureKeyHints) private var keyHints = true
-    @AppStorage(FileTools.enabledKey) private var fileTools = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
@@ -43,18 +42,6 @@ struct CapturePage: View {
                     .hoverHint("Every recent screenshot and recording — drag one into any app to attach it".loc)
                 }
                 RecentCaptures()
-            }
-
-            SettingsGroup(title: "File Tools", footer: "Drag one PDF or image and press Shift. Drop on an action to convert or edit. Originals stay unchanged.") {
-                SettingsRow(title: "Shift while dragging", subtitle: "PDF to JPG, image cropping and backgrounds. Needs Accessibility for drags from other apps.", symbol: "arrow.triangle.2.circlepath") {
-                    Toggle("", isOn: $fileTools).toggleStyle(.switch).labelsHidden()
-                        .onChange(of: fileTools) { FileTools.shared.start() }
-                }
-                RowDivider()
-                SettingsRow(title: "Open a file", subtitle: "Choose an action, then save a separate file beside the original.", symbol: "doc") {
-                    Button("Choose File…") { FileTools.shared.chooseFile() }
-                        .buttonStyle(PillButtonStyle(prominent: false))
-                }
             }
 
             SettingsGroup(title: "Before capture") {
