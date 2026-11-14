@@ -19,17 +19,13 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
         window.bringToFront()
     }
 
-    static func openFile(_ url: URL, action: FileTools.Action) throws {
-        guard FileConversion.kind(of: url) == .image, let image = NSImage(contentsOf: url),
+    /// Annotate from the file ring: the picture opens as-is and saves as a new PNG beside it.
+    static func openFile(_ url: URL) throws {
+        guard FileKind.of(url) == .image, let image = NSImage(contentsOf: url),
               image.cgImage(forProposedRect: nil, context: nil, hints: nil) != nil else {
-            throw FileConversion.Failure.unreadable
+            throw FileToolError.unreadable
         }
         let model = EditorModel(image: image, fileURL: url)
-        model.tool = action == .crop ? .crop : .select
-        if action == .background {
-            model.backdrop = Backdrop()
-            model.showBackgroundControls = true
-        }
         let window = EditorWindow(model: model, externalFile: true)
         open.insert(window)
         watchHelpers()
@@ -154,10 +150,9 @@ final class EditorWindow: NSWindow, NSWindowDelegate {
         let image = model.render()
         if externalFile, let source = model.fileURL {
             do {
-                guard let data = image.pngData else { throw FileConversion.Failure.encoding }
-                let suffix = model.backdrop != nil ? " (Background)" : model.crop != nil ? " (Cropped)" : " (Edited)"
-                let url = try FileConversion.save(data, beside: source, suffix: suffix, extension: "png")
-                FileTools.shared.saved(url)
+                guard let data = image.pngData else { throw FileToolError.encoding }
+                let url = try FileOutput.write(data, beside: source, "%@ Annotated", ext: "png")
+                FileTools.shared.announce([url])
             } catch {
                 Toast.show("Couldn’t save the image", symbol: "exclamationmark.triangle", detail: error.localizedDescription)
             }
@@ -303,9 +298,6 @@ struct EditorView: View {
         }
         .background(Color(white: 0.13))
         .ignoresSafeArea()
-        .onAppear {
-            if model.showBackgroundControls { canvasTab = .background; canvasOpen = true }
-        }
         .onDrop(of: [.fileURL, .image], isTargeted: $dropTargeted) { providers in
             loadDropped(providers)
             return true
