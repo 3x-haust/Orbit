@@ -17,6 +17,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
     case batteryTopUp, chargeLimit
     case checkUpdates
     case notchToggle, notchShelf, notchTimer
+    case fileTools
 
     var id: String { rawValue }
 
@@ -88,6 +89,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .notchToggle: "Open or Close Notch"
         case .notchShelf: "Open Notch Shelf"
         case .notchTimer: "Start Notch Timer"
+        case .fileTools: "Convert Files"
         }
     }
 
@@ -132,6 +134,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .notchToggle: "Notch"
         case .notchShelf: "Notch Shelf"
         case .notchTimer: "Timer"
+        case .fileTools: "Convert"
         default: englishTitle
         }
     }
@@ -199,6 +202,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .notchToggle: "rectangle.topthird.inset.filled"
         case .notchShelf: "tray.full"
         case .notchTimer: "timer"
+        case .fileTools: "arrow.triangle.2.circlepath"
         }
     }
 
@@ -207,7 +211,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .captureArea, .captureWindow, .captureScreen, .captureText, .captureRepeat, .captureScrolling, .pinLastCapture, .captureTimed, .colorPicker,
              .recordArea, .recordWindow, .recordScreen, .stopRecording, .recentCaptures: "Capture"
         case .clipboard, .snippets: "Clipboard"
-        case .launcher, .apps, .passwords, .displays, .settings, .keepAwake, .shelf, .translate, .spellCheck, .hideMenuBarIcons, .checkUpdates, .notchToggle, .notchShelf, .notchTimer: "Orbit"
+        case .launcher, .apps, .passwords, .displays, .settings, .keepAwake, .shelf, .translate, .spellCheck, .hideMenuBarIcons, .checkUpdates, .notchToggle, .notchShelf, .notchTimer, .fileTools: "Orbit"
         case .lockScreen, .sleepDisplay, .darkMode, .desktopIcons, .hiddenFiles, .emptyTrash, .ejectAll, .fanBoost, .cleanKeyboard, .batteryTopUp, .chargeLimit: "System"
         case .mediaPlayPause, .mediaNext, .mediaPrevious, .mediaLike: "Media"
         default: "Window"
@@ -246,6 +250,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .cleanKeyboard: "clean keyboard wipe disable keys lock keyboard keyboardcleantool 키보드 청소 닦기 키 잠그기"
         case .batteryTopUp, .chargeLimit: "battery charge limit aldente top up full 배터리 충전 한도 제한 완충 알덴테"
         case .checkUpdates: "update updates upgrade new version release download 업데이트 새 버전 최신 버전 릴리즈"
+        case .fileTools: "convert converter file pdf jpg png heic docx mp4 gif crop background compress redact metadata 변환 파일 변환 확장자 바꾸기 자르기 배경 압축 가리기 모자이크 메타데이터"
         case .notchToggle, .notchShelf, .notchTimer: "notch dynamic island boring notch notchnook alcove shelf timer pomodoro 노치 다이내믹 아일랜드 선반 타이머 뽀모도로"
         default: ""
         }
@@ -383,6 +388,7 @@ enum OrbitAction: String, CaseIterable, Codable, Identifiable {
         case .notchToggle: NotchCenter.shared.toggleFromAction()
         case .notchShelf: NotchCenter.shared.open(tab: .shelf)
         case .notchTimer: NotchCenter.shared.startTimerFromAction()
+        case .fileTools: FileTools.shared.choose()
         default: break
         }
     }

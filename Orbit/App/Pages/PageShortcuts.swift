@@ -37,6 +37,7 @@ struct PageShortcuts: View {
         case .battery: [.chargeLimit, .batteryTopUp]
         case .nowPlaying: [.mediaPlayPause, .mediaNext, .mediaPrevious, .mediaLike]
         case .notch: [.notchToggle, .notchShelf, .notchTimer]
+        case .files: [.fileTools]
         default: []
         }
     }

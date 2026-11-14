@@ -294,7 +294,6 @@ final class EditorModel {
     var selectedID: UUID? { didSet { adoptSelectedStyle() } }
     var crop: CGRect?
     var backdrop: Backdrop?
-    var showBackgroundControls = false
     var editingText: (point: CGPoint, text: String)?
 
     // View state.

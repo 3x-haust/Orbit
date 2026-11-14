@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum Page: String, CaseIterable, Identifiable {
-    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, knock, gestures, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, apps, system, ports, overlaps, shortcuts, setup, general
+    case home, ring, capture, clipboard, windows, translate, spell, snippets, passwords, input, menubar, corners, knock, gestures, runner, applock, sound, nowPlaying, notch, storage, awake, battery, displays, archives, files, apps, system, ports, overlaps, shortcuts, setup, general
     var id: String { rawValue }
 
     var title: String { englishTitle.loc }
@@ -23,6 +23,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .battery: "Battery"
         case .displays: "Displays"
         case .archives: "Archives"
+        case .files: "File Tools"
         case .apps: "Apps"
         case .input: "Korean Input"
         case .menubar: "Menu Bar"
@@ -59,6 +60,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .battery: "battery.75percent"
         case .displays: "display.2"
         case .archives: "archivebox"
+        case .files: "arrow.triangle.2.circlepath"
         case .apps: "square.grid.3x3"
         case .input: "keyboard.badge.ellipsis"
         case .menubar: "menubar.rectangle"
@@ -84,7 +86,7 @@ enum Page: String, CaseIterable, Identifiable {
         (nil, [.home, .ring]),
         ("Essentials", [.capture, .clipboard, .windows, .translate, .spell, .snippets, .passwords]),
         ("Utilities", [.sound, .nowPlaying, .notch, .input, .awake, .menubar, .corners, .knock, .gestures, .runner, .applock]),
-        ("Mac", [.apps, .system, .ports, .displays, .battery, .storage, .archives]),
+        ("Mac", [.apps, .system, .ports, .displays, .battery, .storage, .archives, .files]),
         ("Settings", [.overlaps, .shortcuts, .setup, .general]),
     ]
 }
@@ -272,6 +274,7 @@ struct MainView: View {
         case .battery: BatteryPage()
         case .displays: DisplaysPage()
         case .archives: ArchivesPage()
+        case .files: FileToolsPage()
         case .apps: AppsPage()
         case .overlaps: OverlapsPage()
         case .shortcuts: ShortcutsPage()

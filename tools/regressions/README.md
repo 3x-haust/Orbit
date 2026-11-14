@@ -7,40 +7,26 @@ bash tools/regressions/run-file-tools-tests.sh \
   /tmp/orbit-files-build/Build/Products/Debug /tmp/orbit-files-tests
 ```
 
-The runner imports the real Debug module without starting the app delegate. Its
-20 test groups create PDFs and PNGs in unique scratch directories and use only a
-private pasteboard. They check JPG pixels, page order and rotation, original and
-name-collision preservation, damaged/locked/unreadable/oversized inputs, retained
-completed pages after failure, pre-cancellation, file filtering, ring geometry,
-and cropped/backdrop output pixels at 1×/2× for every canvas ratio. Entering
-background editing must exit crop mode while preserving the committed crop.
-Source PNGs
-are decoded and checked before editing; decoded outputs are normalized to sRGB
-before comparing channel values. `ORBIT_TEST_LIBRARY` can override the dylib.
+The runner imports the real Debug module without starting the app delegate and
+makes every fixture itself (PNG, JPEG with GPS/EXIF, text PDFs, RTF, an H.264
+clip, a stereo tone) in a fresh scratch folder. Outputs are decoded again with
+ImageIO, PDFKit, AppKit's text system or AVFoundation, never trusted by name.
 
-Cancellation between completed pages, actual Finder drag + Shift delivery,
-copy-only AppKit drop negotiation, and editor preview/crop pointer interaction
-need an interactive check. The unit runner does not claim to cover these.
-Use `ORBIT_FILE_TEST_FILTER` with a regular expression to run only matching test
-groups, for example `ORBIT_FILE_TEST_FILTER='entering background|cancelled before'`.
+It covers the ring menus for each file kind, ring and tab hit-testing, the drop
+path through `FileDropView` with a stand-in dragging session (copy accepted, a
+move-only drag refused, Shift and tab hover flipping Convert/Tools, the progress
+card's result), every conversion (image formats, pictures → one PDF, PDF → JPG,
+PNG, TXT, DOCX, RTF, documents → DOCX/TXT/HTML/ODT/paginated PDF, video → MP4,
+GIF, M4A, audio → M4A/WAV/AIFF), the one-step tools (compress, metadata
+removal, PDF split/merge, mute), name collisions, untouched originals,
+cancellation, and the crop/background/redact renderers.
 
-To check result-window lifecycle against the real Debug module:
+`ORBIT_FILE_TEST_FILTER` takes a regular expression to run only matching tests,
+for example `ORBIT_FILE_TEST_FILTER='PDF|crop'`.
 
-```sh
-bash tools/regressions/build-file-tools-workflow-tests.sh \
-  /tmp/orbit-files-build/Build/Products/Debug /tmp/orbit-files-workflow
-```
-
-Launch the resulting `Orbit File Workflow Tests.app` on a logged-in macOS desktop.
-It does not start Orbit's app delegate. Its eight checks verify that editing a
-completed page retains the other pages and failure information, and that a result
-window closed during conversion reopens when conversion stops. Fixtures and
-`workflow.log` stay in the supplied scratch folder; `workflow.exit` contains the
-failure count. The app stays open for inspecting the real result window.
-
-Completed pages are retained when a later page fails or conversion is cancelled;
-conversion stops at that point. External-file edits save a new PNG beside the
-source, never overwrite it, and do not offer the capture editor's Trash action.
+Not covered: Shift arriving through the global event monitor during a real
+Finder drag, and pointer handling inside the crop and redact windows. Check
+those by hand: drag a file in Finder, press Shift, press Shift again, drop.
 
 # Clipboard regression
 
