@@ -10470,6 +10470,16 @@
         }
       }
     },
+    "Downloading from iCloud…": {
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud에서 받는 중…"
+          }
+        }
+      }
+    },
     "Downloads": {
       "extractionState": "manual",
       "localizations": {

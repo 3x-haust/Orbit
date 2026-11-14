@@ -278,12 +278,18 @@ final class FileTools {
         layoutHUD()
         job.task = Task {
             // Callbacks go through the main queue in order, so the last file lands before "done".
-            let progress: FileEngine.Progress = { value in DispatchQueue.main.async { job.progress = value } }
-            let saved: FileEngine.Saved = { url in DispatchQueue.main.async { job.outputs.append(url) } }
+            let progress: FileEngine.Progress = { value in DispatchQueue.main.async { job.progress = max(job.progress, value) } }
+            let status: FileEngine.Status = { text in DispatchQueue.main.async { job.detail = text } }
+            // After Cancel, anything that still finishes is thrown away: the user asked for nothing more.
+            let saved: FileEngine.Saved = { url in
+                DispatchQueue.main.async {
+                    if job.state == .cancelled { try? FileManager.default.removeItem(at: url) } else { job.outputs.append(url) }
+                }
+            }
             let state: FileJob.State
             var note: String?
             do {
-                note = try await FileEngine.run(action, files: files, progress: progress, saved: saved)?.text
+                note = try await FileEngine.run(action, files: files, progress: progress, saved: saved, status: status)?.text
                 state = .done
             } catch is CancellationError {
                 state = .cancelled
@@ -291,6 +297,7 @@ final class FileTools {
                 state = Task.isCancelled ? .cancelled : .failed(error.localizedDescription)
             }
             DispatchQueue.main.async { [weak self] in
+                guard job.state == .running else { return } // cancelled: already shown and on its way out
                 job.note = note
                 job.state = state
                 self?.finished(job)
@@ -304,11 +311,15 @@ final class FileTools {
         }
         // Successes clear themselves; failures wait to be read.
         guard job.state == .done || job.state == .cancelled else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + (job.state == .done ? 6 : 2)) { [weak self] in self?.dismiss(job) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + (job.state == .done ? 6 : 1.5)) { [weak self] in self?.dismiss(job) }
     }
 
+    /// Takes effect on the card at once; the work itself stops at its next checkpoint.
     func cancel(_ job: FileJob) {
-        if job.state == .running { job.task?.cancel() } else { dismiss(job) }
+        guard job.state == .running else { dismiss(job); return }
+        job.task?.cancel()
+        job.state = .cancelled
+        finished(job)
     }
 
     func dismiss(_ job: FileJob) {
@@ -324,13 +335,34 @@ final class FileTools {
         }
     }
 
+    private static let hudAnchorKey = "files.hudAnchor"
+
+    /// Where the cards sit: the bottom centre of the stack. Bottom of the screen until the user drags them.
+    private var hudAnchor: CGPoint {
+        if let saved = UserDefaults.standard.string(forKey: Self.hudAnchorKey).map(NSPointFromString),
+           NSScreen.screens.contains(where: { $0.visibleFrame.insetBy(dx: -1, dy: -1).contains(saved) }) {
+            return saved
+        }
+        let screen = NSScreen.active.visibleFrame
+        return CGPoint(x: screen.midX, y: screen.minY + 72 - FileJobsView.inset)
+    }
+
+    /// Called when the user lets go of a dragged card.
+    func hudMoved() {
+        let frame = hud.frame
+        UserDefaults.standard.set(NSStringFromPoint(CGPoint(x: frame.midX, y: frame.minY)), forKey: Self.hudAnchorKey)
+    }
+
     private func layoutHUD() {
         // orderOut, not the fading dismiss: a job started mid-fade would otherwise stay hidden.
         guard !jobs.isEmpty else { hud.orderOut(nil); return }
-        let shown = min(jobs.count, FileJobsView.limit)
-        let size = CGSize(width: FileJobsView.width, height: CGFloat(shown) * (FileJobsView.cardHeight + 8) + 8)
-        let screen = NSScreen.active.visibleFrame
-        let frame = CGRect(x: screen.midX - size.width / 2, y: screen.minY + 72, width: size.width, height: size.height)
+        let size = FileJobsView.size(for: jobs.count)
+        let anchor = hudAnchor
+        var frame = CGRect(x: anchor.x - size.width / 2, y: anchor.y, width: size.width, height: size.height)
+        // Growing upward must not push the top cards off the screen.
+        if let screen = NSScreen.screens.first(where: { $0.frame.contains(anchor) })?.visibleFrame, frame.maxY > screen.maxY {
+            frame.origin.y = screen.maxY - frame.height
+        }
         if hud.isVisible { hud.setFrame(frame, display: true) } else { hud.present(at: frame) }
     }
 }
@@ -347,6 +379,8 @@ final class FileJob: Identifiable {
     var outputs: [URL] = []
     var state: State = .running
     var note: String?
+    /// The file being worked on right now ("2/5 · photo.png"), or "Downloading from iCloud…".
+    var detail: String?
     @ObservationIgnored var task: Task<Void, Never>?
 
     init(action: FileAction, files: [URL]) {
@@ -553,66 +587,112 @@ private struct FileSector: Shape {
 
 private struct FileJobsView: View {
     static let width: CGFloat = 360
-    static let cardHeight: CGFloat = 76
+    static let cardHeight: CGFloat = 74
+    static let spacing: CGFloat = 8
     static let limit = 4
+    /// Room around the cards so their shadow fades out instead of ending in a hard edge.
+    static let inset: CGFloat = 24
     let tools: FileTools
 
+    static func size(for count: Int) -> CGSize {
+        let shown = CGFloat(min(count, limit))
+        return CGSize(width: width + inset * 2, height: shown * cardHeight + (shown - 1) * spacing + inset * 2)
+    }
+
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Self.spacing) {
             ForEach(tools.jobs.suffix(Self.limit)) { job in
-                FileJobCard(job: job, tools: tools).frame(height: Self.cardHeight)
+                FileJobCard(job: job, tools: tools).frame(width: Self.width, height: Self.cardHeight)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
             }
         }
-        .padding(4)
-        .frame(width: Self.width, alignment: .bottom)
+        .animation(.spring(duration: 0.3), value: tools.jobs.map(\.id))
+        .padding(Self.inset)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 }
 
 private struct FileJobCard: View {
     let job: FileJob
     let tools: FileTools
+    @State private var hovering = false
+
+    private let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(spacing: 12) {
+            icon.allowsHitTesting(false)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(job.state == .done ? job.action.doneTitle : job.action.progressTitle)
+                    .font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ink)
+                    .lineLimit(1)
+                Text(status).font(.orbitCaption).foregroundStyle(isFailure ? Color.red : Palette.inkSecondary)
+                    .lineLimit(isFailure ? 2 : 1).truncationMode(.middle)
+                if job.state == .running {
+                    // No number yet (a single quick step): an honest moving bar, not a frozen sliver.
+                    Group {
+                        if job.progress > 0 { ProgressView(value: job.progress) } else { ProgressView() }
+                    }
+                    .progressViewStyle(.linear).tint(Palette.accent).controlSize(.small)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .allowsHitTesting(false) // presses fall through to the drag area behind
+            if !job.outputs.isEmpty, job.state != .running {
+                Button("Show") { NSWorkspace.shared.activateFileViewerSelecting(job.outputs) }
+                    .buttonStyle(PillButtonStyle(prominent: false))
+                    .controlSize(.small)
+            }
             Button { tools.cancel(job) } label: {
                 Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(Palette.inkSecondary)
-                    .frame(width: 20, height: 20)
+                    .foregroundStyle(hovering ? Palette.ink : Palette.inkSecondary)
+                    .frame(width: 24, height: 24)
                     .background(Circle().fill(Palette.raised))
+                    .frame(width: 32, height: 32)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .onHover { hovering = $0 }
             .help(job.state == .running ? "Cancel".loc : "Close".loc)
-
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    switch job.state {
-                    case .running: EmptyView()
-                    case .done: Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.accent)
-                    case .cancelled: Image(systemName: "minus.circle.fill").foregroundStyle(Palette.inkSecondary)
-                    case .failed: Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.red)
-                    }
-                    Text(job.state == .done ? job.action.doneTitle : job.action.progressTitle)
-                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.ink)
-                    Spacer()
-                    if !job.outputs.isEmpty, job.state != .running {
-                        Button("Show") { NSWorkspace.shared.activateFileViewerSelecting(job.outputs) }
-                            .buttonStyle(PillButtonStyle(prominent: false))
-                            .controlSize(.small)
-                    }
-                }
-                Text(status).font(.orbitCaption).foregroundStyle(isFailure ? Color.red : Palette.inkSecondary)
-                    .lineLimit(2)
-                if job.state == .running {
-                    ProgressView(value: max(0.02, job.progress)).progressViewStyle(.linear).tint(Palette.accent)
-                }
-            }
         }
-        .padding(12)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Palette.canvas.opacity(0.97))
-            .background(VisualEffect(material: .popover).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.hairline, lineWidth: 1))
-        .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
+        .padding(.leading, 14)
+        .padding(.trailing, 8)
+        .frame(maxHeight: .infinity)
+        // Pressing anywhere else on the card moves it (and the cards that come after).
+        .background(HUDDragArea { tools.hudMoved() })
+        .background(shape.fill(Palette.canvas.opacity(0.9)))
+        .background(VisualEffect(material: .popover).clipShape(shape))
+        .overlay(shape.strokeBorder(Palette.hairline, lineWidth: 1))
+        .clipShape(shape)
+        .shadow(color: .black.opacity(0.16), radius: 12, y: 5)
+    }
+
+    private var icon: some View {
+        ZStack {
+            Circle().fill(iconTint.opacity(0.14))
+            Image(systemName: iconSymbol)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(iconTint)
+                .contentTransition(.symbolEffect(.replace))
+        }
+        .frame(width: 34, height: 34)
+    }
+
+    private var iconSymbol: String {
+        switch job.state {
+        case .running: job.action.symbol ?? "arrow.triangle.2.circlepath"
+        case .done: "checkmark"
+        case .cancelled: "minus"
+        case .failed: "exclamationmark"
+        }
+    }
+
+    private var iconTint: Color {
+        switch job.state {
+        case .running, .done: Palette.accent
+        case .cancelled: Palette.inkSecondary
+        case .failed: .red
+        }
     }
 
     private var isFailure: Bool { if case .failed = job.state { true } else { false } }
@@ -621,7 +701,8 @@ private struct FileJobCard: View {
         let saved = job.outputs.count == 1 ? job.outputs[0].lastPathComponent : "%ld files saved".loc(job.outputs.count)
         switch job.state {
         case .running:
-            return job.outputs.isEmpty ? "Working…".loc : saved
+            let percent = job.progress > 0 ? "\(Int((job.progress * 100).rounded()))%" : nil
+            return [job.detail ?? job.files.first?.lastPathComponent, percent].compactMap { $0 }.joined(separator: " · ")
         case .done:
             if job.outputs.isEmpty { return job.note ?? "Nothing to save.".loc }
             return [saved, job.note].compactMap { $0 }.joined(separator: " · ")
@@ -629,6 +710,37 @@ private struct FileJobCard: View {
             return job.outputs.isEmpty ? "Cancelled".loc : "Cancelled — %@".loc(saved)
         case .failed(let reason):
             return job.outputs.isEmpty ? reason : "%@ — %@".loc(reason, saved)
+        }
+    }
+}
+
+/// The card's background: dragging it moves the stack, and the spot is remembered.
+private struct HUDDragArea: NSViewRepresentable {
+    let onMoved: () -> Void
+
+    func makeNSView(context: Context) -> DragView { DragView() }
+    func updateNSView(_ view: DragView, context: Context) { view.onMoved = onMoved }
+
+    final class DragView: NSView {
+        var onMoved: (() -> Void)?
+        private var start: (mouse: CGPoint, origin: CGPoint)?
+
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+        override func mouseDown(with event: NSEvent) {
+            guard let window else { return }
+            start = (window.convertPoint(toScreen: event.locationInWindow), window.frame.origin)
+        }
+
+        override func mouseDragged(with event: NSEvent) {
+            guard let window, let start else { return }
+            let now = window.convertPoint(toScreen: event.locationInWindow)
+            window.setFrameOrigin(CGPoint(x: start.origin.x + now.x - start.mouse.x, y: start.origin.y + now.y - start.mouse.y))
+        }
+
+        override func mouseUp(with event: NSEvent) {
+            if let start, window?.frame.origin != start.origin { onMoved?() }
+            start = nil
         }
     }
 }
