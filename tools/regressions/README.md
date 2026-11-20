@@ -240,3 +240,20 @@ The runner imports the app's Debug module and reads Tavi's state on this Mac
 without changing it. It checks that Orbit treats Tavi as added exactly when Text
 Input Sources reports it enabled, and doesn't ask for an enabled Tavi to be added
 again. Exit 2 means Tavi isn't registered on this Mac (not a pass).
+
+# Fan helper regression
+
+Build the Debug app, then run:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-fan-helper-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-fan-helper-tests.sh \
+  /tmp/orbit-fan-helper-build/Build/Products/Debug /tmp/orbit-fan-helper-tests
+```
+
+The runner imports the app's Debug module and checks when Orbit registers its
+privileged helper again at launch: when the running helper is older, or when
+macOS can no longer verify it because an update replaced its binary (every call
+then fails and closed-lid mode falls back to the password prompt). A helper
+that is current, interrupted or slow to answer is left running.
