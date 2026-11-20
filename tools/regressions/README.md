@@ -224,3 +224,19 @@ Release also requires the verified Tavi helper and real signing identity.
 Preserve source/tag/version/artifact identity, checksums, clean-install and both
 architecture startup evidence. Report actual PR URL, merge SHA and published
 version/assets to the original Discord channel only after remote confirmation.
+
+# Tavi regression
+
+Build the Debug app, then run:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-tavi-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-tavi-tests.sh \
+  /tmp/orbit-tavi-build/Build/Products/Debug /tmp/orbit-tavi-tests
+```
+
+The runner imports the app's Debug module and reads Tavi's state on this Mac
+without changing it. It checks that Orbit treats Tavi as added exactly when Text
+Input Sources reports it enabled, and doesn't ask for an enabled Tavi to be added
+again. Exit 2 means Tavi isn't registered on this Mac (not a pass).
