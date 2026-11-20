@@ -27,8 +27,7 @@ final class TaviBridge {
     private(set) var installedVersion: String?
     private(set) var words: [Word] = []
     private(set) var isSelected = false
-    /// Whether the user added Tavi in Keyboard Settings. Only that list survives a restart; an
-    /// enable from code is gone at the next login, so it doesn't count.
+    /// Whether Tavi is among the user's input sources, i.e. added in Keyboard Settings.
     private(set) var isAdded = false
 
     private let installed = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Input Methods/Tavi.app")
@@ -144,11 +143,11 @@ final class TaviBridge {
         return (TISCreateInputSourceList(filter, true)?.takeRetainedValue() as? [TISInputSource])?.first
     }
 
-    /// Keyboard Settings' own list, the one macOS keeps across logins.
+    /// Asked of Text Input Sources, as Tavi itself does: where macOS stores Keyboard Settings' list
+    /// varies by version (newer ones keep third-party input methods out of HIToolbox's list).
     private static var addedInKeyboardSettings: Bool {
-        CFPreferencesAppSynchronize("com.apple.HIToolbox" as CFString)
-        let list = CFPreferencesCopyAppValue("AppleEnabledInputSources" as CFString, "com.apple.HIToolbox" as CFString) as? [[String: Any]] ?? []
-        return list.contains { ($0["Bundle ID"] as? String) == inputMethodID || ($0["Input Mode"] as? String)?.hasPrefix(inputMethodID) == true }
+        guard let source, let value = TISGetInputSourceProperty(source, kTISPropertyInputSourceIsEnabled) else { return false }
+        return CFBooleanGetValue(Unmanaged<CFBoolean>.fromOpaque(value).takeUnretainedValue())
     }
 
     private static var currentSourceID: String? {
