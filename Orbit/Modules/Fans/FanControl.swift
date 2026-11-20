@@ -47,6 +47,7 @@ final class FanControl {
     @ObservationIgnored private var connection: NSXPCConnection?
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var manual: Set<Int> = []
+    @ObservationIgnored private var upgrade: Task<Void, Never>?
 
     private init() {
         let d = Pref.defaults
@@ -61,27 +62,44 @@ final class FanControl {
     func start() {
         refresh()
         apply()
-        Task { await upgradeHelperIfNeeded() }
+        upgrade = Task { await upgradeHelperIfNeeded() }
     }
 
     /// launchd keeps the old helper process running after Orbit is updated. If it's older than this
-    /// build, register it again so launchd starts the new one (approval normally carries over).
+    /// build, or macOS can no longer verify it, register it again so launchd starts the new one
+    /// (approval normally carries over).
     private func upgradeHelperIfNeeded() async {
-        guard helper == .ready, let proxy = proxy() else { return }
-        let running: Int? = await withCheckedContinuation { done in
-            let once = Once<Int?>(done)
-            proxy.version { v in once.resume(v) }
+        guard helper == .ready, proxy() != nil, let connection else { return }
+        let reply: Result<Int, Error>? = await withCheckedContinuation { done in
+            let once = Once<Result<Int, Error>?>(done)
+            let proxy = connection.remoteObjectProxyWithErrorHandler { once.resume(.failure($0)) } as? FanHelperProtocol
+            proxy?.version { once.resume(.success($0)) }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { once.resume(nil) }
         }
-        guard let running, running < FanHelper.version else { return }
-        connection?.invalidate()
-        connection = nil
+        guard Self.helperNeedsRestart(reply) else { return }
+        connection.invalidate()
+        self.connection = nil
         try? await service.unregister()
-        try? await Task.sleep(for: .milliseconds(500))
-        do { try service.register() } catch { lastError = error.localizedDescription }
+        // The unregistration can still be landing when the helper is registered again, which leaves it off.
+        for delay in [0.5, 1, 2] {
+            try? await Task.sleep(for: .seconds(delay))
+            do { try service.register() } catch { lastError = error.localizedDescription }
+            if service.status != .notRegistered { break }
+        }
         refresh()
         if helper == .needsApproval {
             Toast.show("Orbit Helper was updated", symbol: "key.fill", detail: "Allow it again in Login Items")
+        }
+    }
+
+    /// The update moves the old app to the Trash, so the helper still running from it fails its
+    /// signature check and every call to it fails. A slow or interrupted one is launchd's to restart.
+    nonisolated static func helperNeedsRestart(_ reply: Result<Int, Error>?) -> Bool {
+        switch reply {
+        case .success(let running): running < FanHelper.version
+        case .failure(let error as NSError):
+            error.domain == NSCocoaErrorDomain && error.code == NSXPCConnectionCodeSigningRequirementFailure
+        case nil: false
         }
     }
 
@@ -187,6 +205,7 @@ final class FanControl {
     /// Closed-lid mode through the helper, so only the one-time approval is needed.
     /// nil when the helper isn't installed or is too old to know how (the caller then asks for a password).
     func setSleepDisabled(_ on: Bool) async -> Bool? {
+        await upgrade?.value // a session resumed at launch must wait for a stale helper to restart
         refresh()
         guard helper == .ready, let helper = proxy() else { return nil }
         let version: Int? = await withCheckedContinuation { done in
