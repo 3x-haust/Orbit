@@ -10,6 +10,7 @@ struct RunnerPage: View {
     @AppStorage(Pref.runnerFPSCap) private var fpsCap = 0
     @AppStorage(Pref.runnerInvert) private var invert = false
     @AppStorage(Pref.runnerShowPercent) private var showPercent = false
+    @AppStorage(Pref.runnerUsageColor) private var usageColor = true
     @AppStorage(Pref.runnerPaused) private var paused = false
     @AppStorage(Pref.runnerFlip) private var flip = false
     @AppStorage(Pref.runnerAccent) private var accent = false
@@ -90,6 +91,10 @@ struct RunnerPage: View {
                     Toggle("", isOn: $showPercent).toggleStyle(.switch).labelsHidden()
                 }
                 RowDivider()
+                SettingsRow(title: "Color by usage", subtitle: "Green while there’s room, orange when busy, red near 100%.", symbol: "thermometer.medium") {
+                    Toggle("", isOn: $usageColor).toggleStyle(.switch).labelsHidden().disabled(!showPercent)
+                }
+                RowDivider()
                 SettingsRow(title: "Pause animation", subtitle: "Stays put until you resume. Click it in the menu bar for stats.", symbol: "pause.circle") {
                     Toggle("", isOn: $paused).toggleStyle(.switch).labelsHidden()
                 }
@@ -120,6 +125,7 @@ struct RunnerPage: View {
         .onChange(of: fpsCap) { runner.refreshLook() }
         .onChange(of: invert) { runner.refreshLook() }
         .onChange(of: showPercent) { runner.refreshLook() }
+        .onChange(of: usageColor) { runner.refreshLook() }
         .onChange(of: paused) { runner.setPaused(paused) }
         .onAppear { SystemMonitor.shared.watch(true) }
         .onDisappear { SystemMonitor.shared.watch(false) }

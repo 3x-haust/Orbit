@@ -146,6 +146,7 @@ enum Pref {
             hiderStyle: "bar",
             hiderAlways: false,
             hideNewItems: true,
+            runnerUsageColor: true,
             fanMode: "auto",
             fanFixedLevel: 0.5,
             fanCurveLow: 55.0,

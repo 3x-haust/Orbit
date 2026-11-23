@@ -31,6 +31,8 @@
   "In the menu bar": "메뉴 막대",
   "Show percentage": "퍼센트 보이기",
   "The reading next to the character, like “23%”.": "캐릭터 옆에 “23%”처럼 수치를 보여줘요.",
+  "Color by usage": "사용량에 따라 색 바꾸기",
+  "Green while there’s room, orange when busy, red near 100%.": "여유로울 땐 초록, 바쁠 땐 주황, 100%에 가까우면 빨강으로 보여요.",
   "Pause animation": "애니메이션 멈추기",
   "Stays put until you resume. Click it in the menu bar for stats.": "다시 켤 때까지 멈춰 있어요. 메뉴 막대에서 누르면 상태를 볼 수 있어요.",
   "Rename Runner": "러너 이름 바꾸기",
