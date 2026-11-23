@@ -293,3 +293,20 @@ open notch window (`notch-folder.png`).
 
 Not covered: a real drag from the notch into another app. Check by hand: pick a folder on the
 Notch page, point at the notch, drag a thumbnail into Finder or a browser upload field.
+
+# Menu bar calendar clock regression
+
+Build the Debug app, then run:
+
+```sh
+bash tools/regressions/run-calendar-tests.sh \
+  /tmp/orbit-calendar-build/Build/Products/Debug /tmp/orbit-calendar-results
+```
+
+The runner imports the Debug module without starting the app delegate. Settings go in the
+volatile argument domain of its own process, so the installed app's preferences are untouched.
+It checks which formats show seconds (an `s` outside quoted text, only in a custom format),
+then puts the real calendar status item in the menu bar with a custom format and reads its
+text every quarter second: a format with `ss` changes every second and matches the clock,
+switching formats the way the Calendar page does moves between second and minute updates.
+It writes two pictures of the status item a few seconds apart (`calendar-seconds-*.png`).
