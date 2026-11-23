@@ -26,7 +26,9 @@ needed. No automatic transfer of that system registration is promised.
 3. Build the merged source with a verified Tavi helper (`tools/fetch-tavi.sh`)
    and the signing identity for team `UM52UU4B7L`. Release is universal:
    `xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Release
-   -derivedDataPath build-rel build`.
+   -destination 'generic/platform=macOS' -derivedDataPath build-rel
+   ONLY_ACTIVE_ARCH=NO build`. A host-specific destination can omit Intel even
+   when `ARCHS` lists both architectures; confirm both with `lipo -archs`.
 4. Verify the app with `codesign --verify --deep --strict --all-architectures`
    and a requirement for `dev.3xhaust.Orbit`, anchored to Apple and team
    `UM52UU4B7L`. Also check the embedded helper and Quick Look extension.
