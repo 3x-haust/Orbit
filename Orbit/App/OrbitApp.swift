@@ -7,9 +7,12 @@ struct OrbitApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     init() {
-        if Bundle.main.bundleIdentifier == "dev.3xhaust.Orbit" {
+        #if !DEBUG
+        if Bundle.main.bundleIdentifier == "dev.3xhaust.Orbit",
+           !Bundle.main.bundlePath.contains("/Build/Products/") {
             Pref.migrate(from: "com.lyu.orbit", to: "dev.3xhaust.Orbit")
         }
+        #endif
     }
 
     var body: some Scene {
