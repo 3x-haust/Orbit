@@ -144,7 +144,7 @@ Set your own team in `project.yml` (`DEVELOPMENT_TEAM` and `CODE_SIGN_IDENTITY`)
 
 ### Notarize a Release app
 
-The release team can notarize a local Release build using its Developer ID Application identity and a [notarytool keychain profile](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow). Use the Orbit release team's identity for distribution because the updater and fan helper verify the team ID.
+Build Orbit using the [release instructions](docs/releasing.md). The script discovers the app's embedded code from the bundle, so it works across Orbit releases with different versions, bundle IDs, and helper layouts. It takes a Developer ID Application identity and a [notarytool keychain profile](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow). For distribution, use the Orbit release team's identity because the updater and fan helper verify the team ID.
 
 ```bash
 mkdir -p dist
