@@ -3,7 +3,7 @@ import Security
 @testable import Orbit
 
 @main struct UpdaterTests {
-    static func main() throws {
+    @MainActor static func main() throws {
         var failed = 0
         func check(_ condition: Bool, _ name: String) {
             if !condition { failed += 1 }
@@ -68,6 +68,12 @@ import Security
               "a later launch does not resurrect a preference the user reset")
         check(NSDictionary(dictionary: defaults.persistentDomain(forName: legacyDomain) ?? [:]).isEqual(to: legacy),
               "migration leaves the legacy settings unchanged")
+
+        check(Archives.isOrbitHandler("com.lyu.orbit"), "a legacy Orbit is not saved as the previous archive app")
+        check(Archives.isOrbitHandler("dev.3xhaust.Orbit"), "the current Orbit is not saved as the previous archive app")
+        check(Archives.isOrbitHandler("DEV.3XHAUST.ORBIT"), "archive app identities are compared case-insensitively")
+        check(!Archives.isOrbitHandler("com.apple.archiveutility"), "another archive app can still be restored")
+        check(!Archives.isOrbitHandler(nil), "a missing archive app is not mistaken for Orbit")
 
         if CommandLine.arguments.count == 3 {
             let old = URL(fileURLWithPath: CommandLine.arguments[1])

@@ -68,6 +68,11 @@ final class Archives {
     func start() {
         NSApp.servicesProvider = ArchiveServices.shared
         refreshServices()
+        if Bundle.main.bundleIdentifier == "dev.3xhaust.Orbit", !Updater.shared.isDevBuild,
+           d.bool(forKey: Key.handling),
+           Self.handlerID(for: "public.zip-archive")?.caseInsensitiveCompare("com.lyu.orbit") == .orderedSame {
+            setDefaultHandler(true)
+        }
     }
 
     // MARK: Opening
@@ -227,6 +232,14 @@ final class Archives {
         return Bundle(url: url)?.bundleIdentifier
     }
 
+    /// The legacy copy can still be registered from the Trash after an update.
+    static func isOrbitHandler(_ bundleID: String?) -> Bool {
+        guard let bundleID else { return false }
+        return [Bundle.main.bundleIdentifier ?? "dev.3xhaust.Orbit", "com.lyu.orbit"].contains {
+            bundleID.caseInsensitiveCompare($0) == .orderedSame
+        }
+    }
+
     /// Who opens .zip files now, for the page ("Now: Keka").
     var currentZipApp: String? {
         if Self.orbitHandlesArchives { return "Orbit" }
@@ -247,20 +260,20 @@ final class Archives {
             Self.log("register \(me.path): \(reg)")
             // Never remember Orbit itself (another copy of it) as "the app before Orbit".
             var previous = (d.dictionary(forKey: Key.previousHandlers) as? [String: String] ?? [:]).filter { _, path in
-                Bundle(url: URL(fileURLWithPath: path))?.bundleIdentifier != myID
+                !Self.isOrbitHandler(Bundle(url: URL(fileURLWithPath: path))?.bundleIdentifier)
             }
             var failures = 0
             for id in Self.handledTypes {
                 guard let type = UTType(id) else { continue }
                 if on {
-                    if let current = ws.urlForApplication(toOpen: type), Bundle(url: current)?.bundleIdentifier != myID {
+                    if let current = ws.urlForApplication(toOpen: type), !Self.isOrbitHandler(Bundle(url: current)?.bundleIdentifier) {
                         previous[id] = current.path
                     }
                     if !(await Self.setHandler(at: me, bundleID: myID, for: type)) { failures += 1 }
                 } else {
                     let back = previous[id].map { URL(fileURLWithPath: $0) }
                         .flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil }
-                        ?? Self.fallbackHandler(for: type, excluding: myID)
+                        ?? Self.fallbackHandler(for: type)
                     if !(await Self.setHandler(at: back, bundleID: Bundle(url: back)?.bundleIdentifier, for: type)) { failures += 1 }
                 }
             }
@@ -279,9 +292,9 @@ final class Archives {
     }
 
     /// Archive Utility when it can open the type, else any other app that can.
-    private static func fallbackHandler(for type: UTType, excluding myID: String) -> URL {
+    private static func fallbackHandler(for type: UTType) -> URL {
         let utility = URL(fileURLWithPath: "/System/Library/CoreServices/Applications/Archive Utility.app")
-        let apps = NSWorkspace.shared.urlsForApplications(toOpen: type).filter { Bundle(url: $0)?.bundleIdentifier != myID }
+        let apps = NSWorkspace.shared.urlsForApplications(toOpen: type).filter { !isOrbitHandler(Bundle(url: $0)?.bundleIdentifier) }
         if apps.contains(where: { $0.standardizedFileURL == utility.standardizedFileURL }) || apps.isEmpty { return utility }
         return apps[0]
     }
