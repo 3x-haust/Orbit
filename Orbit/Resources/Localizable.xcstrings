@@ -13710,17 +13710,6 @@
         }
       }
     },
-    "Green while there’s room, orange when busy, red near 100%.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "여유로울 땐 초록, 바쁠 땐 주황, 100%에 가까우면 빨강으로 보여요."
-          }
-        }
-      }
-    },
     "Group Container": {
       "extractionState": "manual",
       "localizations": {
@@ -14910,6 +14899,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "메뉴 막대"
+          }
+        }
+      }
+    },
+    "In the menu bar and the status card: green while there’s room, orange when busy, red near 100%.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 막대와 상태 카드의 퍼센트가 여유로울 땐 초록, 바쁠 땐 주황, 100%에 가까우면 빨강으로 보여요."
           }
         }
       }
