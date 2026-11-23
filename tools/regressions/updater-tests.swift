@@ -42,6 +42,33 @@ import Security
         catch Updater.FetchError.noAsset { check(true, "a release without a ZIP is rejected") }
         catch { check(false, "missing asset returned the wrong error: \(error)") }
 
+        let legacyDomain = "orbit-migration-legacy-\(UUID().uuidString)"
+        let newDomain = "orbit-migration-new-\(UUID().uuidString)"
+        let defaults = UserDefaults.standard
+        defer {
+            defaults.removePersistentDomain(forName: legacyDomain)
+            defaults.removePersistentDomain(forName: newDomain)
+        }
+        let legacy: [String: Any] = ["AppleLanguages": ["ko"], "updates.autoInstall": true,
+                                      "clipboard.historyLimit": 600, "capture.sound": true]
+        defaults.setPersistentDomain(legacy, forName: legacyDomain)
+        defaults.setPersistentDomain(["capture.sound": false], forName: newDomain)
+        Pref.migrate(from: legacyDomain, to: newDomain)
+        let migrated = defaults.persistentDomain(forName: newDomain) ?? [:]
+        check(migrated["AppleLanguages"] as? [String] == ["ko"]
+              && migrated["updates.autoInstall"] as? Bool == true
+              && migrated["clipboard.historyLimit"] as? Int == 600,
+              "language, automatic updates and saved preferences move to the new domain")
+        check(migrated["capture.sound"] as? Bool == false, "an explicit new-domain value wins over the legacy value")
+        var edited = migrated
+        edited.removeValue(forKey: "clipboard.historyLimit")
+        defaults.setPersistentDomain(edited, forName: newDomain)
+        Pref.migrate(from: legacyDomain, to: newDomain)
+        check(defaults.persistentDomain(forName: newDomain)?["clipboard.historyLimit"] == nil,
+              "a later launch does not resurrect a preference the user reset")
+        check(NSDictionary(dictionary: defaults.persistentDomain(forName: legacyDomain) ?? [:]).isEqual(to: legacy),
+              "migration leaves the legacy settings unchanged")
+
         if CommandLine.arguments.count == 3 {
             let old = URL(fileURLWithPath: CommandLine.arguments[1])
             let new = URL(fileURLWithPath: CommandLine.arguments[2])
@@ -55,6 +82,8 @@ import Security
                 && SecStaticCodeCheckValidity(code!, [], requirement) == errSecSuccess
             check(accepted, "the fan helper accepts the new-ID Orbit client")
         }
+        defaults.removePersistentDomain(forName: legacyDomain)
+        defaults.removePersistentDomain(forName: newDomain)
         print("\(failed) failed")
         exit(failed == 0 ? 0 : 1)
     }

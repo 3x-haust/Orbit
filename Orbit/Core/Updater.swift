@@ -341,6 +341,9 @@ final class Updater {
             if let trashed = trashed as URL? { try? FileManager.default.moveItem(at: trashed, to: target) }
             throw FetchError.cantReplace
         }
+        if Bundle.main.bundleIdentifier == "com.lyu.orbit" {
+            Pref.migrate(from: "com.lyu.orbit", to: "dev.3xhaust.Orbit")
+        }
         UpdateLog.write("installed; relaunching \(target.path)")
         relaunch(target)
     }
