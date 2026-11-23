@@ -162,7 +162,7 @@ struct NotchAIUsageCard: View {
                 }
                 .help("Updated %@".loc(cost.observedAt.formatted(date: .abbreviated, time: .shortened)))
                 .accessibilityElement(children: .combine)
-            case .claudeUnverifiedCost, .missing: stateText("Waiting for quota data")
+            case .missing: stateText("Waiting for quota data")
             case .unreadable: stateText("Can’t read source folder")
             case .invalid: stateText("Invalid quota data")
             case nil: stateText("Checking…")

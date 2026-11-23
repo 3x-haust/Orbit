@@ -90,6 +90,19 @@ import Foundation
         try writeClaudeCache(age: 30, account: "current-account", reset: -1)
         check(available(cache).map(\.minutes) == [10_080], "Claude drops a cache window after its reset")
 
+        try writeClaudeCache(age: 20, account: "current-account")
+        let oldCost = """
+        {"api_key_session":true,"session_cost_usd":0.12,"captured_at":\(now.timeIntervalSince1970 - 60)}
+        """
+        _ = try write(oldCost, to: "claude-cache/orbit-claude-cost.json", in: root)
+        check(available(cache).map(\.usedPercent) == [17, 25], "A new native subscription cache supersedes historical API cost")
+        let unidentifiedCache = """
+        {"cachedUsageUtilization":{"fetchedAtMs":\((now.timeIntervalSince1970 - 10) * 1000),
+          "utilization":{"five_hour":{"utilization":19}}}}
+        """
+        _ = try write(unidentifiedCache, to: "claude-cache/.claude.json", in: root)
+        check(available(cache).isEmpty, "A native cache without account identity cannot supersede an identified source")
+
         let bridge = profile(.claude, "status-line's profile", in: root)
         let bridgeFolder = bridge.sourceFolder!
         let originalCommand = "printf 'existing: '; cat # original trailing comment"
@@ -121,32 +134,42 @@ import Foundation
         if case .available(let live) = NotchAIUsageReader.read(bridge) { bridgeWindows = live.windows }
         else { bridgeWindows = [] }
         check(bridgeWindows.first?.usedPercent == 28, "The installed status line publishes a readable quota snapshot")
-        let apiInput = #"{"cost":{"total_cost_usd":0.0234},"unrelated":"sensitive fixture"}"#
-        let apiOutput = try runShell(wrappedCommand, input: apiInput, apiKey: true)
+        let apiInput = #"{"session_id":"fixture-api-session","cost":{"total_cost_usd":0.0234},"unrelated":"sensitive fixture"}"#
+        let claudeCLI = try write(#"""
+        #!/bin/sh
+        test "$*" = "auth status" || exit 1
+        case "${ORBIT_FIXTURE_AUTH_MODE:-}" in
+            blocked) exec /bin/sleep 10 ;;
+            api_key|claude.ai)
+                printf '{"loggedIn":true,"authMethod":"%s"}\n' "$ORBIT_FIXTURE_AUTH_MODE"
+                ;;
+        esac
+        """#, to: "claude-fixture-bin/claude", in: root)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: claudeCLI.path)
+        let fixturePath = claudeCLI.deletingLastPathComponent().path + ":/usr/bin:/bin"
+        let apiOutput = try runShell(wrappedCommand, input: apiInput, path: fixturePath, authMode: "api_key")
         check(apiOutput == "existing: " + apiInput, "API cost capture preserves the previous status line output")
         let costFile = bridgeFolder.appendingPathComponent("orbit-claude-cost.json")
         let costDocument = try String(contentsOf: costFile, encoding: .utf8)
         check(!costDocument.contains("sensitive fixture") && !costDocument.contains("fake-key"),
               "The session cost snapshot omits prompts and credential values")
         if case .sessionCost(let cost) = NotchAIUsageReader.read(bridge) {
-            check(cost.usd == 0.0234, "API-key mode displays the latest Claude session cost")
+            check(cost.usd == 0.0234, "Verified API-key mode displays the latest Claude session cost")
         } else {
-            check(false, "API-key mode displays the latest Claude session cost")
+            check(false, "Verified API-key mode displays the latest Claude session cost")
         }
-        _ = try runShell(wrappedCommand, input: fixture)
-        if case .available(let freshQuota) = NotchAIUsageReader.read(bridge) {
-            check(freshQuota.windows.first?.usedPercent == 28, "A newer subscription snapshot takes precedence over old cost")
-        } else {
-            check(false, "A newer subscription snapshot takes precedence over old cost")
-        }
-        _ = try runShell(wrappedCommand, input: apiInput)
-        if case .claudeUnverifiedCost(let cost) = NotchAIUsageReader.read(bridge, allowUnverifiedCost: true) {
-            check(cost.usd == 0.0234, "Cost without session authentication requires a separate API-key check")
-        } else {
-            check(false, "Cost without session authentication requires a separate API-key check")
-        }
-        check(availableLiveQuota(bridge),
-              "Unverified cost does not replace the local subscription snapshot")
+        _ = try runShell(wrappedCommand, input: fixture, path: fixturePath, authMode: "api_key")
+        check(availableLiveQuota(bridge), "Real subscription quota wins even if an API key is exported")
+
+        let declinedInput = apiInput.replacingOccurrences(of: "fixture-api-session", with: "declined-key")
+        _ = try runShell(wrappedCommand, input: declinedInput, path: fixturePath, authMode: "claude.ai")
+        check(availableLiveQuota(bridge), "An exported but declined API key does not replace subscription quota with cost")
+
+        let blockedInput = apiInput.replacingOccurrences(of: "fixture-api-session", with: "blocked-auth")
+        let started = Date()
+        let blockedOutput = try runShell(wrappedCommand, input: blockedInput, path: fixturePath, authMode: "blocked")
+        check(Date().timeIntervalSince(started) < 4 && blockedOutput == "existing: " + blockedInput && availableLiveQuota(bridge),
+              "A blocked auth probe is bounded and leaves the original output and quota working")
         let quotaFile = bridgeFolder.appendingPathComponent("orbit-quota.json")
         let savedQuota = try String(contentsOf: quotaFile, encoding: .utf8)
         check(!savedQuota.contains("Fixture") && !savedQuota.contains("unrelated"), "The connection writes only quota data")
@@ -157,6 +180,19 @@ import Foundation
         try ClaudeStatusLineBridge.setConnected(false, in: bridgeFolder)
         let restored = try JSONSerialization.jsonObject(with: Data(contentsOf: settings)) as? NSDictionary
         check(restored == original as NSDictionary, "Disconnect restores the original command and other settings")
+        let legacyScript = "'" + legacyClaudeScript.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        let legacyCommand = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
+            + legacyScript + " -- '/older/location/orbit-quota.json' 1 | (\n" + originalCommand + "\n)"
+        var legacySettings = original
+        legacySettings["statusLine"] = ["type": "command", "command": legacyCommand, "padding": 3]
+        try JSONSerialization.data(withJSONObject: legacySettings).write(to: settings, options: .atomic)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .needsUpdate, "Claude detects an earlier bridge after a folder move")
+        try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "Claude upgrades an earlier bridge without nesting it")
+        try ClaudeStatusLineBridge.setConnected(false, in: bridgeFolder)
+        let legacyRestored = try JSONSerialization.jsonObject(with: Data(contentsOf: settings)) as? NSDictionary
+        check(legacyRestored == original as NSDictionary, "Disconnect after an upgrade restores the original status line")
+
         let fresh = root.appendingPathComponent("new-status-line", isDirectory: true)
         try FileManager.default.createDirectory(at: fresh, withIntermediateDirectories: false)
         try ClaudeStatusLineBridge.setConnected(true, in: fresh)
@@ -223,6 +259,20 @@ import Foundation
         check(NotchCodexQuota.read(executable: URL(fileURLWithPath: "/usr/bin/false"), profile: cliHome, now: now) == nil,
               "A closed Codex process falls back without killing Orbit")
 
+        let rejected = try write(#"""
+        #!/bin/sh
+        IFS= read -r command
+        printf '%s\n' '{"id":1,"result":{}}'
+        IFS= read -r command
+        IFS= read -r command
+        printf '%s\n' '{"id":2,"result":{"account":{"type":"chatgpt"}}}'
+        IFS= read -r command
+        printf '%s\n' '{"id":3,"error":{"code":-32000,"message":"Unavailable"}}'
+        """#, to: "bin/rejected-codex", in: root)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: rejected.path)
+        check(NotchCodexQuota.read(executable: rejected, profile: cliHome, now: now) == .missing,
+              "An authenticated account RPC failure never falls back to an unidentified rollout")
+
         let grok = profile(.codexBar, "codexbar", in: root, key: "Grok")
         let antigravity = profile(.codexBar, "codexbar", in: root, key: "antigravity")
         let export = """
@@ -266,12 +316,40 @@ import Foundation
         return snapshot.windows
     }
 
+    private static let legacyClaudeScript = #"""
+        use strict;
+        use warnings;
+        binmode STDIN;
+        binmode STDOUT;
+        local $/;
+        my $input = <STDIN> // '';
+        my ($target, $forward) = @ARGV;
+        eval {
+            my $data = decode_json($input);
+            if (ref($data) eq 'HASH' && ref($data->{rate_limits}) eq 'HASH') {
+                my %windows;
+                for my $key ('five_hour', 'seven_day') {
+                    my $window = $data->{rate_limits}->{$key};
+                    next unless ref($window) eq 'HASH' && defined $window->{used_percentage};
+                    $windows{$key} = { used_percentage => $window->{used_percentage}, resets_at => $window->{resets_at} };
+                }
+                if (%windows) {
+                    my ($file, $temp) = tempfile('.orbit-quota-XXXXXXXX', DIR => dirname($target), UNLINK => 1);
+                    print {$file} encode_json({ captured_at => time, rate_limits => \%windows }) or die $!;
+                    close $file or die $!;
+                    rename($temp, $target) or die $!;
+                }
+            }
+        };
+        print $input if $forward;
+        """#
+
     private static func availableLiveQuota(_ profile: NotchAIProfile) -> Bool {
         if case .available(let quota) = NotchAIUsageReader.read(profile) { return quota.windows.first?.usedPercent == 28 }
         return false
     }
 
-    private static func runShell(_ command: String, input: String, apiKey: Bool = false) throws -> String {
+    private static func runShell(_ command: String, input: String, path: String = "/usr/bin:/bin", authMode: String? = nil) throws -> String {
         let process = Process()
         let stdin = Pipe()
         let stdout = Pipe()
@@ -279,8 +357,11 @@ import Foundation
         process.arguments = ["-c", command]
         process.standardInput = stdin
         process.standardOutput = stdout
-        process.environment = ProcessInfo.processInfo.environment.filter { $0.key != "ANTHROPIC_API_KEY" }
-        if apiKey { process.environment?["ANTHROPIC_API_KEY"] = "fake-key" }
+        process.environment = ["PATH": path]
+        if let authMode {
+            process.environment?["ANTHROPIC_API_KEY"] = "fake-key"
+            process.environment?["ORBIT_FIXTURE_AUTH_MODE"] = authMode
+        }
         try process.run()
         try stdin.fileHandleForWriting.write(contentsOf: Data(input.utf8))
         try stdin.fileHandleForWriting.close()

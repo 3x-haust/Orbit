@@ -131,9 +131,15 @@ enum NotchCodexQuota {
             guard let authentication = try result(2) else { return nil }
             guard let account = authentication["account"] as? [String: Any],
                   account["type"] as? String == "chatgpt" else { return NotchAIUsageResult.missing }
-            try send(["id": 3, "method": "account/rateLimits/read"])
-            guard let payload = try result(3) else { return nil }
-            return NotchAIUsageReader.codexAccountSnapshot(payload, now: now)
+            do {
+                try send(["id": 3, "method": "account/rateLimits/read"])
+                guard let payload = try result(3) else { return NotchAIUsageResult.missing }
+                return NotchAIUsageReader.codexAccountSnapshot(payload, now: now)
+            } catch {
+                // Rollouts have no account identity. Once the CLI responds, do not
+                // fall back to another account's earlier local snapshot.
+                return NotchAIUsageResult.missing
+            }
         } ?? nil
     }
 }
@@ -154,19 +160,8 @@ actor NotchAIUsageService {
         if profile.provider == .codex, let folder, let result = await readCodex(folder) {
             return result
         }
-        let local = Task.detached(priority: .utility) { NotchAIUsageReader.read(profile, allowUnverifiedCost: true) }
-        let result = await withTaskCancellationHandler { await local.value } onCancel: { local.cancel() }
-        guard !Task.isCancelled, profile.provider == .claude, let folder, case .claudeUnverifiedCost(let cost) = result else {
-            return result
-        }
-        let auth = Task.detached(priority: .utility) {
-            Self.claudeUsesAPIKey(in: folder)
-        }
-        let usesAPIKey = await withTaskCancellationHandler { await auth.value } onCancel: { auth.cancel() }
-        if usesAPIKey { return .sessionCost(cost) }
-        // The snapshot has no auth information. Preserve any existing subscription reading.
-        let fallback = Task.detached(priority: .utility) { NotchAIUsageReader.read(profile, allowUnverifiedCost: false) }
-        return await withTaskCancellationHandler { await fallback.value } onCancel: { fallback.cancel() }
+        let local = Task.detached(priority: .utility) { NotchAIUsageReader.read(profile) }
+        return await withTaskCancellationHandler { await local.value } onCancel: { local.cancel() }
     }
 
     private func readCodex(_ folder: URL) async -> NotchAIUsageResult? {
@@ -184,18 +179,4 @@ actor NotchAIUsageService {
         return result
     }
 
-    private nonisolated static func claudeUsesAPIKey(in folder: URL) -> Bool {
-        guard let executable = NotchUsageCLI.executable("claude") else { return false }
-        return NotchUsageCLI.run(executable, arguments: ["auth", "status"],
-                                 overrides: ["CLAUDE_CONFIG_DIR": folder.path]) { stdin, stdout in
-            try stdin.close()
-            var stdout = stdout
-            let data = try stdout.readDocument()
-            guard let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  payload["loggedIn"] as? Bool == true,
-                  payload["authMethod"] as? String == "api_key" || payload["authMethod"] as? String == "api_key_helper",
-                  let configured = payload["configDirectory"] as? String else { return false }
-            return URL(fileURLWithPath: configured).standardizedFileURL.path == folder.standardizedFileURL.path
-        } ?? false
-    }
 }

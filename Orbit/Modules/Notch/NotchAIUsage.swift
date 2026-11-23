@@ -76,7 +76,6 @@ struct NotchAISessionCost: Equatable, Sendable {
 enum NotchAIUsageResult: Equatable, Sendable {
     case available(NotchAIQuotaSnapshot)
     case sessionCost(NotchAISessionCost)
-    case claudeUnverifiedCost(NotchAISessionCost)
     case missing
     case unreadable
     case invalid
@@ -92,7 +91,7 @@ enum NotchAIUsageReader {
     private static let rateLimitsMarker = Data("\"rate_limits\"".utf8)
     private typealias JSON = [String: Any]
 
-    static func read(_ profile: NotchAIProfile, now: Date = .now, allowUnverifiedCost: Bool = false) -> NotchAIUsageResult {
+    static func read(_ profile: NotchAIProfile, now: Date = .now) -> NotchAIUsageResult {
         guard let folder = profile.sourceFolder else { return .missing }
         let dates = Dates(now: now)
         do {
@@ -100,7 +99,7 @@ enum NotchAIUsageReader {
             case .codex:
                 return try codexSnapshot(in: folder, dates: dates)
             case .claude:
-                return try claudeUsage(in: folder, dates: dates, allowUnverifiedCost: allowUnverifiedCost)
+                return try claudeUsage(in: folder, dates: dates)
             case .custom:
                 let (data, _) = try snapshotFile("orbit-quota.json", in: folder)
                 return try customSnapshot(data, dates: dates)
@@ -129,7 +128,7 @@ enum NotchAIUsageReader {
         })
     }
 
-    private static func claudeUsage(in folder: URL, dates: Dates, allowUnverifiedCost: Bool) throws -> NotchAIUsageResult {
+    private static func claudeUsage(in folder: URL, dates: Dates) throws -> NotchAIUsageResult {
         var capture: NotchAIUsageResult = .missing
         var captureError: Error?
         do {
@@ -140,35 +139,27 @@ enum NotchAIUsageReader {
             if !isMissing(error) { captureError = error }
         }
 
-        if let (data, _) = try? snapshotFile("orbit-claude-cost.json", in: folder),
-           let document = try? object(data),
-           let usd = number(document["session_cost_usd"]), usd >= 0,
-           let observed = dates.observation(document["captured_at"]) {
-            let newer: Bool
-            if case .available(let snapshot) = capture, let quotaTime = snapshot.windows.first?.observedAt {
-                newer = observed > quotaTime
-            } else {
-                newer = true
-            }
-            if newer {
-                let cost = NotchAISessionCost(usd: usd, observedAt: observed)
-                if document["api_key_session"] as? Bool == true { return .sessionCost(cost) }
-                if allowUnverifiedCost { return .claudeUnverifiedCost(cost) }
-            }
-        }
-
+        var quota: NotchAIQuotaSnapshot?
+        if case .available(let direct) = capture { quota = direct }
         let home = FileManager.default.homeDirectoryForCurrentUser
         let standard = home.appendingPathComponent(".claude", isDirectory: true)
         let cacheFolders = folder.standardizedFileURL.path == standard.standardizedFileURL.path ? [folder, home] : [folder]
         for location in cacheFolders {
             guard let (data, _) = try? snapshotFile(".claude.json", in: location, maxBytes: 2 * 1024 * 1024),
                   let state = try? object(data),
-                  let result = claudeCache(state, dates: dates) else { continue }
-            if case .available(let direct) = capture,
-               let recorded = direct.windows.first?.observedAt, let cached = result.windows.first?.observedAt,
-               recorded >= cached { return capture }
-            return .available(result)
+                  let cached = claudeCache(state, dates: dates),
+                  let time = cached.windows.first?.observedAt else { continue }
+            if quota?.windows.first.map({ time > $0.observedAt }) ?? true { quota = cached }
         }
+        if let (data, _) = try? snapshotFile("orbit-claude-cost.json", in: folder),
+           let document = try? object(data),
+           document["api_key_session"] as? Bool == true,
+           let usd = number(document["session_cost_usd"]), usd >= 0,
+           let observed = dates.observation(document["captured_at"]),
+           quota?.windows.first.map({ observed > $0.observedAt }) ?? true {
+            return .sessionCost(.init(usd: usd, observedAt: observed))
+        }
+        if let quota { return .available(quota) }
         if let captureError { throw captureError }
         return capture
     }
@@ -178,7 +169,8 @@ enum NotchAIUsageReader {
               let timestamp = number(cache["fetchedAtMs"]),
               let observed = dates.observation(timestamp / 1_000),
               observed <= dates.now, dates.now.timeIntervalSince(observed) <= 3_600,
-              cache["accountUuid"] as? String == (state["oauthAccount"] as? JSON)?["accountUuid"] as? String,
+              let account = cache["accountUuid"] as? String, !account.isEmpty,
+              account == (state["oauthAccount"] as? JSON)?["accountUuid"] as? String,
               let usage = cache["utilization"] as? JSON else { return nil }
         let current = [(key: "five_hour", minutes: 300), (key: "seven_day", minutes: 10_080)].compactMap { period in
             window(usage[period.key], minutes: period.minutes, usedKey: "utilization", resetKey: "resets_at",

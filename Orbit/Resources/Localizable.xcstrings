@@ -33435,6 +33435,17 @@
         }
       }
     },
+    "Update status line connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태줄 연결 업데이트"
+          }
+        }
+      }
+    },
     "Update to Current Ring": {
       "extractionState": "manual",
       "localizations": {

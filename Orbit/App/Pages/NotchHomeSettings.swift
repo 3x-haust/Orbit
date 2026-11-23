@@ -203,11 +203,14 @@ private struct NotchAIProfileEditor: View {
             if profile.provider == .claude {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        if claudeConnection == .connected {
+                        if claudeConnection != .connected {
+                            Button((claudeConnection == .needsUpdate ? "Update status line connection" : "Connect existing status line").loc) {
+                                setClaudeConnection(true)
+                            }
+                            .disabled(claudeConnection != .available && claudeConnection != .needsUpdate)
+                        }
+                        if claudeConnection == .connected || claudeConnection == .needsUpdate {
                             Button("Disconnect status line") { setClaudeConnection(false) }
-                        } else {
-                            Button("Connect existing status line") { setClaudeConnection(true) }
-                                .disabled(claudeConnection != .available)
                         }
                         Link("Claude Code setup guide", destination: URL(string: "https://code.claude.com/docs/en/statusline")!)
                     }
@@ -306,7 +309,7 @@ private struct NotchAIProfileEditor: View {
             let hasCurrentWindow = snapshot.windows.contains { $0.isCurrent(at: now) }
             return hasCurrentWindow ? "Quota data found" : "Quota data found, but expired"
         case .sessionCost: return "Session cost found"
-        case .claudeUnverifiedCost, .missing: return "Waiting for quota data"
+        case .missing: return "Waiting for quota data"
         case .unreadable: return "Can’t read source folder"
         case .invalid: return "Invalid quota data"
         }
