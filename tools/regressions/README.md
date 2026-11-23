@@ -257,3 +257,17 @@ privileged helper again at launch: when the running helper is older, or when
 macOS can no longer verify it because an update replaced its binary (every call
 then fails and closed-lid mode falls back to the password prompt). A helper
 that is current, interrupted or slow to answer is left running.
+
+# Runner regression
+
+Build the Debug app, then run:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-runner-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-runner-tests.sh \
+  /tmp/orbit-runner-build/Build/Products/Debug /tmp/orbit-runner-tests
+```
+
+It checks where the menu bar percentage turns from green to orange to red:
+60% and 80% for CPU and GPU, 80% and 95% for memory.

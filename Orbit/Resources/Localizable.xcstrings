@@ -7632,6 +7632,17 @@
         }
       }
     },
+    "Color by usage": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용량에 따라 색 바꾸기"
+          }
+        }
+      }
+    },
     "ColorSampler": {
       "extractionState": "manual"
     },
@@ -13695,6 +13706,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "웹 뷰의 그래픽."
+          }
+        }
+      }
+    },
+    "Green while there’s room, orange when busy, red near 100%.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "여유로울 땐 초록, 바쁠 땐 주황, 100%에 가까우면 빨강으로 보여요."
           }
         }
       }

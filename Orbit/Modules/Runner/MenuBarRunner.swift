@@ -14,6 +14,8 @@ extension Pref {
     static let runnerFPSCap = "runner.fpsCap"
     static let runnerInvert = "runner.invert"
     static let runnerShowPercent = "runner.showPercent"
+    /// The percentage turns green, orange or red with the reading.
+    static let runnerUsageColor = "runner.usageColor"
     static let runnerPaused = "runner.paused"
     /// Faces the other way.
     static let runnerFlip = "runner.flip"
@@ -35,6 +37,25 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
             case .cpu: "CPU"
             case .memory: "Memory"
             case .gpu: "GPU"
+            }
+        }
+    }
+
+    /// How the percentage reads at a glance: green with room to spare, Orbit orange when busy, red near the top.
+    enum Load: Equatable {
+        case low, busy, high
+
+        /// Memory sits high on a healthy Mac, so it turns later than CPU and GPU.
+        init(percent: Int, source: Source) {
+            let (busy, high) = source == .memory ? (80, 95) : (60, 80)
+            self = percent >= high ? .high : percent >= busy ? .busy : .low
+        }
+
+        var color: NSColor {
+            switch self {
+            case .low: .systemGreen
+            case .busy: NSColor(Palette.brand)
+            case .high: .systemRed
             }
         }
     }
@@ -467,22 +488,26 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         drawFrame()
     }
 
-    private static func percentTitle(_ value: Int) -> NSAttributedString {
-        NSAttributedString(string: " \(value)%", attributes: [
+    private static func percentTitle(_ value: Int, color: NSColor? = nil) -> NSAttributedString {
+        var attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .medium),
             .baselineOffset: 0.5,
-        ])
+        ]
+        if let color { attributes[.foregroundColor] = color }
+        return NSAttributedString(string: " \(value)%", attributes: attributes)
     }
 
     private func drawTitle() {
         guard let button = item?.button else { return }
         let percent = Pref.defaults.bool(forKey: Pref.runnerShowPercent)
-        let text = percent ? "\(Int((level * 100).rounded()))" : ""
+        let value = Int((level * 100).rounded())
+        let text = percent ? "\(value)" : ""
         guard shownTitle != text else { return }
         shownTitle = text
         if percent {
+            let color = Pref.defaults.bool(forKey: Pref.runnerUsageColor) ? Load(percent: value, source: source).color : nil
             button.imagePosition = .imageLeading
-            button.attributedTitle = Self.percentTitle(Int((level * 100).rounded()))
+            button.attributedTitle = Self.percentTitle(value, color: color)
         } else {
             button.imagePosition = .imageOnly
             button.title = ""
