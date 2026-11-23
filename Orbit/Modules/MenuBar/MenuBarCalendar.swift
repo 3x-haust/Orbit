@@ -75,6 +75,9 @@ final class MenuBarCalendar: NSObject {
                 i.autosaveName = "OrbitCalendar"
                 i.button?.target = self
                 i.button?.action = #selector(toggle(_:))
+                // Same size as the menu bar's font, but every digit equally wide, so a ticking clock
+                // doesn't resize the item and shift the items beside it.
+                if let size = i.button?.font?.pointSize { i.button?.font = .monospacedDigitSystemFont(ofSize: size, weight: .regular) }
                 item = i
                 NotificationCenter.default.addObserver(self, selector: #selector(storeChanged), name: .EKEventStoreChanged, object: store)
                 NotificationCenter.default.addObserver(self, selector: #selector(dayChanged), name: .NSCalendarDayChanged, object: nil)
