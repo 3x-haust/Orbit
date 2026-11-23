@@ -104,17 +104,20 @@ enum ClaudeStatusLineBridge {
     }
 
     private static let interpreter = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
-    private static let signature = "# Orbit Claude status line v2"
-    // SHA-256 of the shell-quoted Perl emitted by the first bridge version.
-    private static let originalScriptHash = "8f80c08b1949f6bdd235230e2f8710eadb4c9477d99e90dc27299f82ea5f9d5d"
+    private static let signature = "# Orbit Claude status line v3"
+    // SHA-256 fingerprints of the two unversioned bridge commands.
+    private static let legacyScriptHashes: Set<String> = [
+        "8f80c08b1949f6bdd235230e2f8710eadb4c9477d99e90dc27299f82ea5f9d5d",
+        "e504e2677498b76890a182647e90bb9b457868f29d74f9a0c2b9a040ed31f75e",
+    ]
 
     private static func installedConnection(_ command: String) -> Connection? {
         guard command.hasPrefix(interpreter), let separator = command.range(of: " -- ") else { return nil }
         let script = command[command.index(command.startIndex, offsetBy: interpreter.count)..<separator.lowerBound]
         let currentVersion = script.hasPrefix("'" + signature + "\n")
-        if !currentVersion {
+        if !currentVersion && !script.hasPrefix("'# Orbit Claude status line v2\n") {
             let hash = SHA256.hash(data: Data(script.utf8)).map { String(format: "%02x", $0) }.joined()
-            guard hash == originalScriptHash else { return nil }
+            guard legacyScriptHashes.contains(hash) else { return nil }
         }
 
         let rest = command[separator.upperBound...]
@@ -136,9 +139,9 @@ enum ClaudeStatusLineBridge {
         let script = signature + "\n" + #"""
         use strict;
         use warnings;
-        use Time::HiRes qw(time);
+        use Time::HiRes qw(time sleep);
         use IO::Select;
-        use Fcntl qw(O_RDONLY O_NOFOLLOW O_NONBLOCK);
+        use Fcntl qw(O_RDONLY O_WRONLY O_CREAT O_NOFOLLOW O_NONBLOCK LOCK_EX LOCK_NB);
         use POSIX qw(WNOHANG);
         binmode STDIN;
         binmode STDOUT;
@@ -194,6 +197,36 @@ enum ClaudeStatusLineBridge {
                 && ($status->{authMethod} // '') =~ /\Aapi_key(?:_helper)?\z/;
         }
 
+        sub read_snapshot {
+            my ($path) = @_;
+            return eval {
+                sysopen(my $file, $path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK) or die $!;
+                die unless -f $file;
+                my $bytes = read($file, my $json, 8192);
+                close $file;
+                decode_json($json) if $bytes;
+            };
+        }
+
+        sub publish_snapshot {
+            my ($path, $snapshot) = @_;
+            sysopen(my $lock, $path . '.lock', O_WRONLY | O_CREAT | O_NOFOLLOW | O_NONBLOCK, 0600) or return;
+            return unless -f $lock;
+            my $until = time + 0.1;
+            while (!flock($lock, LOCK_EX | LOCK_NB)) {
+                return if time >= $until;
+                sleep 0.01;
+            }
+            my $previous = read_snapshot($path);
+            my $captured = ref($previous) eq 'HASH' ? $previous->{captured_at} : undef;
+            return if defined $captured && $captured =~ /\A[0-9]+(?:\.[0-9]+)?\z/
+                && $captured > $snapshot->{captured_at} && $captured <= time + 60;
+            my ($file, $temp) = tempfile('.orbit-quota-XXXXXXXX', DIR => dirname($path), UNLINK => 1);
+            print {$file} encode_json($snapshot) or die $!;
+            close $file or die $!;
+            rename($temp, $path) or die $!;
+        }
+
         eval {
             my $data = decode_json($input);
             if (ref($data) eq 'HASH') {
@@ -212,13 +245,7 @@ enum ClaudeStatusLineBridge {
                     my $folder = dirname($target);
                     $target = $folder . '/orbit-claude-cost.json';
                     my $session = $data->{session_id} // '';
-                    my $previous = eval {
-                        sysopen(my $file, $target, O_RDONLY | O_NOFOLLOW | O_NONBLOCK) or die $!;
-                        die unless -f $file;
-                        my $bytes = read($file, my $json, 8192);
-                        close $file;
-                        decode_json($json) if $bytes;
-                    };
+                    my $previous = read_snapshot($target);
                     my $checked = time;
                     my $api;
                     if (length($session) && ref($previous) eq 'HASH' && ($previous->{session_id} // '') eq $session
@@ -234,12 +261,7 @@ enum ClaudeStatusLineBridge {
                     $snapshot{auth_checked_at} = $checked;
                     $snapshot{api_key_session} = $api ? JSON::PP::true : JSON::PP::false;
                 }
-                if (keys(%snapshot) > 1) {
-                    my ($file, $temp) = tempfile('.orbit-quota-XXXXXXXX', DIR => dirname($target), UNLINK => 1);
-                    print {$file} encode_json(\%snapshot) or die $!;
-                    close $file or die $!;
-                    rename($temp, $target) or die $!;
-                }
+                publish_snapshot($target, \%snapshot) if keys(%snapshot) > 1;
             }
         };
         """#

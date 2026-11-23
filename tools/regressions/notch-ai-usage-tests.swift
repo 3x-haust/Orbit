@@ -92,7 +92,8 @@ import Foundation
 
         try writeClaudeCache(age: 20, account: "current-account")
         let oldCost = """
-        {"api_key_session":true,"session_cost_usd":0.12,"captured_at":\(now.timeIntervalSince1970 - 60)}
+        {"api_key_session":true,"session_cost_usd":0.12,"captured_at":\(now.timeIntervalSince1970 - 60),
+          "auth_checked_at":\(now.timeIntervalSince1970 - 60)}
         """
         _ = try write(oldCost, to: "claude-cache/orbit-claude-cost.json", in: root)
         check(available(cache).map(\.usedPercent) == [17, 25], "A new native subscription cache supersedes historical API cost")
@@ -102,6 +103,13 @@ import Foundation
         """
         _ = try write(unidentifiedCache, to: "claude-cache/.claude.json", in: root)
         check(available(cache).isEmpty, "A native cache without account identity cannot supersede an identified source")
+
+        let oldUnverified = """
+        {"api_key_session":true,"session_cost_usd":0.43,"captured_at":\(now.timeIntervalSince1970)}
+        """
+        _ = try write(oldUnverified, to: "claude-cache/orbit-claude-cost.json", in: root)
+        check(NotchAIUsageReader.read(cache, now: now) == .missing,
+              "A pre-verification cost snapshot cannot assert API-key authentication")
 
         let bridge = profile(.claude, "status-line's profile", in: root)
         let bridgeFolder = bridge.sourceFolder!
@@ -140,6 +148,11 @@ import Foundation
         test "$*" = "auth status" || exit 1
         case "${ORBIT_FIXTURE_AUTH_MODE:-}" in
             blocked) exec /bin/sleep 10 ;;
+            slow_api)
+                /usr/bin/touch "$ORBIT_FIXTURE_AUTH_MARKER"
+                /bin/sleep 0.6
+                printf '%s\n' '{"loggedIn":true,"authMethod":"api_key"}'
+                ;;
             api_key|claude.ai)
                 printf '{"loggedIn":true,"authMethod":"%s"}\n' "$ORBIT_FIXTURE_AUTH_MODE"
                 ;;
@@ -170,6 +183,23 @@ import Foundation
         let blockedOutput = try runShell(wrappedCommand, input: blockedInput, path: fixturePath, authMode: "blocked")
         check(Date().timeIntervalSince(started) < 4 && blockedOutput == "existing: " + blockedInput && availableLiveQuota(bridge),
               "A blocked auth probe is bounded and leaves the original output and quota working")
+        let marker = root.appendingPathComponent("slow-auth-started")
+        let earlier = #"{"session_id":"earlier","cost":{"total_cost_usd":7}}"#
+        let later = #"{"session_id":"later","cost":{"total_cost_usd":11}}"#
+        let slow = try startShell(wrappedCommand, input: earlier, path: fixturePath, authMode: "slow_api",
+                                  marker: marker.path)
+        for _ in 0..<100 where !FileManager.default.fileExists(atPath: marker.path) {
+            Thread.sleep(forTimeInterval: 0.01)
+        }
+        precondition(FileManager.default.fileExists(atPath: marker.path))
+        _ = try runShell(wrappedCommand, input: later, path: fixturePath, authMode: "api_key")
+        slow.process.waitUntilExit()
+        let newestCost = NotchAIUsageReader.read(bridge)
+        if case .sessionCost(let recent) = newestCost {
+            check(recent.usd == 11, "The slow older API session cannot overwrite a newer published estimate")
+        } else {
+            check(false, "The slow older API session cannot overwrite a newer published estimate")
+        }
         let quotaFile = bridgeFolder.appendingPathComponent("orbit-quota.json")
         let savedQuota = try String(contentsOf: quotaFile, encoding: .utf8)
         check(!savedQuota.contains("Fixture") && !savedQuota.contains("unrelated"), "The connection writes only quota data")
@@ -180,19 +210,20 @@ import Foundation
         try ClaudeStatusLineBridge.setConnected(false, in: bridgeFolder)
         let restored = try JSONSerialization.jsonObject(with: Data(contentsOf: settings)) as? NSDictionary
         check(restored == original as NSDictionary, "Disconnect restores the original command and other settings")
-        let legacyScript = "'" + legacyClaudeScript.replacingOccurrences(of: "'", with: "'\\''") + "'"
-        let legacyCommand = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
-            + legacyScript + " -- '/older/location/orbit-quota.json' 1 | (\n" + originalCommand + "\n)"
-        var legacySettings = original
-        legacySettings["statusLine"] = ["type": "command", "command": legacyCommand, "padding": 3]
-        try JSONSerialization.data(withJSONObject: legacySettings).write(to: settings, options: .atomic)
-        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .needsUpdate, "Claude detects an earlier bridge after a folder move")
-        try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
-        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "Claude upgrades an earlier bridge without nesting it")
-        try ClaudeStatusLineBridge.setConnected(false, in: bridgeFolder)
-        let legacyRestored = try JSONSerialization.jsonObject(with: Data(contentsOf: settings)) as? NSDictionary
-        check(legacyRestored == original as NSDictionary, "Disconnect after an upgrade restores the original status line")
-
+        for script in [legacyClaudeScript, intermediateClaudeScript] {
+            let legacyScript = "'" + script.replacingOccurrences(of: "'", with: "'\\''") + "'"
+            let legacyCommand = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
+                + legacyScript + " -- '/older/location/orbit-quota.json' 1 | (\n" + originalCommand + "\n)"
+            var legacySettings = original
+            legacySettings["statusLine"] = ["type": "command", "command": legacyCommand, "padding": 3]
+            try JSONSerialization.data(withJSONObject: legacySettings).write(to: settings, options: .atomic)
+            check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .needsUpdate, "Claude detects an earlier bridge after a folder move")
+            try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
+            check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "Claude upgrades an earlier bridge without nesting it")
+            try ClaudeStatusLineBridge.setConnected(false, in: bridgeFolder)
+            let legacyRestored = try JSONSerialization.jsonObject(with: Data(contentsOf: settings)) as? NSDictionary
+            check(legacyRestored == original as NSDictionary, "Disconnect after an upgrade restores the original status line")
+        }
         let fresh = root.appendingPathComponent("new-status-line", isDirectory: true)
         try FileManager.default.createDirectory(at: fresh, withIntermediateDirectories: false)
         try ClaudeStatusLineBridge.setConnected(true, in: fresh)
@@ -344,12 +375,61 @@ import Foundation
         print $input if $forward;
         """#
 
+    private static let intermediateClaudeScript = #"""
+        use strict;
+        use warnings;
+        use Time::HiRes qw(time);
+        binmode STDIN;
+        binmode STDOUT;
+        local $/;
+        my $input = <STDIN> // '';
+        my ($target, $forward) = @ARGV;
+        eval {
+            my $data = decode_json($input);
+            if (ref($data) eq 'HASH') {
+                my %snapshot = (captured_at => time);
+                my %windows;
+                if (ref($data->{rate_limits}) eq 'HASH') {
+                    for my $key ('five_hour', 'seven_day') {
+                        my $window = $data->{rate_limits}->{$key};
+                        next unless ref($window) eq 'HASH' && defined $window->{used_percentage};
+                        $windows{$key} = { used_percentage => $window->{used_percentage}, resets_at => $window->{resets_at} };
+                    }
+                }
+                my $api = $ENV{ANTHROPIC_API_KEY};
+                if (%windows && !$api) {
+                    $snapshot{rate_limits} = \%windows;
+                } elsif (ref($data->{cost}) eq 'HASH' && defined $data->{cost}->{total_cost_usd}) {
+                    $snapshot{session_cost_usd} = $data->{cost}->{total_cost_usd};
+                    $snapshot{api_key_session} = $api ? JSON::PP::true : JSON::PP::false;
+                    $target = dirname($target) . '/orbit-claude-cost.json';
+                }
+                if (keys(%snapshot) > 1) {
+                    my ($file, $temp) = tempfile('.orbit-quota-XXXXXXXX', DIR => dirname($target), UNLINK => 1);
+                    print {$file} encode_json(\%snapshot) or die $!;
+                    close $file or die $!;
+                    rename($temp, $target) or die $!;
+                }
+            }
+        };
+        print $input if $forward;
+        """#
+
     private static func availableLiveQuota(_ profile: NotchAIProfile) -> Bool {
         if case .available(let quota) = NotchAIUsageReader.read(profile) { return quota.windows.first?.usedPercent == 28 }
         return false
     }
 
     private static func runShell(_ command: String, input: String, path: String = "/usr/bin:/bin", authMode: String? = nil) throws -> String {
+        let run = try startShell(command, input: input, path: path, authMode: authMode)
+        let data = run.stdout.fileHandleForReading.readDataToEndOfFile()
+        run.process.waitUntilExit()
+        precondition(run.process.terminationStatus == 0)
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    private static func startShell(_ command: String, input: String, path: String, authMode: String?,
+                                   marker: String? = nil) throws -> (process: Process, stdout: Pipe) {
         let process = Process()
         let stdin = Pipe()
         let stdout = Pipe()
@@ -362,13 +442,11 @@ import Foundation
             process.environment?["ANTHROPIC_API_KEY"] = "fake-key"
             process.environment?["ORBIT_FIXTURE_AUTH_MODE"] = authMode
         }
+        if let marker { process.environment?["ORBIT_FIXTURE_AUTH_MARKER"] = marker }
         try process.run()
         try stdin.fileHandleForWriting.write(contentsOf: Data(input.utf8))
         try stdin.fileHandleForWriting.close()
-        let data = stdout.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-        precondition(process.terminationStatus == 0)
-        return String(decoding: data, as: UTF8.self)
+        return (process, stdout)
     }
 
     private static func profile(_ provider: NotchAIProvider, _ directory: String, in root: URL,

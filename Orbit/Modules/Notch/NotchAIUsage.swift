@@ -156,6 +156,8 @@ enum NotchAIUsageReader {
            document["api_key_session"] as? Bool == true,
            let usd = number(document["session_cost_usd"]), usd >= 0,
            let observed = dates.observation(document["captured_at"]),
+           let verified = dates.observation(document["auth_checked_at"]),
+           abs(verified.timeIntervalSince(observed)) <= 65,
            quota?.windows.first.map({ observed > $0.observedAt }) ?? true {
             return .sessionCost(.init(usd: usd, observedAt: observed))
         }
