@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 @testable import Orbit
 
 /// The menu bar calendar's clock: which formats show seconds, and that the real status item's
@@ -80,6 +81,30 @@ import AppKit
         settings(format: "HH:mm")
         MenuBarCalendar.shared.apply()
         check(MenuBarCalendar.shared.button?.title == expected("HH:mm", Date()), "back to the minute format")
+
+        // The Menu Bar page itself: typing a format with seconds there starts the second ticks.
+        // @AppStorage reads the runner's own persistent domain, so the volatile overrides go.
+        let keys = [Pref.calendarEnabled, Pref.calendarIcon, Pref.calendarStyle, Pref.calendarFormat]
+        UserDefaults.standard.setVolatileDomain([:], forName: UserDefaults.argumentDomain)
+        for (key, value) in zip(keys, [true, "none", "custom", "HH:mm"] as [Any]) { UserDefaults.standard.set(value, forKey: key) }
+        defer { keys.forEach(UserDefaults.standard.removeObject(forKey:)) }
+        let page = NSHostingView(rootView: MenuBarPage().frame(width: 640).padding(24))
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 690, height: 900), styleMask: [.titled], backing: .buffered, defer: false)
+        window.contentView = page
+        window.orderFrontRegardless()
+        MenuBarCalendar.shared.apply()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+        UserDefaults.standard.set(format, forKey: Pref.calendarFormat)
+        let pageSamples = sample(for: 3)
+        check(pageSamples.map(\.title).reduce(into: [String]()) { if $0.last != $1 { $0.append($1) } }.count >= 3,
+              "a seconds format typed on the Menu Bar page ticks every second")
+        check(pageSamples.last.map { [expected(format, $0.at), expected(format, $0.at.addingTimeInterval(-0.1))].contains($0.title) } ?? false,
+              "the page's format reaches the menu bar")
+        if let rep = page.bitmapImageRepForCachingDisplay(in: page.bounds) {
+            page.cacheDisplay(in: page.bounds, to: rep)
+            try? rep.representation(using: .png, properties: [:])?.write(to: output.appendingPathComponent("menu-bar-page.png"))
+        }
+        window.close()
 
         print("\(passed) passed, \(failed) failed")
         exit(failed == 0 ? 0 : 1)
