@@ -11,7 +11,7 @@ final class Updater {
 
     static let repo = "3x-haust/Orbit"
     private static let teamID = "UM52UU4B7L"
-    private static let bundleID = "com.lyu.orbit"
+    private static let bundleID = "dev.3xhaust.Orbit"
 
     struct Release: Equatable, Codable, Sendable {
         let version: String
@@ -34,7 +34,7 @@ final class Updater {
         static let autoInstall = "updates.autoInstall"
         static let lastChecked = "updates.lastChecked"
         static let dismissed = "updates.dismissed"
-        static let etag = "updates.etag"
+        static let etag = "updates.feedETag"
     }
 
     private(set) var status: Status = .idle
@@ -168,7 +168,7 @@ final class Updater {
         return error.localizedDescription
     }
 
-    private nonisolated static var cacheURL: URL { Storage.dir("Updates").appendingPathComponent("latest.json") }
+    private nonisolated static var cacheURL: URL { Storage.dir("Updates").appendingPathComponent("feed.json") }
 
     nonisolated static func request(_ url: URL) -> URLRequest {
         var r = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
@@ -179,10 +179,10 @@ final class Updater {
         return r
     }
 
-    /// The newest published release. A 304 against the saved ETag reuses the saved answer, which
-    /// doesn't count against GitHub's hourly limit.
+    /// GitHub's `latest` stays on the legacy-ID bridge so older installations can reach this feed.
+    /// A 304 against this feed's own ETag reuses its cached list.
     nonisolated static func fetchLatest() async throws -> Release {
-        var r = request(URL(string: "https://api.github.com/repos/\(repo)/releases/latest")!)
+        var r = request(URL(string: "https://api.github.com/repos/\(repo)/releases?per_page=100")!)
         let cached = try? Data(contentsOf: cacheURL)
         if cached != nil, let etag = UserDefaults.standard.string(forKey: Key.etag) {
             r.setValue(etag, forHTTPHeaderField: "If-None-Match")
@@ -218,9 +218,14 @@ final class Updater {
             let prerelease: Bool
             let assets: [Asset]
         }
-        let p = try JSONDecoder().decode(Payload.self, from: data)
-        guard !p.draft, !p.prerelease else { throw FetchError.noReleases }
-        let version = p.tag_name.hasPrefix("v") ? String(p.tag_name.dropFirst()) : p.tag_name
+        let releases = try JSONDecoder().decode([Payload].self, from: data)
+        func version(_ p: Payload) -> String {
+            p.tag_name.hasPrefix("v") ? String(p.tag_name.dropFirst()) : p.tag_name
+        }
+        guard let p = releases.filter({ !$0.draft && !$0.prerelease }).max(by: {
+            isNewer(version($1), than: version($0))
+        }) else { throw FetchError.noReleases }
+        let version = version(p)
         let zips = p.assets.filter { $0.name.hasSuffix(".zip") }
         guard let asset = zips.first(where: { $0.name == "Orbit-\(version).zip" }) ?? zips.first(where: { $0.name.hasPrefix("Orbit") })
         else { throw FetchError.noAsset }
@@ -335,6 +340,9 @@ final class Updater {
         } catch {
             if let trashed = trashed as URL? { try? FileManager.default.moveItem(at: trashed, to: target) }
             throw FetchError.cantReplace
+        }
+        if Bundle.main.bundleIdentifier == "com.lyu.orbit" {
+            Pref.migrate(from: "com.lyu.orbit", to: "dev.3xhaust.Orbit")
         }
         UpdateLog.write("installed; relaunching \(target.path)")
         relaunch(target)

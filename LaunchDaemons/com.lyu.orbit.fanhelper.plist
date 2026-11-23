@@ -17,6 +17,7 @@
 	<key>AssociatedBundleIdentifiers</key>
 	<array>
 		<string>com.lyu.orbit</string>
+		<string>dev.3xhaust.Orbit</string>
 	</array>
 </dict>
 </plist>

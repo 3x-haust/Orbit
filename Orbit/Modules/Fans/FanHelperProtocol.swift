@@ -25,13 +25,13 @@ import Foundation
 enum FanHelper {
     static let label = "com.lyu.orbit.fanhelper"
     static let plist = "com.lyu.orbit.fanhelper.plist"
-    static let version = 3
+    static let version = 4
     static let leaseSeconds: TimeInterval = 15
     static let dischargeLease: TimeInterval = 90
     /// At or above this chip temperature every manual fan runs at full speed, whatever was asked.
     static let hotLimit: Double = 95
     /// Only Orbit, signed by its own team, may drive the fans…
-    static let clientRequirement = #"anchor apple generic and identifier "com.lyu.orbit" and certificate leaf[subject.OU] = "UM52UU4B7L""#
+    static let clientRequirement = #"anchor apple generic and (identifier "com.lyu.orbit" or identifier "dev.3xhaust.Orbit") and certificate leaf[subject.OU] = "UM52UU4B7L""#
     /// …and Orbit only talks to its own helper.
     static let helperRequirement = #"anchor apple generic and identifier "com.lyu.orbit.fanhelper" and certificate leaf[subject.OU] = "UM52UU4B7L""#
 }

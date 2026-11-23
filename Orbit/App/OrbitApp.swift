@@ -6,6 +6,15 @@ import KeyboardShortcuts
 struct OrbitApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
+    init() {
+        #if !DEBUG
+        if Bundle.main.bundleIdentifier == "dev.3xhaust.Orbit",
+           !Bundle.main.bundlePath.contains("/Build/Products/") {
+            Pref.migrate(from: "com.lyu.orbit", to: "dev.3xhaust.Orbit")
+        }
+        #endif
+    }
+
     var body: some Scene {
         // The planet is an AppKit status item (OrbitPlanet), only there when the user wants it, so
         // the app's one scene is an empty, never-opened Settings.
