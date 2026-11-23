@@ -41,6 +41,7 @@ struct NotchHomeLayout: Codable, Equatable, Sendable {
     let ratio: NotchHomeRatio
 
     static let standard = Self()
+    static let gap: CGFloat = 29
 
     init(widgets: [NotchHomeWidget] = [.music, .calendar], ratio: NotchHomeRatio = .leadingWide) {
         var seen: Set<NotchHomeWidget> = []
@@ -61,6 +62,13 @@ struct NotchHomeLayout: Codable, Equatable, Sendable {
 
     static func decode(_ data: Data) -> Self {
         (try? JSONDecoder().decode(Self.self, from: data)) ?? .standard
+    }
+
+    func horizontalRange(for widget: NotchHomeWidget, total: CGFloat) -> Range<CGFloat>? {
+        guard let index = widgets.firstIndex(of: widget) else { return nil }
+        let widths = widths(total: total, gap: Self.gap)
+        let start = widths.prefix(index).reduce(0, +) + Self.gap * CGFloat(index)
+        return start..<(start + widths[index])
     }
 
     /// Width of each card after reserving space for the separators.

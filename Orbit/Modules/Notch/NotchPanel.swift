@@ -6,6 +6,10 @@ import UniformTypeIdentifiers
 
 /// The open notch: tabs beside the camera, the chosen tab below.
 struct NotchOpenPanel: View {
+    static let contentInset: CGFloat = 16
+    static let contentTop: CGFloat = 8
+    static let contentBottom: CGFloat = 14
+
     let notch: CGSize
     let display: CGDirectDisplayID
     private var center: NotchCenter { .shared }
@@ -48,9 +52,9 @@ struct NotchOpenPanel: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 14)
+            .padding(.horizontal, Self.contentInset)
+            .padding(.top, Self.contentTop)
+            .padding(.bottom, Self.contentBottom)
             .transition(.opacity)
             .id(center.tab)
         }
@@ -120,16 +124,14 @@ private struct NotchBatteryChip: View {
 
 private struct NotchHomeTab: View {
     private var layout: NotchHomeLayout { NotchCenter.shared.config.homeLayout }
-    private let spacing: CGFloat = 14
-
     var body: some View {
         GeometryReader { geometry in
-            let widths = layout.widths(total: geometry.size.width, gap: 2 * spacing + 1)
+            let widths = layout.widths(total: geometry.size.width, gap: NotchHomeLayout.gap)
             HStack(spacing: 0) {
                 ForEach(Array(layout.widgets.enumerated()), id: \.element) { index, widget in
                     if index > 0 {
                         Rectangle().fill(.white.opacity(0.08)).frame(width: 1)
-                            .padding(.horizontal, spacing)
+                            .padding(.horizontal, (NotchHomeLayout.gap - 1) / 2)
                             .accessibilityHidden(true)
                     }
                     card(widget, width: widths[index])

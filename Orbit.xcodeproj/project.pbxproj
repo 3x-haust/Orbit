@@ -78,6 +78,9 @@
 		45B2E842BD3FA3C8CE4D8E6B /* AppsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3564120D48CDE745B9DB090D /* AppsCatalog.swift */; };
 		4663717942B58BD844CBA579 /* SystemActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08CD43FAE3991B9A6E497FBB /* SystemActions.swift */; };
 		47364602B8DB05386F86B391 /* ScriptedPlayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7801AE5639A87B07980FA80A /* ScriptedPlayers.swift */; };
+		79824F9D228C7A8D8F63B9ED /* NotchHomeLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */; };
+		5FC3A7A3C9C4A660DCAA5C57 /* NotchAIUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */; };
+		B03A123789F20B636472EEA1 /* NotchAIUsageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */; };
 		4BA52F6F9D6857E504DDFF8E /* NotchPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */; };
 		4C676EA04AA3BF2BD6E93D70 /* NotchRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DFA5140BB9FAB83BE84FB7 /* NotchRoom.swift */; };
 		4FEF02217080D2B8859E2D0E /* FaceEnrollment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093F489A591D4C02CAED3AF6 /* FaceEnrollment.swift */; };
@@ -186,6 +189,7 @@
 		C954D0B9E8F11D75E3EAFFD4 /* OrbitQuickLook.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0828531D6A12CF39075F3E03 /* OrbitQuickLook.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB0B20325588C474ADD8088A /* FanHelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1FCB901AE0D21AD4D652B5 /* FanHelperProtocol.swift */; };
 		CD002485D9C0C611514C1E67 /* HotCornersPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */; };
+		5ABE11E3DA02E8BE1802DB35 /* NotchHomeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02853066BFD8A999D834ADB /* NotchHomeSettings.swift */; };
 		CD13FD0262A9FB1CE57C93EC /* NotchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4641B7D04484412A463BB1B7 /* NotchPage.swift */; };
 		CD853CD1D7B25BFB45DF11E6 /* NotchHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D420498634E50180A130C12 /* NotchHUD.swift */; };
 		CD95668ECA7BAC741B28273A /* SpellPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3558BC0BE033902158EC555 /* SpellPanel.swift */; };
@@ -372,6 +376,7 @@
 		4538EFE289F4A870DC563D8E /* KnockPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnockPage.swift; sourceTree = "<group>"; };
 		45E1758F6842DD178C67093F /* MenuBarLayoutEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLayoutEditor.swift; sourceTree = "<group>"; };
 		463813AFCAB44CF9C71A1C15 /* OrbitAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitAction.swift; sourceTree = "<group>"; };
+		B02853066BFD8A999D834ADB /* NotchHomeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeSettings.swift; sourceTree = "<group>"; };
 		4641B7D04484412A463BB1B7 /* NotchPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPage.swift; sourceTree = "<group>"; };
 		46A8ED97B013D95859769F92 /* LauncherPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherPanel.swift; sourceTree = "<group>"; };
 		46AD126FFA18662AD065C1A0 /* DisplaysPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaysPage.swift; sourceTree = "<group>"; };
@@ -466,6 +471,9 @@
 		A2C6EAF1CC8AAD43C9D3FD14 /* FileConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileConversion.swift; sourceTree = "<group>"; };
 		A32F78CC5FAD56E7B598379E /* RecordingChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingChrome.swift; sourceTree = "<group>"; };
 		A500758B091531D79013DFC1 /* WidgetWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetWindow.swift; sourceTree = "<group>"; };
+		59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeLayout.swift; sourceTree = "<group>"; };
+		30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsage.swift; sourceTree = "<group>"; };
+		A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsageCard.swift; sourceTree = "<group>"; };
 		A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPrefs.swift; sourceTree = "<group>"; };
 		A69984C3D397513BDC4EB8FD /* Vault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vault.swift; sourceTree = "<group>"; };
 		A7177418BE5818FFC61B9036 /* CaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureService.swift; sourceTree = "<group>"; };
@@ -991,6 +999,9 @@
 				5D868E5FDB67716BF9496EFF /* NotchCenter.swift */,
 				25D5F42C2953AA16A3D86051 /* NotchFolder.swift */,
 				814260B5C9AC2E9E0C009A90 /* NotchPanel.swift */,
+				59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */,
+				30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */,
+				A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */,
 				A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */,
 				69DFA5140BB9FAB83BE84FB7 /* NotchRoom.swift */,
 				2AE81E19832E02AF985C6FFC /* NotchViews.swift */,
@@ -1163,6 +1174,7 @@
 				05EABB958605751517434087 /* HomePage.swift */,
 				20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */,
 				4538EFE289F4A870DC563D8E /* KnockPage.swift */,
+				B02853066BFD8A999D834ADB /* NotchHomeSettings.swift */,
 				4641B7D04484412A463BB1B7 /* NotchPage.swift */,
 				BF054AF38374B66F3105F1B9 /* NowPlayingPage.swift */,
 				6FDB24D90B286F0507B5AB69 /* OverlapsPage.swift */,
@@ -1486,9 +1498,13 @@
 				1F6ADA95864EF03FDC1A0F86 /* NotchCenter.swift in Sources */,
 				E8FE4274BA4965C9D848F1EE /* NotchFolder.swift in Sources */,
 				CD853CD1D7B25BFB45DF11E6 /* NotchHUD.swift in Sources */,
+				5ABE11E3DA02E8BE1802DB35 /* NotchHomeSettings.swift in Sources */,
 				CD13FD0262A9FB1CE57C93EC /* NotchPage.swift in Sources */,
 				BFBE64AC254AE6E25BBBFA9A /* NotchPanel.swift in Sources */,
 				C2278FF040D05AF031F560E4 /* NotchPlayerViews.swift in Sources */,
+				79824F9D228C7A8D8F63B9ED /* NotchHomeLayout.swift in Sources */,
+				5FC3A7A3C9C4A660DCAA5C57 /* NotchAIUsage.swift in Sources */,
+				B03A123789F20B636472EEA1 /* NotchAIUsageCard.swift in Sources */,
 				4BA52F6F9D6857E504DDFF8E /* NotchPrefs.swift in Sources */,
 				4C676EA04AA3BF2BD6E93D70 /* NotchRoom.swift in Sources */,
 				E945B31314EB820D7F5489AF /* NotchViews.swift in Sources */,

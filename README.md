@@ -75,7 +75,7 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 | | |
 |---|---|
 | 🔊 **Sound** | Per-app volume and EQ, plus a system-wide EQ. |
-| 🔳 **Notch** | A living notch: music with live artwork, calendar, timers, charging and AirPods, HUDs, and a file shelf — hover or swipe to open. |
+| 🔳 **Notch** | Arrange music, calendar, and [AI usage](docs/notch-ai-usage.md) widgets on Home. The notch also shows timers, charging, AirPods, HUDs, and a file shelf. |
 | 🎵 **Now Playing** | Controls in the notch with album art and a banner when the song changes; pauses music while a video plays. |
 | ⌨️ **Input** | Automatic 한/영 switching, a scroll direction for the mouse and trackpad separately, and a keyboard-cleaning lock. |
 | ☕️ **Keep Awake** | Sessions by time, until a time or while an app runs — even with the lid closed. |

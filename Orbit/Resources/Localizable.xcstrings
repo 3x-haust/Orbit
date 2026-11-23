@@ -1098,6 +1098,39 @@
         }
       }
     },
+    "%lldd": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld일"
+          }
+        }
+      }
+    },
+    "%lldh": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld시간"
+          }
+        }
+      }
+    },
+    "%lldm": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld분"
+          }
+        }
+      }
+    },
     "&amp;": {
       "extractionState": "manual"
     },
@@ -1341,6 +1374,17 @@
         }
       }
     },
+    "1 week": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1주"
+          }
+        }
+      }
+    },
     "1, 5, 10 and 25 minute timers and pomodoro, counting down beside the notch.": {
       "extractionState": "manual",
       "localizations": {
@@ -1522,6 +1566,17 @@
         }
       }
     },
+    "1w": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1주"
+          }
+        }
+      }
+    },
     "25 + 5 min": {
       "extractionState": "manual",
       "localizations": {
@@ -1678,6 +1733,17 @@
         }
       }
     },
+    "5 hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5시간"
+          }
+        }
+      }
+    },
     "5 min": {
       "extractionState": "manual",
       "localizations": {
@@ -1702,6 +1768,17 @@
     },
     "5K": {
       "extractionState": "manual"
+    },
+    "5h": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5시간"
+          }
+        }
+      }
     },
     "5s": {
       "extractionState": "manual",
@@ -2247,6 +2324,17 @@
         }
       }
     },
+    "AI Usage": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 사용량"
+          }
+        }
+      }
+    },
     "AMPDeviceDiscoveryAgent": {
       "extractionState": "manual"
     },
@@ -2645,6 +2733,17 @@
         }
       }
     },
+    "Add profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "프로필 추가"
+          }
+        }
+      }
+    },
     "Add to Favorites": {
       "extractionState": "manual",
       "localizations": {
@@ -2652,6 +2751,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "즐겨찾기에 추가"
+          }
+        }
+      }
+    },
+    "Add usage profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용량 프로필 추가"
           }
         }
       }
@@ -3055,6 +3165,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "하루 종일"
+          }
+        }
+      }
+    },
+    "All limits": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 한도"
           }
         }
       }
@@ -5804,6 +5925,17 @@
         }
       }
     },
+    "Can’t read source folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "데이터 폴더를 읽을 수 없어요"
+          }
+        }
+      }
+    },
     "Capacity": {
       "extractionState": "manual",
       "localizations": {
@@ -6462,6 +6594,17 @@
         }
       }
     },
+    "Check source": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "데이터 확인"
+          }
+        }
+      }
+    },
     "Check spelling of this text": {
       "extractionState": "manual",
       "localizations": {
@@ -6685,6 +6828,17 @@
         }
       }
     },
+    "Choose a Codex profile folder containing its sessions directory. Orbit reads the quota snapshots recorded by Codex.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sessions 폴더가 들어 있는 Codex 프로필 폴더를 고르면 Codex가 기록한 한도 정보를 읽어요."
+          }
+        }
+      }
+    },
     "Choose a File…": {
       "extractionState": "manual",
       "localizations": {
@@ -6751,6 +6905,28 @@
         }
       }
     },
+    "Choose profiles in Notch Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 설정에서 프로필을 골라 주세요"
+          }
+        }
+      }
+    },
+    "Choose the providers shown in the AI Usage widget.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 사용량 위젯에 표시할 제공자를 고르세요."
+          }
+        }
+      }
+    },
     "Choose the vault file you backed up, then type the Secret Key from the kit and your Master Password.": {
       "extractionState": "manual",
       "localizations": {
@@ -6769,6 +6945,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "가져올 항목을 고르세요. 이미 있는 로그인은 그대로 둬요."
+          }
+        }
+      }
+    },
+    "Choose widgets and use the arrows to change their order.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위젯을 고르고 화살표로 순서를 바꾸세요."
           }
         }
       }
@@ -6856,6 +7043,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "클래식"
+          }
+        }
+      }
+    },
+    "Claude Code setup guide": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 설정 가이드"
           }
         }
       }
@@ -7577,6 +7775,17 @@
         }
       }
     },
+    "CodexBar export": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CodexBar 내보내기"
+          }
+        }
+      }
+    },
     "Collects on-device usage signals for Siri and Screen Time.": {
       "extractionState": "manual",
       "localizations": {
@@ -8243,6 +8452,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "결과 복사"
+          }
+        }
+      }
+    },
+    "Copy Claude setup": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude 설정 복사"
           }
         }
       }
@@ -9270,6 +9490,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "사용자 EQ"
+          }
+        }
+      }
+    },
+    "Custom JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용자 지정 JSON"
           }
         }
       }
@@ -10992,6 +11223,17 @@
         }
       }
     },
+    "Edit usage profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용량 프로필 편집"
+          }
+        }
+      }
+    },
     "Edited %@": {
       "extractionState": "manual",
       "localizations": {
@@ -11715,6 +11957,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "바꾸기"
+          }
+        }
+      }
+    },
+    "Expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "만료됨"
           }
         }
       }
@@ -14345,6 +14598,17 @@
         }
       }
     },
+    "Home layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈 배치"
+          }
+        }
+      }
+    },
     "Homebrew": {
       "extractionState": "manual"
     },
@@ -15101,6 +15365,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "코드 설정이 올바르지 않아요"
+          }
+        }
+      }
+    },
+    "Invalid quota data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한도 데이터 형식이 올바르지 않아요"
           }
         }
       }
@@ -16726,6 +17001,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Music에서 곡에 좋아요를 누르고, 좋아요 여부를 읽고, 재생 정보가 안 될 때도 계속 동작해요."
+          }
+        }
+      }
+    },
+    "Limit windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한도 기간"
           }
         }
       }
@@ -18373,6 +18659,28 @@
         }
       }
     },
+    "Move earlier": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앞으로 이동"
+          }
+        }
+      }
+    },
+    "Move later": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "뒤로 이동"
+          }
+        }
+      }
+    },
     "Move left a space": {
       "extractionState": "manual",
       "localizations": {
@@ -19303,6 +19611,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "팬이 없는 Mac이에요."
+          }
+        }
+      }
+    },
+    "No folder selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "폴더를 선택하지 않았어요"
           }
         }
       }
@@ -21854,6 +22173,17 @@
         }
       }
     },
+    "Orbit reads quota snapshots from your selected folders.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선택한 폴더에서 한도 정보를 읽어요."
+          }
+        }
+      }
+    },
     "Orbit ring mouse": {
       "extractionState": "manual"
     },
@@ -23696,6 +24026,17 @@
     "Profile ": {
       "extractionState": "manual"
     },
+    "Profile name": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "프로필 이름"
+          }
+        }
+      }
+    },
     "Profile: %@": {
       "extractionState": "manual",
       "localizations": {
@@ -23729,6 +24070,17 @@
         }
       }
     },
+    "Provider ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제공자 ID"
+          }
+        }
+      }
+    },
     "Puma": {
       "extractionState": "manual"
     },
@@ -23750,6 +24102,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면 모서리로 포인터를 밀어 넣으면 Orbit의 기능이 바로 실행돼요."
+          }
+        }
+      }
+    },
+    "Put a version 1 orbit-quota.json file from your quota exporter in this folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내보낸 버전 1 orbit-quota.json 파일을 이 폴더에 넣으세요."
           }
         }
       }
@@ -24001,6 +24364,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "“%@”을(를) 종료할까요?"
+          }
+        }
+      }
+    },
+    "Quota data found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한도 데이터를 찾았어요"
+          }
+        }
+      }
+    },
+    "Quota data found, but expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한도 데이터를 찾았지만 만료됐어요"
+          }
+        }
+      }
+    },
+    "Quota used": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용량"
           }
         }
       }
@@ -24623,6 +25019,17 @@
         }
       }
     },
+    "Remaining": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잔량"
+          }
+        }
+      }
+    },
     "Remix": {
       "extractionState": "manual"
     },
@@ -24677,6 +25084,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "아이콘 완전히 지우기"
+          }
+        }
+      }
+    },
+    "Remove profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "프로필 삭제"
           }
         }
       }
@@ -24939,6 +25357,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "자르기 초기화"
+          }
+        }
+      }
+    },
+    "Reset layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배치 초기화"
+          }
+        }
+      }
+    },
+    "Resets %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 초기화"
           }
         }
       }
@@ -25894,6 +26334,17 @@
         }
       }
     },
+    "Save the output of codexbar usage --provider <provider-id> --json as codexbar-usage.json in this folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "codexbar usage --provider <provider-id> --json 출력을 이 폴더에 codexbar-usage.json으로 저장하세요."
+          }
+        }
+      }
+    },
     "Save to": {
       "extractionState": "manual",
       "localizations": {
@@ -26775,6 +27226,17 @@
         }
       }
     },
+    "Selected limit unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "선택한 기간의 한도가 없어요"
+          }
+        }
+      }
+    },
     "Semibold": {
       "extractionState": "manual",
       "localizations": {
@@ -26954,6 +27416,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "단축키 설정"
+          }
+        }
+      }
+    },
+    "Set the left and right widths when two widgets are shown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위젯을 두 개 표시할 때 왼쪽과 오른쪽의 너비를 정하세요."
           }
         }
       }
@@ -27440,6 +27913,17 @@
         }
       }
     },
+    "Show as": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "표시 방식"
+          }
+        }
+      }
+    },
     "Show calendar": {
       "extractionState": "manual",
       "localizations": {
@@ -27692,6 +28176,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "실행한 기능 알림"
+          }
+        }
+      }
+    },
+    "Show your chosen widgets when the notch opens to Home.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치를 홈으로 열면 선택한 위젯을 보여줘요."
           }
         }
       }
@@ -28365,6 +28860,17 @@
     },
     "SoundSource": {
       "extractionState": "manual"
+    },
+    "Source folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "데이터 폴더"
+          }
+        }
+      }
     },
     "Space": {
       "extractionState": "manual",
@@ -32863,6 +33369,17 @@
         }
       }
     },
+    "Updated %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 업데이트"
+          }
+        }
+      }
+    },
     "Updates": {
       "extractionState": "manual",
       "localizations": {
@@ -32903,6 +33420,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "가동 시간"
+          }
+        }
+      }
+    },
+    "Usage profiles": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용량 프로필"
+          }
+        }
+      }
+    },
+    "Usage source": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "데이터 출처"
           }
         }
       }
@@ -32998,6 +33537,17 @@
         }
       }
     },
+    "Use default": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본 폴더 사용"
+          }
+        }
+      }
+    },
     "Use for Orbit": {
       "extractionState": "manual",
       "localizations": {
@@ -33027,6 +33577,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "가로 스크롤에도 같은 방향을 써요."
+          }
+        }
+      }
+    },
+    "Use the setup snippet to write orbit-quota.json from Claude Code’s status line. If you already have a status line, add the capture command to it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정 예시를 Claude Code에 적용하면 상태줄이 orbit-quota.json을 만들어요. 기존 상태줄이 있다면 저장 명령만 추가하세요."
           }
         }
       }
@@ -33505,6 +34066,17 @@
     },
     "W": {
       "extractionState": "manual"
+    },
+    "Waiting for quota data": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한도 데이터를 기다리는 중"
+          }
+        }
+      }
     },
     "Waiting for the export file in Downloads or on the Desktop…": {
       "extractionState": "manual",
@@ -34147,6 +34719,28 @@
     },
     "WiFi": {
       "extractionState": "manual"
+    },
+    "Widget widths": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위젯 너비"
+          }
+        }
+      }
+    },
+    "Widgets": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위젯"
+          }
+        }
+      }
     },
     "Width": {
       "extractionState": "manual",
@@ -35435,6 +36029,17 @@
     },
     "dubai 두바이": {
       "extractionState": "manual"
+    },
+    "e.g. codex, grok, antigravity": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "예: codex, grok, antigravity"
+          }
+        }
+      }
     },
     "editor:": {
       "extractionState": "manual"

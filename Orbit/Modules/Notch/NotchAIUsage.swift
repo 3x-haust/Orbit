@@ -180,6 +180,7 @@ enum NotchAIUsageReader {
         var newest: Date?
         var unreadable = false
         for candidate in candidates {
+            guard !Task.isCancelled else { return .missing }
             do {
                 let (data, truncated) = try codexTail(candidate)
                 let lines = data.split(separator: 10, omittingEmptySubsequences: false)
@@ -235,7 +236,7 @@ enum NotchAIUsageReader {
             (folder, 0),
             (folder.appendingPathComponent("sessions", isDirectory: true), 0)
         ]
-        while budget > 0, let root = roots.popLast() {
+        while !Task.isCancelled, budget > 0, let root = roots.popLast() {
             if root.url != folder {
                 guard let values = try? root.url.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey]),
                       values.isDirectory == true, values.isSymbolicLink != true else { continue }

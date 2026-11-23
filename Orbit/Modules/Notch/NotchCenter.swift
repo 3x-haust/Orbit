@@ -111,6 +111,8 @@ final class NotchCenter {
         var allScreens = false
         var hideFullScreen = true
         var openTab: OpenTab = .home
+        var homeLayout = NotchHomeLayout.standard
+        var aiUsage = NotchAIUsageOptions()
         var tabs: [Tab] = Tab.allCases
         var live: Set<String> = []
 
@@ -128,11 +130,17 @@ final class NotchCenter {
             c.allScreens = d.string(forKey: NotchPrefs.screens) == "all"
             c.hideFullScreen = d.bool(forKey: NotchPrefs.hideFullScreen)
             c.openTab = OpenTab(rawValue: d.string(forKey: NotchPrefs.openTab) ?? "") ?? .home
+            c.loadHomeSettings(d)
             c.tabs = Tab.allCases.filter { tab in tab.pref.map { d.bool(forKey: $0) } ?? (NotchFolder.url != nil) }
             c.live = Set([NotchPrefs.liveMusic, NotchPrefs.liveCharging, NotchPrefs.liveTimer, NotchPrefs.liveRecording,
                           NotchPrefs.liveAwake, NotchPrefs.liveFocus, NotchPrefs.liveDownloads, NotchPrefs.liveBluetooth]
                 .filter { d.bool(forKey: $0) })
             return c
+        }
+
+        mutating func loadHomeSettings(_ defaults: UserDefaults) {
+            homeLayout = NotchHomeLayout.decode(defaults.data(forKey: NotchPrefs.homeLayout) ?? Data())
+            aiUsage = NotchAIUsageOptions.decode(defaults.data(forKey: NotchPrefs.aiUsage) ?? Data())
         }
     }
 
@@ -190,6 +198,10 @@ final class NotchCenter {
         NotchLive.shared.apply(config)
         watchFrontApp()
         checkFullScreen()
+    }
+
+    func reloadHomeSettings() {
+        config.loadHomeSettings(Pref.defaults)
     }
 
     private func teardown() {

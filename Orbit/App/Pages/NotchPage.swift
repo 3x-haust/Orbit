@@ -43,7 +43,7 @@ struct NotchPage: View {
                 Toggle("", isOn: applied($enabled)).toggleStyle(.switch).labelsHidden()
             }
 
-            NotchPreviewStage(scale: scale, radius: radius, shadow: shadow)
+            NotchPreviewStage(scale: scale, radius: radius, shadow: shadow, layout: NotchCenter.shared.config.homeLayout)
 
             Group {
                 SettingsGroup(title: "Opening", footer: "Drop files on the notch to keep them on its shelf.") {
@@ -71,7 +71,7 @@ struct NotchPage: View {
                 }
 
                 SettingsGroup(title: "Tabs", footer: "The mirror turns the camera on only when you ask it to, and off as soon as the notch closes.") {
-                    SettingsRow(title: "Home", subtitle: "What's playing, with controls, and what's left on today's calendar.", symbol: "house") {
+                    SettingsRow(title: "Home", subtitle: "Show your chosen widgets when the notch opens to Home.", symbol: "house") {
                         Toggle("", isOn: applied($tabHome)).toggleStyle(.switch).labelsHidden()
                     }
                     RowDivider()
@@ -106,6 +106,10 @@ struct NotchPage: View {
                         Toggle("", isOn: applied($tabClipboard)).toggleStyle(.switch).labelsHidden()
                     }
                 }
+
+                NotchHomeLayoutSettings()
+
+                NotchAIUsageSettings()
 
                 SettingsGroup(title: "Live activities", footer: "Shown beside the closed notch while they're going on. macOS's own AirPods “Connected” banner has no setting apps can change, so it still appears too — turn it off yourself if macOS offers it in Notifications.") {
                     SettingsRow(title: "Music", subtitle: "The cover and moving bars while something plays.", symbol: "music.note") {
@@ -259,6 +263,7 @@ private struct NotchPreviewStage: View {
     let scale: Double
     let radius: Double
     let shadow: Bool
+    let layout: NotchHomeLayout
 
     enum Demo: String, CaseIterable, Identifiable {
         case idle, music, hud, notice, open
@@ -302,7 +307,7 @@ private struct NotchPreviewStage: View {
                 .foregroundStyle(.white.opacity(0.9))
                 .padding(.horizontal, 14)
                 .frame(height: 24)
-                NotchDemoShape(demo: demo, scale: scale, radius: radius, shadow: shadow, volume: volume)
+                NotchDemoShape(demo: demo, scale: scale, radius: radius, shadow: shadow, volume: volume, layout: layout)
             }
             .frame(height: 260)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -316,6 +321,10 @@ private struct NotchPreviewStage: View {
                 Button(auto ? "Pause" : "Play") { auto.toggle() }
                     .buttonStyle(PillButtonStyle())
             }
+        }
+        .onChange(of: layout) {
+            auto = false
+            withAnimation(NotchCenter.morph) { demo = .open }
         }
         .task(id: auto) {
             guard auto else { return }
@@ -345,6 +354,7 @@ private struct NotchDemoShape: View {
     let radius: Double
     let shadow: Bool
     let volume: Double
+    let layout: NotchHomeLayout
 
     private let notch = CGSize(width: 150, height: 24)
 
@@ -411,36 +421,17 @@ private struct NotchDemoShape: View {
                         }
                         .padding(.leading, 14)
                         .frame(height: notch.height)
-                        HStack(spacing: 12) {
-                            Image(nsImage: art).resizable().frame(width: 70, height: 70)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Night Drive").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white)
-                                Text("Orbit").font(.system(size: 10)).foregroundStyle(.white.opacity(0.6))
-                                Capsule().fill(.white.opacity(0.15)).frame(height: 3)
-                                    .overlay(alignment: .leading) { Capsule().fill(.white).frame(width: 60, height: 3) }
-                                HStack(spacing: 14) {
-                                    Image(systemName: "backward.fill")
-                                    Image(systemName: "pause.fill").font(.system(size: 15))
-                                    Image(systemName: "forward.fill")
+                        let width = size.width - 2 * ear.width - 28
+                        let widths = layout.widths(total: width, gap: 13)
+                        HStack(spacing: 6) {
+                            ForEach(Array(layout.widgets.enumerated()), id: \.element) { index, widget in
+                                if index > 0 {
+                                    Rectangle().fill(.white.opacity(0.08)).frame(width: 1)
                                 }
-                                .font(.system(size: 11))
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
+                                previewWidget(widget, width: widths[index], artwork: art)
                             }
-                            Rectangle().fill(.white.opacity(0.08)).frame(width: 1)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("29").font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
-                                HStack(spacing: 5) {
-                                    Capsule().fill(Color.blue).frame(width: 3, height: 20)
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        Text("Design review").font(.system(size: 10, weight: .semibold)).foregroundStyle(.white)
-                                        Text("3:00 PM").font(.system(size: 9)).foregroundStyle(.white.opacity(0.5))
-                                    }
-                                }
-                            }
-                            .frame(width: 100, alignment: .leading)
                         }
+                        .frame(height: 80)
                         .padding(.horizontal, 14)
                         .padding(.top, 4)
                     }
@@ -454,6 +445,62 @@ private struct NotchDemoShape: View {
         }
         .frame(width: size.width, height: size.height, alignment: .top)
         .animation(NotchCenter.morph, value: demo)
+    }
+
+    @ViewBuilder private func previewWidget(_ widget: NotchHomeWidget, width: CGFloat, artwork: NSImage) -> some View {
+        Group {
+            switch widget {
+            case .music:
+                HStack(spacing: 8) {
+                    if width >= 130 {
+                        Image(nsImage: artwork).resizable()
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(verbatim: "Night Drive").font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                        Text(verbatim: "Orbit").font(.system(size: 10)).foregroundStyle(.white.opacity(0.6))
+                        Capsule().fill(.white.opacity(0.16)).frame(height: 3)
+                            .overlay(alignment: .leading) { Capsule().fill(.white).frame(width: 25, height: 3) }
+                        HStack(spacing: 10) {
+                            Image(systemName: "backward.fill")
+                            Image(systemName: "pause.fill")
+                            Image(systemName: "forward.fill")
+                        }
+                        .font(.system(size: 11))
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            case .calendar:
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("29").font(.system(size: 16, weight: .bold))
+                    HStack(spacing: 5) {
+                        Capsule().fill(.blue).frame(width: 3, height: 20)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Design review").font(.system(size: 10, weight: .semibold)).lineLimit(1)
+                            Text("3:00 PM").font(.system(size: 9)).foregroundStyle(.white.opacity(0.5))
+                        }
+                    }
+                }
+            case .aiUsage:
+                VStack(alignment: .leading, spacing: 5) {
+                    Label("AI Usage", systemImage: widget.symbol)
+                        .font(.system(size: 10, weight: .semibold)).lineLimit(1)
+                    HStack(spacing: 5) {
+                        Text(verbatim: "Codex").lineLimit(1)
+                        Spacer(minLength: 0)
+                        Text("72%").monospacedDigit()
+                    }
+                    .font(.system(size: 9))
+                    Capsule().fill(.white.opacity(0.14)).frame(height: 3)
+                        .overlay(alignment: .leading) {
+                            Capsule().fill(Palette.brand).frame(width: width * 0.72, height: 3)
+                        }
+                }
+            }
+        }
+        .foregroundStyle(.white)
+        .frame(width: width, alignment: .leading)
     }
 }
 

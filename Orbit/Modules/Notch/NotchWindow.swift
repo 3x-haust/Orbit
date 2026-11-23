@@ -192,7 +192,25 @@ final class NotchHostingView: NSHostingView<NotchRoot> {
 
     override func scrollWheel(with event: NSEvent) {
         super.scrollWheel(with: event)
-        NotchCenter.shared.scroll(event, on: display)
+        let point = convert(event.locationInWindow, from: nil)
+        if !isOverAIUsage(point) {
+            NotchCenter.shared.scroll(event, on: display)
+        }
+    }
+
+    // Keep trackpad scrolling inside the quota list from closing Home.
+    private func isOverAIUsage(_ point: NSPoint) -> Bool {
+        let center = NotchCenter.shared
+        guard center.tab == .home, center.phase(on: display) == .expanded,
+              center.config.aiUsage.profiles.contains(where: \.isVisible) else { return false }
+        let notch = rootView.model.notch
+        let size = NotchGeometry.shape(.expanded, notch: notch, config: center.config)
+        let contentWidth = size.width - 2 * (NotchGeometry.ear(.expanded).width + NotchOpenPanel.contentInset)
+        let left = bounds.midX - contentWidth / 2
+        let fromTop = isFlipped ? point.y - bounds.minY : bounds.maxY - point.y
+        return fromTop >= notch.height + NotchOpenPanel.contentTop
+            && fromTop < size.height - NotchOpenPanel.contentBottom
+            && center.config.homeLayout.horizontalRange(for: .aiUsage, total: contentWidth)?.contains(point.x - left) == true
     }
 }
 
