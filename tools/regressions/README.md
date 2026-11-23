@@ -271,3 +271,25 @@ bash tools/regressions/run-runner-tests.sh \
 
 It checks where the menu bar percentage turns from green to orange to red:
 60% and 80% for CPU and GPU, 80% and 95% for memory.
+
+# Notch Folder tab regression
+
+Build the Debug app, then run:
+
+```sh
+bash tools/regressions/run-notch-folder-tests.sh \
+  /tmp/orbit-notch-build/Build/Products/Debug /tmp/orbit-notch-folder-results [--screenshots]
+```
+
+The runner imports the Debug module without starting the app delegate. Settings go in the
+volatile argument domain of its own process, so the installed app's preferences are untouched.
+It makes a folder of pictures with known creation dates (plus a text file, a hidden file and a
+subfolder) in the result directory and checks: no Folder tab without a folder, the tab after
+Home with one, a hover open landing on it when "Tab when it opens" is Folder, the listing
+(hidden files left out, newest first), empty and missing folders, Quick Look thumbnails, the
+file URL a tile's drag hands over, and that a tile dragged across the notch neither switches to
+the Shelf nor gets shelved while a file from elsewhere still does. `--screenshots` writes the
+open notch window (`notch-folder.png`).
+
+Not covered: a real drag from the notch into another app. Check by hand: pick a folder on the
+Notch page, point at the notch, drag a thumbnail into Finder or a browser upload field.

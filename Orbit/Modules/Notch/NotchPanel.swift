@@ -14,9 +14,10 @@ struct NotchOpenPanel: View {
         let tabs = center.config.tabs
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                HStack(spacing: 3) {
+                // Six tabs only fit beside the camera a little narrower.
+                HStack(spacing: tabs.count > 5 ? 2 : 3) {
                     ForEach(tabs) { tab in
-                        NotchTabButton(tab: tab, selected: center.tab == tab) {
+                        NotchTabButton(tab: tab, selected: center.tab == tab, width: tabs.count > 5 ? 24 : 28) {
                             withAnimation(.spring(duration: 0.3, bounce: 0.15)) { center.tab = tab }
                         }
                     }
@@ -39,6 +40,7 @@ struct NotchOpenPanel: View {
             Group {
                 switch center.tab {
                 case .home: NotchHomeTab()
+                case .folder: NotchFolderTab()
                 case .shelf: NotchShelfTab()
                 case .mirror: NotchMirrorTab()
                 case .timer: NotchTimerTab()
@@ -58,6 +60,7 @@ struct NotchOpenPanel: View {
 private struct NotchTabButton: View {
     let tab: NotchCenter.Tab
     let selected: Bool
+    var width: CGFloat = 28
     let action: () -> Void
     @State private var hover = false
 
@@ -66,7 +69,7 @@ private struct NotchTabButton: View {
             Image(systemName: tab.symbol)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(selected ? .white : .white.opacity(hover ? 0.8 : 0.5))
-                .frame(width: 28, height: 22)
+                .frame(width: width, height: 22)
                 .background(Capsule().fill(.white.opacity(selected ? 0.16 : hover ? 0.07 : 0)))
                 .contentShape(Capsule())
         }
@@ -242,6 +245,108 @@ private struct NotchCalendarCard: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear { model.load() }
+    }
+}
+
+// MARK: - Folder
+
+/// The chosen folder's files, newest first, ready to drag out into another app.
+private struct NotchFolderTab: View {
+    private var folder: NotchFolder { .shared }
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 6)
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "folder.fill").font(.system(size: 10, weight: .semibold)).foregroundStyle(Palette.brand)
+                Text(NotchFolder.url?.lastPathComponent ?? "").font(.system(size: 11, weight: .semibold)).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
+                if case .files(let entries) = folder.contents {
+                    Text("%ld items".loc(entries.count)).font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.45))
+                }
+                Spacer()
+                if let url = NotchFolder.url {
+                    NotchIconButton(symbol: "arrow.up.forward.app", help: "Show in Finder", size: 10) { folder.reveal(url) }
+                }
+            }
+            .frame(height: 18)
+            content
+        }
+        .onAppear { folder.reload() }
+    }
+
+    @ViewBuilder private var content: some View {
+        switch folder.contents {
+        case .loading:
+            ProgressView().controlSize(.small).frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .empty:
+            placeholder(symbol: "folder", title: "This folder is empty")
+        case .unreadable:
+            placeholder(symbol: "exclamationmark.triangle", title: "Orbit can't read this folder", action: "Notch Settings")
+        case .files(let entries):
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(entries) { NotchFolderTile(entry: $0) }
+                }
+            }
+        }
+    }
+
+    private func placeholder(symbol: String, title: String, action: String? = nil) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: symbol).font(.system(size: 20, weight: .medium)).foregroundStyle(.white.opacity(0.4))
+            Text(title.loc).font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.7))
+            if let action {
+                Button(action.loc) {
+                    NotchCenter.shared.close()
+                    MainWindow.show(.notch)
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Palette.brand)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct NotchFolderTile: View {
+    let entry: NotchFolder.Entry
+    @State private var image: NSImage?
+    @State private var hover = false
+    private static let thumb = CGSize(width: 76, height: 48)
+
+    var body: some View {
+        VStack(spacing: 4) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous).fill(.white.opacity(0.06))
+                if let image {
+                    Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
+                } else {
+                    Image(nsImage: NSWorkspace.shared.icon(forFile: entry.url.path)).resizable().aspectRatio(contentMode: .fit).padding(6)
+                }
+            }
+            .frame(height: Self.thumb.height)
+            .frame(maxWidth: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.white.opacity(hover ? 0.35 : 0.08), lineWidth: 1))
+            Text(entry.name).font(.system(size: 10, weight: .medium)).foregroundStyle(.white.opacity(hover ? 0.95 : 0.65))
+                .lineLimit(1).truncationMode(.middle)
+        }
+        .contentShape(Rectangle())
+        .onHover { hover = $0 }
+        .help(entry.name)
+        .onTapGesture { NotchFolder.shared.open(entry) }
+        .onDrag { entry.provider }
+        .contextMenu {
+            Button("Open") { NotchFolder.shared.open(entry) }
+            Button("Show in Finder") { NotchFolder.shared.reveal(entry.url) }
+            Button("Copy") { NotchFolder.shared.copy(entry) }
+        }
+        .task(id: entry.id) {
+            image = NotchFolder.shared.cachedThumbnail(entry)
+            guard image == nil else { return }
+            image = await NotchFolder.shared.thumbnail(entry, size: Self.thumb)
+        }
     }
 }
 

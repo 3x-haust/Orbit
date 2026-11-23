@@ -12,12 +12,13 @@ final class NotchCenter {
     static var enabled: Bool { NotchPrefs.bool(NotchPrefs.enabled) }
 
     enum Tab: String, CaseIterable, Identifiable {
-        case home, shelf, mirror, timer, clipboard
+        case home, folder, shelf, mirror, timer, clipboard
         var id: String { rawValue }
 
         var title: String {
             switch self {
             case .home: "Home"
+            case .folder: "Folder"
             case .shelf: "Shelf"
             case .mirror: "Mirror"
             case .timer: "Timer"
@@ -28,6 +29,7 @@ final class NotchCenter {
         var symbol: String {
             switch self {
             case .home: "house.fill"
+            case .folder: "folder.fill"
             case .shelf: "tray.full.fill"
             case .mirror: "person.crop.square.fill"
             case .timer: "timer"
@@ -35,9 +37,11 @@ final class NotchCenter {
             }
         }
 
-        var pref: String {
+        /// The switch that turns it on. The Folder tab has none: it's there while a folder is chosen.
+        var pref: String? {
             switch self {
             case .home: NotchPrefs.tabHome
+            case .folder: nil
             case .shelf: NotchPrefs.tabShelf
             case .mirror: NotchPrefs.tabMirror
             case .timer: NotchPrefs.tabTimer
@@ -87,6 +91,14 @@ final class NotchCenter {
         }
     }
 
+    /// The tab a plain open shows.
+    enum OpenTab: String {
+        case home
+        /// The one last looked at.
+        case last
+        case folder
+    }
+
     struct Config: Equatable {
         var scale: CGFloat = 1
         var radius: CGFloat = 30
@@ -98,8 +110,7 @@ final class NotchCenter {
         var swipe = true
         var allScreens = false
         var hideFullScreen = true
-        /// Open on the tab last looked at, instead of Home.
-        var openLast = false
+        var openTab: OpenTab = .home
         var tabs: [Tab] = Tab.allCases
         var live: Set<String> = []
 
@@ -116,8 +127,8 @@ final class NotchCenter {
             c.swipe = d.bool(forKey: NotchPrefs.swipe)
             c.allScreens = d.string(forKey: NotchPrefs.screens) == "all"
             c.hideFullScreen = d.bool(forKey: NotchPrefs.hideFullScreen)
-            c.openLast = d.string(forKey: NotchPrefs.openTab) == "last"
-            c.tabs = Tab.allCases.filter { d.bool(forKey: $0.pref) }
+            c.openTab = OpenTab(rawValue: d.string(forKey: NotchPrefs.openTab) ?? "") ?? .home
+            c.tabs = Tab.allCases.filter { tab in tab.pref.map { d.bool(forKey: $0) } ?? (NotchFolder.url != nil) }
             c.live = Set([NotchPrefs.liveMusic, NotchPrefs.liveCharging, NotchPrefs.liveTimer, NotchPrefs.liveRecording,
                           NotchPrefs.liveAwake, NotchPrefs.liveFocus, NotchPrefs.liveDownloads, NotchPrefs.liveBluetooth]
                 .filter { d.bool(forKey: $0) })
@@ -380,7 +391,12 @@ final class NotchCenter {
             self.tab = tab
         } else if expandedOn == nil {
             let quickReturn = byHover && ProcessInfo.processInfo.systemUptime - closedAt < 1.5
-            let wanted = config.openLast || quickReturn ? tabWhenClosed : homeTab
+            let preferred: Tab = switch config.openTab {
+            case .last: tabWhenClosed
+            case .folder: .folder
+            case .home: homeTab
+            }
+            let wanted = quickReturn ? tabWhenClosed : preferred
             self.tab = config.tabs.contains(wanted) || (wanted == .shelf && shelfAvailable) ? wanted : homeTab
         }
         guard expandedOn != display else { return }
@@ -399,7 +415,7 @@ final class NotchCenter {
         tabWhenClosed = tab
         closedAt = ProcessInfo.processInfo.systemUptime
         // Back to Home once it has finished closing, so the closing frames keep what they showed.
-        guard !config.openLast else { return }
+        guard config.openTab != .last else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) { [weak self] in
             guard let self, self.expandedOn == nil else { return }
             self.tab = self.homeTab
@@ -515,7 +531,7 @@ final class NotchCenter {
         if swipe.amount > 18, expandedOn == nil {
             swipeSpent = true
             open(on: display)
-        } else if swipe.amount < -18, expandedOn == display {
+        } else if swipe.amount < -18, expandedOn == display, tab != .folder { // there, it scrolls the grid
             swipeSpent = true
             close()
         }
@@ -525,6 +541,8 @@ final class NotchCenter {
 
     func setDropTargeted(_ on: Bool, on display: CGDirectDisplayID) {
         guard !FileTools.shared.isDraggingRing else { return }
+        // A tile dragged out of the Folder tab passes over the notch first: it's leaving, not arriving.
+        if on, NotchFolder.isOwnDrag() { return }
         dropTargeted = on
         if on {
             guard shelfAvailable else { return }
@@ -535,7 +553,7 @@ final class NotchCenter {
     }
 
     func drop(_ providers: [NSItemProvider]) -> Bool {
-        guard shelfAvailable, !FileTools.shared.isDraggingRing else { return false }
+        guard shelfAvailable, !FileTools.shared.isDraggingRing, !NotchFolder.isOwnDrag() else { return false }
         tab = .shelf
         return Shelf.shared.accept(providers)
     }
@@ -775,9 +793,9 @@ extension NotchCenter {
             debugEarOn = true
             open(on: primary, byHover: state == "open-hover")
             stopClickMonitor()
-        case "expanded-home", "expanded-shelf":
+        case "expanded-home", "expanded-shelf", "expanded-folder":
             debugEarOn = true
-            open(on: primary, tab: state == "expanded-shelf" ? .shelf : .home)
+            open(on: primary, tab: state == "expanded-shelf" ? .shelf : state == "expanded-folder" ? .folder : .home)
             stopClickMonitor() // a real click elsewhere mustn't close it mid-capture
         case "charging":
             close()

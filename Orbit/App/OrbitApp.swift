@@ -457,6 +457,11 @@ enum DebugHook {
                 try? data.write(to: URL(fileURLWithPath: out))
             }
         case "notch":
+            // `folder`: what the Folder tab shows for this run, without touching the setting.
+            if let folder = spec["folder"] as? String {
+                NotchFolder.debugURL = URL(fileURLWithPath: folder, isDirectory: true)
+                NotchCenter.shared.apply()
+            }
             if let title = spec["title"] as? String {
                 NowPlaying.shared.debugPlaceholder(title: title, artist: spec["artist"] as? String ?? "", duration: spec["duration"] as? Double ?? 200,
                                                    elapsed: spec["elapsed"] as? Double ?? 60, artwork: image("artwork"))

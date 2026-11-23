@@ -95,5 +95,8 @@
   "Last viewed": "마지막에 본 탭",
   "A notice when Do Not Disturb or another Focus turns on or off.": "방해 금지 모드나 다른 집중 모드가 켜지거나 꺼질 때 알려줘요.",
   "macOS keeps which Focus is on in a protected folder: Orbit needs Full Disk Access to see it.": "켜진 집중 모드는 macOS가 보호된 폴더에 둬서, Orbit이 보려면 전체 디스크 접근 권한이 필요해요.",
-  "Allow Full Disk Access": "전체 디스크 접근 허용"
+  "Allow Full Disk Access": "전체 디스크 접근 허용",
+  "Pick a folder, like your screenshots, to see its files in the notch and drag them out.": "스크린샷 폴더처럼 자주 꺼내 쓰는 폴더를 고르면, 노치에서 파일을 바로 보고 끌어낼 수 있어요.",
+  "This folder is empty": "폴더가 비어 있어요",
+  "Orbit can't read this folder": "Orbit이 이 폴더를 읽을 수 없어요"
 }

@@ -31,6 +31,7 @@ struct NotchPage: View {
     @AppStorage(NotchPrefs.timerMinutes) private var timerMinutes = 25
     @AppStorage(NotchPrefs.hudPlace) private var hudPlace = "bottom"
     @AppStorage(NotchPrefs.openTab) private var openTab = "home"
+    @AppStorage(NotchPrefs.folderPath) private var folderPath = ""
 
     private var hasNotch: Bool { NSScreen.screens.contains(where: \.hasCameraHousing) }
     /// Checked again whenever Orbit comes back, from System Settings say.
@@ -57,7 +58,7 @@ struct NotchPage: View {
                     NotchSlider(title: "Close delay", symbol: "arrow.up.to.line", value: applied($closeDelay), range: 0.1...1.5, step: 0.05)
                     RowDivider()
                     SettingsRow(title: "Tab when it opens", subtitle: "Dragging a file in, or the Shelf shortcut, always opens the Shelf.", symbol: "square.on.square") {
-                        ChipPicker(selection: applied($openTab), options: [("home", "Home"), ("last", "Last viewed")])
+                        ChipPicker(selection: applied($openTab), options: [("home", "Home"), ("last", "Last viewed")] + (folderPath.isEmpty ? [] : [("folder", "Folder")]))
                     }
                     RowDivider()
                     SettingsRow(title: "Swipe down to open", subtitle: "Two fingers down on the notch open it; up closes it.", symbol: "hand.draw") {
@@ -72,6 +73,21 @@ struct NotchPage: View {
                 SettingsGroup(title: "Tabs", footer: "The mirror turns the camera on only when you ask it to, and off as soon as the notch closes.") {
                     SettingsRow(title: "Home", subtitle: "What's playing, with controls, and what's left on today's calendar.", symbol: "house") {
                         Toggle("", isOn: applied($tabHome)).toggleStyle(.switch).labelsHidden()
+                    }
+                    RowDivider()
+                    SettingsRow(title: "Folder", subtitle: folderPath.isEmpty ? "Pick a folder, like your screenshots, to see its files in the notch and drag them out." : (folderPath as NSString).abbreviatingWithTildeInPath, symbol: "folder") {
+                        HStack(spacing: 8) {
+                            if !folderPath.isEmpty {
+                                Button("Remove") {
+                                    folderPath = ""
+                                    if openTab == "folder" { openTab = "home" }
+                                    NotchCenter.shared.apply()
+                                }
+                                .buttonStyle(PillButtonStyle(prominent: false))
+                            }
+                            Button(folderPath.isEmpty ? "Choose…" : "Change…") { chooseFolder() }
+                                .buttonStyle(PillButtonStyle(prominent: folderPath.isEmpty))
+                        }
                     }
                     RowDivider()
                     SettingsRow(title: "Shelf", subtitle: "Files you dropped on the notch, ready to drag out, AirDrop or share.", symbol: "tray.full") {
@@ -175,6 +191,21 @@ struct NotchPage: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             focusReadable = NotchFocus.readable
         }
+    }
+
+    /// A folder for the Folder tab, which then opens first. Starts where macOS saves screenshots.
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        let shots = UserDefaults(suiteName: "com.apple.screencapture")?.string(forKey: "location").map { ($0 as NSString).expandingTildeInPath }
+        panel.directoryURL = URL(fileURLWithPath: folderPath.isEmpty ? shots ?? NSHomeDirectory() + "/Desktop" : folderPath)
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        folderPath = url.path
+        openTab = "folder"
+        NotchCenter.shared.apply()
+        // Read it once now, so a macOS privacy prompt for it shows here rather than in the notch.
+        NotchFolder.shared.reload()
     }
 
     /// Writes the setting, then has the notch pick it up.
@@ -370,7 +401,7 @@ private struct NotchDemoShape: View {
                 case .open:
                     VStack(spacing: 0) {
                         HStack(spacing: 4) {
-                            ForEach(NotchCenter.Tab.allCases) { t in
+                            ForEach(NotchCenter.Tab.allCases.filter { $0 != .folder }) { t in
                                 Image(systemName: t.symbol).font(.system(size: 9, weight: .semibold))
                                     .foregroundStyle(.white.opacity(t == .home ? 1 : 0.45))
                                     .frame(width: 20, height: 16)
