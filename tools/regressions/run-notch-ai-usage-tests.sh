@@ -6,6 +6,6 @@ output=$(mktemp -d "${TMPDIR:-/tmp}/orbit-ai-quota-tests.XXXXXX")
 trap 'rm -rf "$output"' EXIT
 
 xcrun swiftc -swift-version 5 -parse-as-library \
-    Orbit/Modules/Notch/NotchAIUsage.swift tools/regressions/notch-ai-usage-tests.swift \
+    Orbit/Modules/Notch/NotchAIUsage.swift Orbit/Modules/Notch/ClaudeStatusLineBridge.swift tools/regressions/notch-ai-usage-tests.swift \
     -o "$output/notch-ai-usage-tests"
 "$output/notch-ai-usage-tests"

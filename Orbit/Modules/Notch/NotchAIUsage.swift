@@ -93,8 +93,7 @@ enum NotchAIUsageReader {
             case .codex:
                 return try codexSnapshot(in: folder, dates: dates)
             case .claude:
-                let (data, modified) = try snapshotFile("orbit-quota.json", in: folder)
-                return try claudeSnapshot(data, modified: modified, dates: dates)
+                return try claudeUsage(in: folder, dates: dates)
             case .custom:
                 let (data, _) = try snapshotFile("orbit-quota.json", in: folder)
                 return try customSnapshot(data, dates: dates)
@@ -109,6 +108,48 @@ enum NotchAIUsageReader {
         } catch {
             return isMissing(error) ? .missing : .unreadable
         }
+    }
+
+    private static func claudeUsage(in folder: URL, dates: Dates) throws -> NotchAIUsageResult {
+        var capture: NotchAIUsageResult = .missing
+        var captureError: Error?
+        do {
+            let (data, modified) = try snapshotFile("orbit-quota.json", in: folder)
+            capture = try claudeSnapshot(data, modified: modified, dates: dates)
+        } catch {
+            if !isMissing(error) { captureError = error }
+        }
+
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let standard = home.appendingPathComponent(".claude", isDirectory: true)
+        let cacheFolders = folder.standardizedFileURL.path == standard.standardizedFileURL.path ? [folder, home] : [folder]
+        for location in cacheFolders {
+            guard let (data, _) = try? snapshotFile(".claude.json", in: location, maxBytes: 2 * 1024 * 1024),
+                  let state = try? object(data),
+                  let result = claudeCache(state, dates: dates) else { continue }
+            if case .available(let direct) = capture,
+               let recorded = direct.windows.first?.observedAt, let cached = result.windows.first?.observedAt,
+               recorded >= cached { return capture }
+            return .available(result)
+        }
+        if let captureError { throw captureError }
+        return capture
+    }
+
+    private static func claudeCache(_ state: JSON, dates: Dates) -> NotchAIQuotaSnapshot? {
+        guard let cache = state["cachedUsageUtilization"] as? JSON,
+              let timestamp = number(cache["fetchedAtMs"]),
+              let observed = dates.observation(timestamp / 1_000),
+              observed <= dates.now, dates.now.timeIntervalSince(observed) <= 3_600,
+              cache["accountUuid"] as? String == (state["oauthAccount"] as? JSON)?["accountUuid"] as? String,
+              let usage = cache["utilization"] as? JSON else { return nil }
+        let current = [(key: "five_hour", minutes: 300), (key: "seven_day", minutes: 10_080)].compactMap { period in
+            window(usage[period.key], minutes: period.minutes, usedKey: "utilization", resetKey: "resets_at",
+                   observed: observed, dates: dates)
+        }.filter { window in
+            window.resetAt.map { $0 > dates.now } ?? true
+        }
+        return current.isEmpty ? nil : NotchAIQuotaSnapshot(windows: current)
     }
 
     private static func claudeSnapshot(_ data: Data, modified: Date, dates: Dates) throws -> NotchAIUsageResult {
@@ -283,11 +324,11 @@ enum NotchAIUsageReader {
         return (data, first != 10)
     }
 
-    private static func snapshotFile(_ name: String, in folder: URL) throws -> (Data, Date) {
+    private static func snapshotFile(_ name: String, in folder: URL, maxBytes: Int = snapshotBytes) throws -> (Data, Date) {
         let (handle, info) = try openRegularFile(folder.appendingPathComponent(name))
         defer { try? handle.close() }
-        guard info.st_size <= snapshotBytes,
-              let data = try handle.read(upToCount: snapshotBytes + 1), data.count <= snapshotBytes else {
+        guard info.st_size <= maxBytes,
+              let data = try handle.read(upToCount: maxBytes + 1), data.count <= maxBytes else {
             throw SourceError.invalid
         }
         let modified = Date(timeIntervalSince1970: Double(info.st_mtimespec.tv_sec) + Double(info.st_mtimespec.tv_nsec) / 1e9)

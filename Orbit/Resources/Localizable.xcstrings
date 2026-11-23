@@ -8059,6 +8059,28 @@
         }
       }
     },
+    "Connect existing status line": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기존 상태줄 연결"
+          }
+        }
+      }
+    },
+    "Connect once to share quota updates while keeping your current status line.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번 연결하면 기존 상태줄을 유지하면서 한도 정보를 받아와요."
+          }
+        }
+      }
+    },
     "Connected": {
       "extractionState": "manual",
       "localizations": {
@@ -8066,6 +8088,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "연결됨"
+          }
+        }
+      }
+    },
+    "Connected. Usage updates after Claude Code runs the status line.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결했어요. Claude Code가 상태줄을 실행하면 사용량이 갱신돼요."
           }
         }
       }
@@ -8452,17 +8485,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "결과 복사"
-          }
-        }
-      }
-    },
-    "Copy Claude setup": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude 설정 복사"
           }
         }
       }
@@ -10312,6 +10334,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%ld%%까지 방전 중"
+          }
+        }
+      }
+    },
+    "Disconnect status line": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "상태줄 연결 해제"
           }
         }
       }
@@ -21876,6 +21909,17 @@
         }
       }
     },
+    "Orbit couldn’t update Claude Code’s settings.json.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code의 settings.json을 업데이트할 수 없어요."
+          }
+        }
+      }
+    },
     "Orbit does these jobs too. Turn macOS’s off to free the keys, or hand the keys to Orbit.": {
       "extractionState": "manual",
       "localizations": {
@@ -22169,6 +22213,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "앱을 종료하고, 무엇이 휴지통으로 갈지 먼저 보여줘요."
+          }
+        }
+      }
+    },
+    "Orbit reads Claude Code’s local quota cache automatically when it’s current.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code의 최신 로컬 한도 캐시를 자동으로 읽어요."
           }
         }
       }
@@ -33577,17 +33632,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "가로 스크롤에도 같은 방향을 써요."
-          }
-        }
-      }
-    },
-    "Use the setup snippet to write orbit-quota.json from Claude Code’s status line. If you already have a status line, add the capture command to it.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "설정 예시를 Claude Code에 적용하면 상태줄이 orbit-quota.json을 만들어요. 기존 상태줄이 있다면 저장 명령만 추가하세요."
           }
         }
       }

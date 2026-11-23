@@ -65,6 +65,86 @@ import Foundation
         _ = try write(#"{"context_window":{"used_percentage":85}}"#, to: "claude/orbit-quota.json", in: root)
         check(NotchAIUsageReader.read(claude, now: now) == .missing, "Claude context metrics are never reported as quota")
 
+        let cache = profile(.claude, "claude-cache", in: root)
+        func writeClaudeCache(age: TimeInterval, account: String, reset: TimeInterval = 600) throws {
+            let document: [String: Any] = [
+                "oauthAccount": ["accountUuid": "current-account"],
+                "cachedUsageUtilization": [
+                    "accountUuid": account,
+                    "fetchedAtMs": now.addingTimeInterval(-age).timeIntervalSince1970 * 1_000,
+                    "utilization": [
+                        "five_hour": ["utilization": 17, "resets_at": now.addingTimeInterval(reset).timeIntervalSince1970],
+                        "seven_day": ["utilization": 25],
+                    ],
+                ],
+            ]
+            let data = try JSONSerialization.data(withJSONObject: document)
+            _ = try write(String(decoding: data, as: UTF8.self), to: "claude-cache/.claude.json", in: root)
+        }
+        try writeClaudeCache(age: 30, account: "current-account")
+        check(available(cache).map(\.usedPercent) == [17, 25], "Claude automatically imports the current local cache")
+        try writeClaudeCache(age: 30, account: "previous-account")
+        check(available(cache).isEmpty, "Claude ignores the previous account’s cache")
+        try writeClaudeCache(age: 3_601, account: "current-account")
+        check(available(cache).isEmpty, "Claude ignores an old cache")
+        try writeClaudeCache(age: 30, account: "current-account", reset: -1)
+        check(available(cache).map(\.minutes) == [10_080], "Claude drops a cache window after its reset")
+
+        let bridge = profile(.claude, "status-line's profile", in: root)
+        let bridgeFolder = bridge.sourceFolder!
+        let originalCommand = "printf 'existing: '; cat # original trailing comment"
+        let original: [String: Any] = [
+            "statusLine": ["type": "command", "command": originalCommand, "padding": 3],
+            "permissions": ["defaultMode": "plan"],
+        ]
+        let originalData = try JSONSerialization.data(withJSONObject: original)
+        let settings = try write(String(decoding: originalData, as: UTF8.self),
+                                 to: "status-line's profile/settings.json", in: root)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: settings.path)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .available, "Claude detects an existing status line")
+        try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "Claude detects its installed connection")
+        let connected = try Data(contentsOf: settings)
+        try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
+        let repeated = try Data(contentsOf: settings)
+        check(repeated == connected, "Connecting twice does not wrap the existing command twice")
+        let mode = try FileManager.default.attributesOfItem(atPath: settings.path)[.posixPermissions] as? Int
+        check(mode == 0o600, "Connecting preserves existing settings file permissions")
+        let connectedSettings = try JSONSerialization.jsonObject(with: connected) as? [String: Any]
+        let connectedStatus = connectedSettings?["statusLine"] as? [String: Any]
+        let wrappedCommand = connectedStatus?["command"] as? String ?? ""
+        check(connectedStatus?["padding"] as? Int == 3, "Connecting preserves status line padding")
+        let fixture = #"{"rate_limits":{"five_hour":{"used_percentage":28}},"unrelated":"Fixture 한글"}"#
+        let result = try runShell(wrappedCommand, input: fixture)
+        check(result == "existing: " + fixture, "The existing status line still receives the original input and produces the same output")
+        let bridgeWindows: [NotchAIQuotaWindow]
+        if case .available(let live) = NotchAIUsageReader.read(bridge) { bridgeWindows = live.windows }
+        else { bridgeWindows = [] }
+        check(bridgeWindows.first?.usedPercent == 28, "The installed status line publishes a readable quota snapshot")
+        let quotaFile = bridgeFolder.appendingPathComponent("orbit-quota.json")
+        let savedQuota = try String(contentsOf: quotaFile, encoding: .utf8)
+        check(!savedQuota.contains("Fixture") && !savedQuota.contains("unrelated"), "The connection writes only quota data")
+        try FileManager.default.removeItem(at: quotaFile)
+        try FileManager.default.createDirectory(at: quotaFile, withIntermediateDirectories: false)
+        let failedCapture = try runShell(wrappedCommand, input: fixture)
+        check(failedCapture == "existing: " + fixture, "A failed quota write leaves the original status line working")
+        try ClaudeStatusLineBridge.setConnected(false, in: bridgeFolder)
+        let restored = try JSONSerialization.jsonObject(with: Data(contentsOf: settings)) as? NSDictionary
+        check(restored == original as NSDictionary, "Disconnect restores the original command and other settings")
+        let fresh = root.appendingPathComponent("new-status-line", isDirectory: true)
+        try FileManager.default.createDirectory(at: fresh, withIntermediateDirectories: false)
+        try ClaudeStatusLineBridge.setConnected(true, in: fresh)
+        check(ClaudeStatusLineBridge.state(in: fresh) == .connected, "Claude can connect when settings have no status line")
+        try ClaudeStatusLineBridge.setConnected(false, in: fresh)
+        let newSettings = try Data(contentsOf: fresh.appendingPathComponent("settings.json"))
+        let disconnected = try JSONSerialization.jsonObject(with: newSettings) as? [String: Any]
+        check(disconnected?.isEmpty == true, "Disconnect removes the generated status line when there was no previous one")
+
+        let symlinkFolder = root.appendingPathComponent("settings-link", isDirectory: true)
+        try FileManager.default.createDirectory(at: symlinkFolder, withIntermediateDirectories: false)
+        try FileManager.default.createSymbolicLink(at: symlinkFolder.appendingPathComponent("settings.json"), withDestinationURL: settings)
+        check(ClaudeStatusLineBridge.state(in: symlinkFolder) == .unavailable, "Claude does not rewrite a linked settings file")
+
         let custom = profile(.custom, "custom", in: root)
         _ = try write(#"{"version":1,"observedAt":"2026-08-17T00:00:00Z","windows":[{"minutes":1440,"usedPercent":15.25},{"minutes":300,"usedPercent":true}]}"#,
                       to: "custom/orbit-quota.json", in: root)
@@ -117,6 +197,23 @@ import Foundation
     private static func available(_ profile: NotchAIProfile) -> [NotchAIQuotaWindow] {
         guard case let .available(snapshot) = NotchAIUsageReader.read(profile, now: now) else { return [] }
         return snapshot.windows
+    }
+
+    private static func runShell(_ command: String, input: String) throws -> String {
+        let process = Process()
+        let stdin = Pipe()
+        let stdout = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", command]
+        process.standardInput = stdin
+        process.standardOutput = stdout
+        try process.run()
+        try stdin.fileHandleForWriting.write(contentsOf: Data(input.utf8))
+        try stdin.fileHandleForWriting.close()
+        let data = stdout.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        precondition(process.terminationStatus == 0)
+        return String(decoding: data, as: UTF8.self)
     }
 
     private static func profile(_ provider: NotchAIProvider, _ directory: String, in root: URL,

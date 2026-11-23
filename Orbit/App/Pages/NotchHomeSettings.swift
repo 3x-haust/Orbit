@@ -162,7 +162,8 @@ private struct NotchAIProfileEditor: View {
     let remove: () -> Void
     @State private var check: CheckRequest?
     @State private var result: NotchAIUsageResult?
-    @State private var copied = false
+    @State private var claudeConnection: ClaudeStatusLineBridge.State?
+    @State private var claudeError = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -200,10 +201,29 @@ private struct NotchAIProfileEditor: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             if profile.provider == .claude {
-                HStack {
-                    Button((copied ? "Copied" : "Copy Claude setup").loc) { copyClaudeSetup() }
-                        .disabled(profile.sourceFolder == nil)
-                    Link("Claude Code setup guide", destination: URL(string: "https://code.claude.com/docs/en/statusline")!)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        if claudeConnection == .connected {
+                            Button("Disconnect status line") { setClaudeConnection(false) }
+                        } else {
+                            Button("Connect existing status line") { setClaudeConnection(true) }
+                                .disabled(claudeConnection != .available)
+                        }
+                        Link("Claude Code setup guide", destination: URL(string: "https://code.claude.com/docs/en/statusline")!)
+                    }
+                    if claudeError || claudeConnection == .unavailable {
+                        Text("Orbit couldn’t update Claude Code’s settings.json.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    } else if claudeConnection == .connected {
+                        Text("Connected. Usage updates after Claude Code runs the status line.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Connect once to share quota updates while keeping your current status line.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             HStack {
@@ -244,7 +264,13 @@ private struct NotchAIProfileEditor: View {
         .onChange(of: profile) {
             check = nil
             result = nil
-            copied = false
+        }
+        .task(id: claudeFolder) {
+            claudeConnection = nil
+            claudeError = false
+            guard let folder = claudeFolder else { return }
+            let state = await Task.detached(priority: .utility) { ClaudeStatusLineBridge.state(in: folder) }.value
+            if !Task.isCancelled { claudeConnection = state }
         }
         .task(id: check?.id) {
             guard let request = check else { return }
@@ -290,15 +316,17 @@ private struct NotchAIProfileEditor: View {
         }
     }
 
-    private func copyClaudeSetup() {
-        guard let folder = profile.sourceFolder else { return }
-        let output = folder.appendingPathComponent("orbit-quota.json").path
-        let command = ClaudeQuotaSetup.command(outputPath: output)
-        let settings = ["statusLine": ["type": "command", "command": command]]
-        guard let data = try? JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]),
-              let snippet = String(data: data, encoding: .utf8) else { return }
-        NSPasteboard.general.prepareForNewContents(with: [])
-        copied = NSPasteboard.general.setString(snippet, forType: .string)
+    private var claudeFolder: URL? { profile.provider == .claude ? profile.sourceFolder : nil }
+
+    private func setClaudeConnection(_ connected: Bool) {
+        guard let folder = claudeFolder else { return }
+        do {
+            try ClaudeStatusLineBridge.setConnected(connected, in: folder)
+            claudeConnection = ClaudeStatusLineBridge.state(in: folder)
+            claudeError = false
+        } catch {
+            claudeError = true
+        }
     }
 }
 
@@ -325,7 +353,7 @@ extension NotchAIProvider {
         case .codex:
             "Choose a Codex profile folder containing its sessions directory. Orbit reads the quota snapshots recorded by Codex."
         case .claude:
-            "Use the setup snippet to write orbit-quota.json from Claude Code’s status line. If you already have a status line, add the capture command to it."
+            "Orbit reads Claude Code’s local quota cache automatically when it’s current."
         case .custom:
             "Put a version 1 orbit-quota.json file from your quota exporter in this folder."
         case .codexBar:
@@ -337,38 +365,5 @@ extension NotchAIProvider {
 private extension NotchAIProfile {
     var sourceDescription: String {
         sourceFolder.map { ($0.path as NSString).abbreviatingWithTildeInPath } ?? "No folder selected".loc
-    }
-}
-
-/// Claude Code sends the entire status-line input on stdin. Save only the quota fields and
-/// publish with an atomic rename so Orbit can read the file while Claude updates it.
-enum ClaudeQuotaSetup {
-    static func command(outputPath: String) -> String {
-        let script = #"""
-        use strict;
-        use warnings;
-        local $/;
-        my $input = <STDIN>;
-        my $data = eval { decode_json($input // '') };
-        exit 0 unless ref($data) eq 'HASH' && ref($data->{rate_limits}) eq 'HASH';
-        my %windows;
-        for my $key ('five_hour', 'seven_day') {
-            my $window = $data->{rate_limits}->{$key};
-            next unless ref($window) eq 'HASH' && defined $window->{used_percentage};
-            $windows{$key} = { used_percentage => $window->{used_percentage}, resets_at => $window->{resets_at} };
-        }
-        exit 0 unless %windows;
-        my $target = $ARGV[0];
-        my ($file, $temp) = tempfile('.orbit-quota-XXXXXXXX', DIR => dirname($target), UNLINK => 1);
-        print {$file} encode_json({ captured_at => time, rate_limits => \%windows }) or die $!;
-        close $file or die $!;
-        rename($temp, $target) or die $!;
-        """#
-        return "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
-            + shellArgument(script) + " -- " + shellArgument(outputPath)
-    }
-
-    private static func shellArgument(_ value: String) -> String {
-        "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 }

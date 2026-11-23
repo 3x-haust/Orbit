@@ -10,17 +10,15 @@ The built-in profile uses `CODEX_HOME` when available to Orbit, or `~/.codex`. C
 
 ## Claude Code
 
-The built-in profile uses `CLAUDE_CONFIG_DIR` when available to Orbit, or `~/.claude`. In the profile editor, choose **Copy Claude setup** to copy a `statusLine` settings snippet for the selected folder.
+The built-in profile uses `CLAUDE_CONFIG_DIR` when available to Orbit, or `~/.claude`. Orbit reads Claude Code’s recent local quota cache automatically. Run `/usage` in Claude Code to refresh that cache.
 
-- If you have no status line, add the snippet’s `statusLine` entry to the existing Claude Code `settings.json` in the profile’s configuration folder.
-- If you have a custom status line, keep its configuration and invoke the copied `command` from your existing script with the same JSON it receives on stdin. For example, a script that already saves the input in a shell variable can pipe it into the capture command with `printf '%s' "$input" | <command>`.
-- Start a Claude Code session and make a request. Orbit checks for `orbit-quota.json` in the selected folder. The capture command writes the quota fields and capture time.
+For updates as you use Claude Code, edit the profile and click **Connect existing status line**. Orbit detects the user settings in the selected profile folder and wraps the existing command. Claude Code keeps displaying that command’s output, and Orbit saves its 5-hour and weekly quota data to `orbit-quota.json`. **Disconnect status line** restores the previous command. The connection uses tools included with macOS and reads the quota fields Claude Code already sends to its status line.
 
-The snippet uses macOS’s system Perl. See the [Claude Code status line guide](https://code.claude.com/docs/en/statusline) for the provider’s setup and availability details.
+Project or managed settings can override your user status line. See the [Claude Code status line guide](https://code.claude.com/docs/en/statusline) and [settings precedence](https://code.claude.com/docs/en/settings).
 
 ## CodexBar or another provider
 
-Add a profile with **CodexBar export** as its source and enter the provider ID, such as `grok` or `antigravity`. Configure the provider in CodexBar and export its documented JSON into the selected folder. Run the command again to update the snapshot. Keep one account per export. Orbit displays percentage windows returned for that provider. [CodexBar CLI documentation](https://github.com/steipete/CodexBar/blob/main/docs/cli.md)
+[CodexBar](https://github.com/steipete/CodexBar) is a separate open-source quota monitor. If you already use it, Orbit can read its exports. Add a profile with **CodexBar export** as its source and enter the provider ID, such as `grok` or `antigravity`. Configure the provider in CodexBar and export its documented JSON into the selected folder. Run the command again to update the snapshot. Keep one account per export. Orbit displays percentage windows returned for that provider. [CodexBar CLI documentation](https://github.com/steipete/CodexBar/blob/main/docs/cli.md)
 
 ```sh
 codexbar usage --provider antigravity --json > /path/to/folder/.codexbar-next.json &&
