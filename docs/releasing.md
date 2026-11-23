@@ -10,6 +10,13 @@ highest stable version. Publish **1.7.2 and every later release with
 must not take over `/releases/latest`, or older apps lose their upgrade path.
 The README links to the release list and sorts its version badge by SemVer.
 
+The bridge respects a legacy user's decision to dismiss 1.7.1. Because the
+legacy endpoint remains pinned, that version will not prompt again; the user
+must check manually in General > Updates. Do not silently reset dismissal.
+Login-item registration is owned by macOS rather than the copied preferences;
+users should check Open at login after the ID change and enable it again if
+needed. No automatic transfer of that system registration is promised.
+
 ## Build and publish
 
 1. Update `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `project.yml`,

@@ -106,7 +106,7 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 
 Orbit updates itself from GitHub Releases. You can turn automatic checks and installs on or off in **General › Updates**.
 
-Versions up to 1.7.0 update through 1.7.1 before installing 1.7.2 or later. If automatic installation is off, choose **Check for Updates** and install again after 1.7.1 restarts. The new app ID is `dev.3xhaust.Orbit`; saved settings and data are kept. macOS may ask you to allow permissions, login items, Quick Look or Keychain access again.
+Versions up to 1.7.0 update through 1.7.1 before installing 1.7.2 or later. If automatic installation is off, choose **Check for Updates** and install again after 1.7.1 restarts. If you chose **Later** for 1.7.1, use **General › Updates** to check again. The new app ID is `dev.3xhaust.Orbit`; saved preferences and files are kept. macOS may ask you to allow permissions, archive associations, Quick Look or Keychain access again. If you used **Open at login**, check that switch in **General** after updating and turn it back on if it is off.
 
 > [!NOTE]
 > Releases are signed but not notarized. If macOS says it can't verify the developer, right-click Orbit.app › **Open**, or allow it in **System Settings › Privacy & Security**.
