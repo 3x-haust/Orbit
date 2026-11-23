@@ -24,6 +24,15 @@ final class MenuBarCalendar: NSObject {
             case .custom: custom.trimmingCharacters(in: .whitespaces).isEmpty ? nil : custom
             }
         }
+
+        /// Whether the text shows seconds: an `s` outside the pattern's quoted literals.
+        func showsSeconds(custom: String) -> Bool {
+            var quoted = false
+            for c in pattern(custom: custom) ?? "" {
+                if c == "'" { quoted.toggle() } else if c == "s", !quoted { return true }
+            }
+            return false
+        }
     }
 
     var month = Date()
@@ -80,11 +89,16 @@ final class MenuBarCalendar: NSObject {
         }
     }
 
-    /// Re-renders on each minute boundary so a time style never lags.
+    /// Re-renders on each second boundary when the text shows seconds, otherwise on each minute's,
+    /// so a time style never lags.
     private func scheduleTick() {
         timer?.invalidate()
-        let next = calendar.nextDate(after: Date(), matching: DateComponents(second: 0), matchingPolicy: .nextTime) ?? Date().addingTimeInterval(60)
-        timer = Timer(fire: next, interval: 60, repeats: true) { _ in MainActor.assumeIsolated { MenuBarCalendar.shared.render() } }
+        let d = Pref.defaults
+        let seconds = Style(stored: d.string(forKey: Pref.calendarStyle)).showsSeconds(custom: d.string(forKey: Pref.calendarFormat) ?? "")
+        let now = Date()
+        let next = seconds ? Date(timeIntervalSinceReferenceDate: now.timeIntervalSinceReferenceDate.rounded(.down) + 1)
+            : calendar.nextDate(after: now, matching: DateComponents(second: 0), matchingPolicy: .nextTime) ?? now.addingTimeInterval(60)
+        timer = Timer(fire: next, interval: seconds ? 1 : 60, repeats: true) { _ in MainActor.assumeIsolated { MenuBarCalendar.shared.render() } }
         RunLoop.main.add(timer!, forMode: .common)
     }
 

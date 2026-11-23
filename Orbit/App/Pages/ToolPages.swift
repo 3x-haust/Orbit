@@ -578,7 +578,7 @@ struct MenuBarPage: View {
             .onChange(of: [iconShape, style, format]) {
                 // Text only with no text would leave nothing to click.
                 if iconShape == "none", style == "none" { style = "date" }
-                MenuBarCalendar.shared.render()
+                MenuBarCalendar.shared.apply() // the format decides between minute and second ticks
             }
             .onChange(of: [iconMonth, iconWeekday]) { MenuBarCalendar.shared.render() }
         }
