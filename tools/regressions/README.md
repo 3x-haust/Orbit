@@ -317,3 +317,31 @@ It then opens the real Menu Bar settings page and changes the stored format unde
 `@AppStorage` change handler is what starts the second updates. Those settings go in the
 runner's own defaults domain (not Orbit's) and are removed afterward. It writes two pictures of
 the status item a few seconds apart (`calendar-seconds-*.png`) and the page (`menu-bar-page.png`).
+
+# Bundle ID and updater regression
+
+Build Debug, then run:
+
+```sh
+bash tools/regressions/run-updater-tests.sh \
+  /tmp/orbit-update-build/Build/Products/Debug /tmp/orbit-update-tests \
+  /tmp/legacy/Orbit.app /tmp/new/Orbit.app
+bash tools/regressions/run-fan-helper-tests.sh \
+  /tmp/orbit-update-build/Build/Products/Debug /tmp/orbit-update-tests
+```
+
+The optional last two arguments are real signed app bundles: the legacy
+`com.lyu.orbit` app and `dev.3xhaust.Orbit`, both signed by team `UM52UU4B7L`.
+They are read-only fixtures. Without them, signature and helper-client checks
+are not run. The runner imports the real Debug module without launching the
+app delegate. It checks stable release selection independently of GitHub's
+`latest` marker, numeric version order, draft/prerelease exclusion, missing
+assets, accepted/rejected app IDs, and the fan helper's client requirement.
+Preferences are migrated between unique test domains and removed afterward;
+Orbit's own settings and files are untouched. Existing new-domain values win,
+reset preferences are not resurrected, and the legacy domain is unchanged.
+
+This does not replace a real two-hop update through download, replacement and
+relaunch. That check must use a disposable macOS account because both app IDs
+share Orbit's storage and single-instance lock. See `docs/releasing.md` for the
+legacy release route that must stay available.

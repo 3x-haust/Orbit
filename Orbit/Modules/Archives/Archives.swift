@@ -241,7 +241,7 @@ final class Archives {
         Task {
             let ws = NSWorkspace.shared
             let me = Bundle.main.bundleURL
-            let myID = Bundle.main.bundleIdentifier ?? "com.lyu.orbit"
+            let myID = Bundle.main.bundleIdentifier ?? "dev.3xhaust.Orbit"
             // Make sure LaunchServices knows this copy (and its document types) before asking.
             let reg = LSRegisterURL(me as CFURL, true)
             Self.log("register \(me.path): \(reg)")
@@ -337,7 +337,7 @@ final class Archives {
             // Turned off by the user in Keyboard Shortcuts › Services?
             let status = UserDefaults(suiteName: "pbs")?.dictionary(forKey: "NSServicesStatus") ?? [:]
             let off = status.contains { key, value in
-                key.hasPrefix("com.lyu.orbit") && ((value as? [String: Any])?["enabled_context_menu"] as? Bool) == false
+                key.hasPrefix(Bundle.main.bundleIdentifier ?? "dev.3xhaust.Orbit") && ((value as? [String: Any])?["enabled_context_menu"] as? Bool) == false
             }
             let state: ServicesState = !listed ? .missing : (off ? .disabled : .ready)
             await MainActor.run { self.servicesState = state }
