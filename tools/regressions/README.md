@@ -313,6 +313,8 @@ It checks which formats show seconds (an `s` outside quoted text, only in a cust
 then puts the real calendar status item in the menu bar with a custom format and reads its
 text every quarter second: a format with `ss` changes every second and matches the clock,
 switching formats the way the Calendar page does moves between second and minute updates.
+With `HH:mm:ss` it reads the item's width for eleven seconds: it must not change as the digits
+do, or the menu bar items beside it shift every second (#89).
 It then opens the real Menu Bar settings page and changes the stored format under it, so its
 `@AppStorage` change handler is what starts the second updates. Those settings go in the
 runner's own defaults domain (not Orbit's) and are removed afterward. It writes two pictures of
