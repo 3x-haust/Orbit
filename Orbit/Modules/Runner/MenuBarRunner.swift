@@ -64,6 +64,11 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         }
     }
 
+    /// The color for a reading shown as `percent`, in the menu bar and the status card; nil while usage colors are off.
+    static func usageColor(_ percent: Int, source: Source) -> NSColor? {
+        Pref.defaults.bool(forKey: Pref.runnerUsageColor) ? Load(percent: percent, source: source).color : nil
+    }
+
     static let minFPS = 2.0, maxFPS = 45.0
 
     /// 0…1 reading of the chosen source.
@@ -513,9 +518,8 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         guard shownTitle != text else { return }
         shownTitle = text
         if percent {
-            let color = Pref.defaults.bool(forKey: Pref.runnerUsageColor) ? Load(percent: value, source: source).color : nil
             button.imagePosition = .imageLeading
-            button.attributedTitle = Self.percentTitle(value, color: color)
+            button.attributedTitle = Self.percentTitle(value, color: Self.usageColor(value, source: source))
         } else {
             button.imagePosition = .imageOnly
             button.title = ""

@@ -270,7 +270,9 @@ bash tools/regressions/run-runner-tests.sh \
 ```
 
 It checks where the menu bar percentage turns from green to orange to red:
-60% and 80% for CPU and GPU, 80% and 95% for memory.
+60% and 80% for CPU and GPU, 80% and 95% for memory. The status card that opens
+from the runner takes its colors from the same place, and both go plain when the
+"Color by usage" switch is off.
 
 It also puts a real runner in the menu bar (a logged-in desktop is required),
 fades its button while the menu bar's appearance changes back, as when waking
@@ -313,6 +315,8 @@ It checks which formats show seconds (an `s` outside quoted text, only in a cust
 then puts the real calendar status item in the menu bar with a custom format and reads its
 text every quarter second: a format with `ss` changes every second and matches the clock,
 switching formats the way the Calendar page does moves between second and minute updates.
+With `HH:mm:ss` it reads the item's width for eleven seconds: it must not change as the digits
+do, or the menu bar items beside it shift every second (#89).
 It then opens the real Menu Bar settings page and changes the stored format under it, so its
 `@AppStorage` change handler is what starts the second updates. Those settings go in the
 runner's own defaults domain (not Orbit's) and are removed afterward. It writes two pictures of

@@ -91,8 +91,8 @@ struct RunnerPage: View {
                     Toggle("", isOn: $showPercent).toggleStyle(.switch).labelsHidden()
                 }
                 RowDivider()
-                SettingsRow(title: "Color by usage", subtitle: "Green while there’s room, orange when busy, red near 100%.", symbol: "thermometer.medium") {
-                    Toggle("", isOn: $usageColor).toggleStyle(.switch).labelsHidden().disabled(!showPercent)
+                SettingsRow(title: "Color by usage", subtitle: "In the menu bar and the status card: green while there’s room, orange when busy, red near 100%.", symbol: "thermometer.medium") {
+                    Toggle("", isOn: $usageColor).toggleStyle(.switch).labelsHidden()
                 }
                 RowDivider()
                 SettingsRow(title: "Pause animation", subtitle: "Stays put until you resume. Click it in the menu bar for stats.", symbol: "pause.circle") {

@@ -179,20 +179,23 @@ struct RunnerStatsView: View {
     @ViewBuilder private func block(_ card: RunnerStatSection) -> some View {
         switch card {
         case .cpu:
-            section("cpu", title: "CPU", value: pct(m.cpu.last ?? 0)) {
-                detail("System", pct(m.cpuSystem))
-                detail("User", pct(m.cpuUser))
-                detail("Idle", pct(max(0, 1 - m.cpuUser - m.cpuSystem)))
+            let idle = max(0, 1 - m.cpuUser - m.cpuSystem)
+            section("cpu", title: "CPU", value: pct(m.cpu.last ?? 0), tint: usage(m.cpu.last ?? 0, .cpu)) {
+                detail("System", pct(m.cpuSystem), tint: usage(m.cpuSystem, .cpu))
+                detail("User", pct(m.cpuUser), tint: usage(m.cpuUser, .cpu))
+                // Idle is the room left, so it takes the color of what's in use.
+                detail("Idle", pct(idle), tint: usage(1 - idle, .cpu))
             } chart: { StatLine(values: m.cpu, fill: true) }
         case .gpu:
-            section("cube.transparent", title: "GPU", value: pct(runner.gpu ?? 0)) {
-                if let r = stats.gpu.renderer { detail("Renderer", pct(r)) }
-                if let t = stats.gpu.tiler { detail("Tiler", pct(t)) }
+            section("cube.transparent", title: "GPU", value: pct(runner.gpu ?? 0), tint: usage(runner.gpu ?? 0, .gpu)) {
+                if let r = stats.gpu.renderer { detail("Renderer", pct(r), tint: usage(r, .gpu)) }
+                if let t = stats.gpu.tiler { detail("Tiler", pct(t), tint: usage(t, .gpu)) }
                 if let mem = stats.gpu.memory, mem > 0 { detail("Memory in use", mem.orbitBytes) }
             } chart: { StatLine(values: stats.gpuHistory, fill: true) }
         case .memory:
-            section("memorychip", title: "Memory".loc, value: pct(m.memoryTotal > 0 ? m.memoryUsed / m.memoryTotal : 0)) {
-                if let p = stats.pressure { detail("Pressure", pct(p), tint: p > 0.7 ? Palette.accent : nil) }
+            let used = m.memoryTotal > 0 ? m.memoryUsed / m.memoryTotal : 0
+            section("memorychip", title: "Memory".loc, value: pct(used), tint: usage(used, .memory)) {
+                if let p = stats.pressure { detail("Pressure", pct(p), tint: usage(p, .memory) ?? (p > 0.7 ? Palette.accent : nil)) }
                 detail("App memory", m.memoryApp.orbitBytes)
                 detail("Wired", m.memoryWired.orbitBytes)
                 detail("Compressed", m.memoryCompressed.orbitBytes)
@@ -248,7 +251,7 @@ struct RunnerStatsView: View {
 
     private var divider: some View { Rectangle().fill(Palette.hairline).frame(height: 1).padding(.leading, 56) }
 
-    private func section<D: View, C: View>(_ symbol: String, title: String, value: String,
+    private func section<D: View, C: View>(_ symbol: String, title: String, value: String, tint: Color? = nil,
                                            @ViewBuilder details: () -> D, @ViewBuilder chart: () -> C) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol).font(.system(size: 14, weight: .semibold)).foregroundStyle(Palette.ink)
@@ -258,7 +261,7 @@ struct RunnerStatsView: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text(title).font(.system(size: 12, weight: .semibold)).foregroundStyle(Palette.inkSecondary)
                     Spacer()
-                    Text(value).font(.system(size: 15, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Palette.ink)
+                    Text(value).font(.system(size: 15, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(tint ?? Palette.ink)
                         .contentTransition(.numericText())
                 }
                 chart().frame(height: 18)
@@ -293,7 +296,12 @@ struct RunnerStatsView: View {
         .buttonStyle(.plain)
     }
 
-    private func pct(_ v: Double) -> String { "\(Int((v * 100).rounded()))%" }
+    private func percent(_ v: Double) -> Int { Int((v * 100).rounded()) }
+    private func pct(_ v: Double) -> String { "\(percent(v))%" }
+    /// The menu bar's usage color for a 0…1 reading, judged on the number shown.
+    private func usage(_ v: Double, _ source: MenuBarRunner.Source) -> Color? {
+        MenuBarRunner.usageColor(percent(v), source: source).map(Color.init(nsColor:))
+    }
 }
 
 /// A little history line; values are 0…1 unless `fill` is false, in which case they're scaled to their max.

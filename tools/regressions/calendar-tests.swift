@@ -77,6 +77,20 @@ import SwiftUI
         check(samples.allSatisfy { [expected(format, $0.at), expected(format, $0.at.addingTimeInterval(-0.1))].contains($0.title) },
               "every sample matches the clock within a tenth of a second")
 
+        // #89: the item keeps its width while the digits change, so the items beside it stay put.
+        // Eleven seconds walk the last digit through 0–9.
+        settings(format: "HH:mm:ss")
+        MenuBarCalendar.shared.apply()
+        var widths: [CGFloat] = []
+        let widthEnd = Date().addingTimeInterval(11)
+        while Date() < widthEnd {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.25))
+            if let w = MenuBarCalendar.shared.button?.window?.frame.width { widths.append(w) }
+        }
+        let distinctWidths = Set(widths)
+        print("  widths: \(distinctWidths.sorted())")
+        check(!widths.isEmpty && distinctWidths.count == 1, "the status item keeps one width while seconds tick (\(distinctWidths.count) widths)")
+
         // Back to minutes: the next render drops the seconds again.
         settings(format: "HH:mm")
         MenuBarCalendar.shared.apply()
