@@ -272,6 +272,10 @@ bash tools/regressions/run-runner-tests.sh \
 It checks where the menu bar percentage turns from green to orange to red:
 60% and 80% for CPU and GPU, 80% and 95% for memory.
 
+It also puts a real runner in the menu bar (a logged-in desktop is required),
+fades its button while the menu bar's appearance changes back, as when waking
+from sleep, and checks the runner is back at full color once the fading ends.
+
 # Notch Folder tab regression
 
 Build the Debug app, then run:
