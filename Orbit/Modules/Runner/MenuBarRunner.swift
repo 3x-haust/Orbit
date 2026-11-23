@@ -53,7 +53,11 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
 
         var color: NSColor {
             switch self {
-            case .low: .systemGreen
+            // System green fades into a light menu bar (2:1); a deeper green there reads like the red does.
+            case .low: NSColor(name: nil) { appearance in
+                appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+                    ? .systemGreen : NSColor(srgbRed: 0x1A / 255.0, green: 0x94 / 255.0, blue: 0x36 / 255.0, alpha: 1)
+            }
             case .busy: NSColor(Palette.brand)
             case .high: .systemRed
             }
