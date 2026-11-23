@@ -436,8 +436,11 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
             return true
         }
         probe.isTemplate = true
-        let (image, position, title) = (button.image, button.imagePosition, button.attributedTitle)
+        let (image, position, title, alpha) = (button.image, button.imagePosition, button.attributedTitle, button.alphaValue)
         frameLayer?.isHidden = true
+        // Measured while the item is drawn faded (the menu bar coming back after sleep), the faded
+        // color would be kept until the next appearance change.
+        button.alphaValue = 1
         button.image = probe
         button.imagePosition = .imageOnly
         button.title = ""
@@ -449,6 +452,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         button.image = image
         button.imagePosition = position
         button.attributedTitle = title
+        button.alphaValue = alpha
         frameLayer?.isHidden = false
         glyph = (name, color)
         return color
