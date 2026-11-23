@@ -270,7 +270,9 @@ bash tools/regressions/run-runner-tests.sh \
 ```
 
 It checks where the menu bar percentage turns from green to orange to red:
-60% and 80% for CPU and GPU, 80% and 95% for memory.
+60% and 80% for CPU and GPU, 80% and 95% for memory. The status card that opens
+from the runner takes its colors from the same place, and both go plain when the
+"Color by usage" switch is off.
 
 It also puts a real runner in the menu bar (a logged-in desktop is required),
 fades its button while the menu bar's appearance changes back, as when waking

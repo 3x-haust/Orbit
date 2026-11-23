@@ -1,7 +1,7 @@
 import AppKit
 @testable import Orbit
 
-/// Checks the colors of the runner's menu bar percentage, and that the runner's own color
+/// Checks the colors of the runner's percentages (menu bar and status card), and that the runner's own color
 /// isn't left dimmed after the menu bar showed it faded for a moment.
 @main struct RunnerTests {
     @MainActor static func main() async {
@@ -24,6 +24,14 @@ import AppKit
         check(Load(percent: 94, source: .memory) == .busy, "memory 94% is orange")
         check(Load(percent: 95, source: .memory) == .high, "memory 95% is red")
         check(Load.low.color != Load.busy.color && Load.busy.color != Load.high.color, "each step has its own color")
+
+        // The menu bar and the status card both take their colors from here.
+        UserDefaults.standard.setVolatileDomain([Pref.runnerUsageColor: true], forName: UserDefaults.argumentDomain)
+        func same(_ a: NSColor?, _ b: NSColor) -> Bool { a?.usingColorSpace(.sRGB) == b.usingColorSpace(.sRGB) }
+        check(same(MenuBarRunner.usageColor(85, source: .cpu), Load.high.color), "usage colors on: cpu 85% is red")
+        check(same(MenuBarRunner.usageColor(85, source: .memory), Load.busy.color), "usage colors on: memory 85% is orange")
+        UserDefaults.standard.setVolatileDomain([Pref.runnerUsageColor: false], forName: UserDefaults.argumentDomain)
+        check(MenuBarRunner.usageColor(85, source: .cpu) == nil, "usage colors off: no color")
 
         // A real menu bar item, as after waking from sleep: the menu bar's appearance comes back while
         // the item is still drawn faded, then the fading ends with no further appearance change.
