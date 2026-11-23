@@ -531,7 +531,7 @@ enum SystemData {
         // Listed elsewhere, or Orbit's own.
         let elsewhere: Set<String> = [
             "Library/Application Support/MobileSync", "Library/Containers/com.docker.docker", "Library/Containers/com.utmapp.UTM",
-            "Library/Application Support/Orbit", "Library/Caches/com.lyu.orbit",
+            "Library/Application Support/Orbit", "Library/Caches/com.lyu.orbit", "Library/Caches/dev.3xhaust.Orbit",
         ].reduce(into: []) { $0.insert(folder($1).path) }
         return roots.flatMap { rel, kind in
             children(of: folder(rel)).filter { !elsewhere.contains($0.path) && !DiskSize.isPersonal(path: $0.path) }.map { AppFolder(url: $0, kind: kind) }

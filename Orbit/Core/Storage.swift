@@ -161,6 +161,18 @@ enum Pref {
 
     static var defaults: UserDefaults { .standard }
 
+    /// Copy only saved settings once; a value already saved by the new app always wins.
+    static func migrate(from legacyDomain: String, to domain: String) {
+        let key = "app.migratedLegacyDefaults"
+        var saved = defaults.persistentDomain(forName: domain) ?? [:]
+        guard saved[key] as? Bool != true else { return }
+        let legacy = defaults.persistentDomain(forName: legacyDomain) ?? [:]
+        saved.merge(legacy) { current, _ in current }
+        saved[key] = true
+        defaults.setPersistentDomain(saved, forName: domain)
+        defaults.synchronize() // The updater relaunches under the new domain immediately afterward.
+    }
+
     /// Where a status item first appears, in points from the right end of the app icons (1 = next to
     /// Control Center). Only seeded once, so a ⌘-drag by the user always wins. New items otherwise land
     /// at the far left, where a crowded notched menu bar pushes them out of sight.

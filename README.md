@@ -6,12 +6,12 @@
 
 **Every Mac utility, in one orbit.**
 
-[![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases/latest)
+[![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?sort=semver&style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases)
 [![macOS](https://img.shields.io/badge/macOS-15%2B-000000?style=flat-square&logo=apple&logoColor=white)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
 
-[**Download**](https://github.com/3x-haust/Orbit/releases/latest) · [Features](#features) · [Build from source](#build-from-source)
+[**Download**](https://github.com/3x-haust/Orbit/releases) · [Features](#features) · [Build from source](#build-from-source)
 
 **English** · [한국어](README.ko.md)
 
@@ -100,11 +100,13 @@ Black and white, with a single orange accent. Native SwiftUI + AppKit, no Electr
 
 ## Install
 
-1. Download `Orbit-<version>.dmg` (or the `.zip`) from the [latest release](https://github.com/3x-haust/Orbit/releases/latest).
+1. Download `Orbit-<version>.dmg` (or the `.zip`) from the [releases page](https://github.com/3x-haust/Orbit/releases).
 2. Open it and drag **Orbit** into **Applications**.
 3. Launch Orbit. It lives in the menu bar; the setup page walks you through the permissions it needs.
 
 Orbit updates itself from GitHub Releases. You can turn automatic checks and installs on or off in **General › Updates**.
+
+Versions up to 1.7.0 update through 1.7.1 before installing 1.7.2 or later. If automatic installation is off, choose **Check for Updates** and install again after 1.7.1 restarts. If you chose **Later** for 1.7.1, use **General › Updates** to check again. The new app ID is `dev.3xhaust.Orbit`; saved preferences and files are kept. macOS may ask you to allow permissions, archive associations, Quick Look or Keychain access again. If you used **Open at login**, check that switch in **General** after updating and turn it back on if it is off.
 
 > [!NOTE]
 > Releases are signed but not notarized. If macOS says it can't verify the developer, right-click Orbit.app › **Open**, or allow it in **System Settings › Privacy & Security**.

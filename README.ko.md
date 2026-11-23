@@ -6,12 +6,12 @@
 
 **맥의 모든 유틸리티 앱을 한 번에**
 
-[![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases/latest)
+[![Release](https://img.shields.io/github/v/release/3x-haust/Orbit?sort=semver&style=flat-square&color=ff6b35&label=release)](https://github.com/3x-haust/Orbit/releases)
 [![macOS](https://img.shields.io/badge/macOS-15%2B-000000?style=flat-square&logo=apple&logoColor=white)](#요구-사항)
 [![Swift](https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
 
-[**다운로드**](https://github.com/3x-haust/Orbit/releases/latest) · [기능](#기능) · [직접 빌드](#직접-빌드)
+[**다운로드**](https://github.com/3x-haust/Orbit/releases) · [기능](#기능) · [직접 빌드](#직접-빌드)
 
 [English](README.md) · **한국어**
 
@@ -100,11 +100,13 @@
 
 ## 설치
 
-1. [최신 릴리즈](https://github.com/3x-haust/Orbit/releases/latest)에서 `Orbit-<버전>.dmg`(또는 `.zip`)를 받아요.
+1. [릴리즈 페이지](https://github.com/3x-haust/Orbit/releases)에서 `Orbit-<버전>.dmg`(또는 `.zip`)를 받아요.
 2. 열어서 **Orbit**을 **응용 프로그램**으로 끌어다 놓아요.
 3. Orbit을 켜면 메뉴 막대에 들어가고, 설정 페이지가 필요한 권한을 안내해요.
 
 Orbit은 GitHub 릴리즈에서 스스로 업데이트해요. **일반 › 업데이트**에서 자동 확인·자동 설치를 켜고 끌 수 있어요.
+
+1.7.0 이하는 1.7.1을 거쳐 1.7.2 이상으로 업데이트해요. 자동 설치를 껐다면 1.7.1로 다시 시작한 뒤 **일반 › 업데이트**에서 한 번 더 확인하고 설치해 주세요. 1.7.1 알림에서 **나중에**를 골랐다면 **일반 › 업데이트**에서 다시 확인해 주세요. 새 앱 ID는 `dev.3xhaust.Orbit`이며 저장된 환경설정과 파일은 유지돼요. macOS가 권한, 압축 파일 연결, Quick Look 또는 키체인 접근을 다시 허용해 달라고 할 수 있어요. **로그인 시 열기**를 사용했다면 업데이트 후 **일반**에서 스위치를 확인하고, 꺼져 있으면 다시 켜 주세요.
 
 > [!NOTE]
 > 릴리즈는 서명돼 있지만 공증은 받지 않았어요. "개발자를 확인할 수 없다"고 나오면 Orbit.app을 우클릭 › **열기**, 또는 **시스템 설정 › 개인정보 보호 및 보안**에서 허용해 주세요.

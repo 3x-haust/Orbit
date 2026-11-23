@@ -2,7 +2,7 @@ import AppKit
 
 /// Orbit Preview, the Quick Look extension inside Orbit.app that lists archive and folder contents.
 enum QuickLookExtension {
-    static let identifier = "com.lyu.orbit.quicklook"
+    static let identifier = "dev.3xhaust.Orbit.quicklook"
 
     static func openSettings() {
         let urls = [
