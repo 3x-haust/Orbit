@@ -80,6 +80,7 @@
 		47364602B8DB05386F86B391 /* ScriptedPlayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7801AE5639A87B07980FA80A /* ScriptedPlayers.swift */; };
 		79824F9D228C7A8D8F63B9ED /* NotchHomeLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */; };
 		54B239F2ECB0BDCA136D1603 /* ClaudeStatusLineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE199EFEF268C8ABEA690A2 /* ClaudeStatusLineBridge.swift */; };
+		A5568B582893B6BE46F197C4 /* NotchUsageCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9213DBA6C9BAA3572A2C6E7 /* NotchUsageCLI.swift */; };
 		5FC3A7A3C9C4A660DCAA5C57 /* NotchAIUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */; };
 		B03A123789F20B636472EEA1 /* NotchAIUsageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */; };
 		4BA52F6F9D6857E504DDFF8E /* NotchPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */; };
@@ -474,6 +475,7 @@
 		A500758B091531D79013DFC1 /* WidgetWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetWindow.swift; sourceTree = "<group>"; };
 		59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeLayout.swift; sourceTree = "<group>"; };
 		FEE199EFEF268C8ABEA690A2 /* ClaudeStatusLineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStatusLineBridge.swift; sourceTree = "<group>"; };
+		C9213DBA6C9BAA3572A2C6E7 /* NotchUsageCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchUsageCLI.swift; sourceTree = "<group>"; };
 		30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsage.swift; sourceTree = "<group>"; };
 		A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsageCard.swift; sourceTree = "<group>"; };
 		A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPrefs.swift; sourceTree = "<group>"; };
@@ -1003,6 +1005,7 @@
 				814260B5C9AC2E9E0C009A90 /* NotchPanel.swift */,
 				59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */,
 				FEE199EFEF268C8ABEA690A2 /* ClaudeStatusLineBridge.swift */,
+				C9213DBA6C9BAA3572A2C6E7 /* NotchUsageCLI.swift */,
 				30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */,
 				A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */,
 				A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */,
@@ -1507,6 +1510,7 @@
 				C2278FF040D05AF031F560E4 /* NotchPlayerViews.swift in Sources */,
 				79824F9D228C7A8D8F63B9ED /* NotchHomeLayout.swift in Sources */,
 				54B239F2ECB0BDCA136D1603 /* ClaudeStatusLineBridge.swift in Sources */,
+				A5568B582893B6BE46F197C4 /* NotchUsageCLI.swift in Sources */,
 				5FC3A7A3C9C4A660DCAA5C57 /* NotchAIUsage.swift in Sources */,
 				B03A123789F20B636472EEA1 /* NotchAIUsageCard.swift in Sources */,
 				4BA52F6F9D6857E504DDFF8E /* NotchPrefs.swift in Sources */,

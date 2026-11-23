@@ -274,12 +274,7 @@ private struct NotchAIProfileEditor: View {
         }
         .task(id: check?.id) {
             guard let request = check else { return }
-            let work = Task.detached(priority: .utility) { NotchAIUsageReader.read(request.profile) }
-            let reading = await withTaskCancellationHandler {
-                await work.value
-            } onCancel: {
-                work.cancel()
-            }
+            let reading = await NotchAIUsageService.shared.read(request.profile)
             if !Task.isCancelled, check?.id == request.id { result = reading }
         }
     }
@@ -310,7 +305,8 @@ private struct NotchAIProfileEditor: View {
             let now = Date()
             let hasCurrentWindow = snapshot.windows.contains { $0.isCurrent(at: now) }
             return hasCurrentWindow ? "Quota data found" : "Quota data found, but expired"
-        case .missing: return "Waiting for quota data"
+        case .sessionCost: return "Session cost found"
+        case .claudeUnverifiedCost, .missing: return "Waiting for quota data"
         case .unreadable: return "Can’t read source folder"
         case .invalid: return "Invalid quota data"
         }
@@ -351,9 +347,9 @@ extension NotchAIProvider {
     var instructions: String {
         switch self {
         case .codex:
-            "Choose a Codex profile folder containing its sessions directory. Orbit reads the quota snapshots recorded by Codex."
+            "Choose a Codex profile folder. Orbit checks the signed-in account through the installed CLI, then uses saved quota snapshots when the CLI is unavailable."
         case .claude:
-            "Orbit reads Claude Code’s local quota cache automatically when it’s current."
+            "Orbit reads recent subscription quota automatically. Connect the status line for ongoing quota updates or API session cost."
         case .custom:
             "Put a version 1 orbit-quota.json file from your quota exporter in this folder."
         case .codexBar:

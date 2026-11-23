@@ -6,13 +6,13 @@ Orbit displays quota reported by the provider. Values reflect the latest local s
 
 ## Codex
 
-The built-in profile uses `CODEX_HOME` when available to Orbit, or `~/.codex`. Choose a different Codex data folder for a separate profile. Orbit looks for quota snapshots in Codex’s local rollout logs. Some sessions omit quota snapshots. Open a session in Codex and make a request if the profile is waiting for data.
+The built-in profile uses `CODEX_HOME` when available to Orbit, or `~/.codex`. Choose a different Codex data folder for a separate profile. When Codex is installed and signed in with ChatGPT, Orbit asks its app server for the current account quota. This works for shared plan usage from other clients, such as Pi or OpenCode, when Codex is signed in to the same account and workspace. Orbit also reads existing Codex rollout snapshots if the app server cannot be reached. A ChatGPT login in Pi or OpenCode alone does not sign Codex in.
 
 ## Claude Code
 
 The built-in profile uses `CLAUDE_CONFIG_DIR` when available to Orbit, or `~/.claude`. Orbit reads Claude Code’s recent local quota cache automatically. Run `/usage` in Claude Code to refresh that cache.
 
-For updates as you use Claude Code, edit the profile and click **Connect existing status line**. Orbit detects the user settings in the selected profile folder and wraps the existing command. Claude Code keeps displaying that command’s output, and Orbit saves its 5-hour and weekly quota data to `orbit-quota.json`. **Disconnect status line** restores the previous command. The connection uses tools included with macOS and reads the quota fields Claude Code already sends to its status line.
+For updates as you use Claude Code, edit the profile and click **Connect existing status line**. Orbit detects the user settings in the selected profile folder and wraps the existing command. Claude Code keeps displaying that command’s output, and Orbit saves its 5-hour and weekly quota data to `orbit-quota.json`. If the Claude Code session uses an API key, Orbit can show the estimated cost for the latest session from `orbit-claude-cost.json`. The estimate comes from Claude Code’s status line and can differ from the API bill. **Disconnect status line** restores the previous command. The connection uses tools included with macOS and reads the quota fields Claude Code already sends to its status line.
 
 Project or managed settings can override your user status line. See the [Claude Code status line guide](https://code.claude.com/docs/en/statusline) and [settings precedence](https://code.claude.com/docs/en/settings).
 

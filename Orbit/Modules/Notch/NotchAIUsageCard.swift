@@ -114,21 +114,18 @@ struct NotchAIUsageCard: View {
 
     private func refresh(_ profiles: [NotchAIProfile]) async {
         while !Task.isCancelled {
-            let work = Task.detached(priority: .utility) {
-                var results: [NotchAIProfile.ID: Reading] = [:]
+            await withTaskGroup(of: Reading.self) { group in
                 for profile in profiles {
-                    guard !Task.isCancelled else { break }
-                    results[profile.id] = Reading(profile: profile, result: NotchAIUsageReader.read(profile))
+                    group.addTask {
+                        let result = await NotchAIUsageService.shared.read(profile)
+                        return Reading(profile: profile, result: result)
+                    }
                 }
-                return results
+                for await reading in group {
+                    guard !Task.isCancelled else { break }
+                    readings[reading.profile.id] = reading
+                }
             }
-            let results = await withTaskCancellationHandler {
-                await work.value
-            } onCancel: {
-                work.cancel()
-            }
-            guard !Task.isCancelled else { return }
-            readings = results
             try? await Task.sleep(for: .seconds(60))
         }
     }
@@ -151,13 +148,34 @@ struct NotchAIUsageCard: View {
                         NotchAIWindowView(window: window, mode: options.mode, now: now)
                     }
                 }
-            case .missing: stateText("Waiting for quota data")
+            case .sessionCost(let cost):
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 5) {
+                        stateText("Estimated session cost")
+                        Spacer(minLength: 0)
+                        costAmount(cost)
+                    }
+                    VStack(alignment: .leading, spacing: 3) {
+                        stateText("Estimated session cost")
+                        costAmount(cost)
+                    }
+                }
+                .help("Updated %@".loc(cost.observedAt.formatted(date: .abbreviated, time: .shortened)))
+                .accessibilityElement(children: .combine)
+            case .claudeUnverifiedCost, .missing: stateText("Waiting for quota data")
             case .unreadable: stateText("Can’t read source folder")
             case .invalid: stateText("Invalid quota data")
             case nil: stateText("Checking…")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func costAmount(_ cost: NotchAISessionCost) -> some View {
+        Text(cost.usd.formatted(.currency(code: "USD").precision(.fractionLength(2...4))))
+            .font(.system(size: 11, weight: .semibold))
+            .monospacedDigit()
+            .fixedSize()
     }
 
     private func stateText(_ text: String) -> some View {

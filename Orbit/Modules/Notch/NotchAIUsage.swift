@@ -68,8 +68,15 @@ struct NotchAIQuotaSnapshot: Equatable, Sendable {
     let windows: [NotchAIQuotaWindow]
 }
 
+struct NotchAISessionCost: Equatable, Sendable {
+    let usd: Double
+    let observedAt: Date
+}
+
 enum NotchAIUsageResult: Equatable, Sendable {
     case available(NotchAIQuotaSnapshot)
+    case sessionCost(NotchAISessionCost)
+    case claudeUnverifiedCost(NotchAISessionCost)
     case missing
     case unreadable
     case invalid
@@ -85,7 +92,7 @@ enum NotchAIUsageReader {
     private static let rateLimitsMarker = Data("\"rate_limits\"".utf8)
     private typealias JSON = [String: Any]
 
-    static func read(_ profile: NotchAIProfile, now: Date = .now) -> NotchAIUsageResult {
+    static func read(_ profile: NotchAIProfile, now: Date = .now, allowUnverifiedCost: Bool = false) -> NotchAIUsageResult {
         guard let folder = profile.sourceFolder else { return .missing }
         let dates = Dates(now: now)
         do {
@@ -93,7 +100,7 @@ enum NotchAIUsageReader {
             case .codex:
                 return try codexSnapshot(in: folder, dates: dates)
             case .claude:
-                return try claudeUsage(in: folder, dates: dates)
+                return try claudeUsage(in: folder, dates: dates, allowUnverifiedCost: allowUnverifiedCost)
             case .custom:
                 let (data, _) = try snapshotFile("orbit-quota.json", in: folder)
                 return try customSnapshot(data, dates: dates)
@@ -110,14 +117,44 @@ enum NotchAIUsageReader {
         }
     }
 
-    private static func claudeUsage(in folder: URL, dates: Dates) throws -> NotchAIUsageResult {
+    static func codexAccountSnapshot(_ payload: [String: Any], now: Date) -> NotchAIUsageResult {
+        let buckets = payload["rateLimitsByLimitId"] as? JSON
+        let limits = (buckets?["codex"] as? JSON) ?? (payload["rateLimits"] as? JSON)
+        guard let limits, isCodexAccountLimit(limits["limitId"]) else { return .missing }
+        let dates = Dates(now: now)
+        return windows(["primary", "secondary"].map { key in
+            let row = limits[key] as? JSON
+            return window(row, minutes: codexMinutes(row?["windowDurationMins"]), usedKey: "usedPercent",
+                          resetKey: "resetsAt", observed: now, dates: dates)
+        })
+    }
+
+    private static func claudeUsage(in folder: URL, dates: Dates, allowUnverifiedCost: Bool) throws -> NotchAIUsageResult {
         var capture: NotchAIUsageResult = .missing
         var captureError: Error?
         do {
             let (data, modified) = try snapshotFile("orbit-quota.json", in: folder)
-            capture = try claudeSnapshot(data, modified: modified, dates: dates)
+            let document = try object(data)
+            capture = claudeSnapshot(document, modified: modified, dates: dates)
         } catch {
             if !isMissing(error) { captureError = error }
+        }
+
+        if let (data, _) = try? snapshotFile("orbit-claude-cost.json", in: folder),
+           let document = try? object(data),
+           let usd = number(document["session_cost_usd"]), usd >= 0,
+           let observed = dates.observation(document["captured_at"]) {
+            let newer: Bool
+            if case .available(let snapshot) = capture, let quotaTime = snapshot.windows.first?.observedAt {
+                newer = observed > quotaTime
+            } else {
+                newer = true
+            }
+            if newer {
+                let cost = NotchAISessionCost(usd: usd, observedAt: observed)
+                if document["api_key_session"] as? Bool == true { return .sessionCost(cost) }
+                if allowUnverifiedCost { return .claudeUnverifiedCost(cost) }
+            }
         }
 
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -152,8 +189,7 @@ enum NotchAIUsageReader {
         return current.isEmpty ? nil : NotchAIQuotaSnapshot(windows: current)
     }
 
-    private static func claudeSnapshot(_ data: Data, modified: Date, dates: Dates) throws -> NotchAIUsageResult {
-        let document = try object(data)
+    private static func claudeSnapshot(_ document: JSON, modified: Date, dates: Dates) -> NotchAIUsageResult {
         guard let rawLimits = document["rate_limits"], !(rawLimits is NSNull) else { return .missing }
         guard let limits = rawLimits as? JSON,
               let observed = dates.observation(document["captured_at"], fallback: modified) else {

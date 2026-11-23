@@ -121,6 +121,32 @@ import Foundation
         if case .available(let live) = NotchAIUsageReader.read(bridge) { bridgeWindows = live.windows }
         else { bridgeWindows = [] }
         check(bridgeWindows.first?.usedPercent == 28, "The installed status line publishes a readable quota snapshot")
+        let apiInput = #"{"cost":{"total_cost_usd":0.0234},"unrelated":"sensitive fixture"}"#
+        let apiOutput = try runShell(wrappedCommand, input: apiInput, apiKey: true)
+        check(apiOutput == "existing: " + apiInput, "API cost capture preserves the previous status line output")
+        let costFile = bridgeFolder.appendingPathComponent("orbit-claude-cost.json")
+        let costDocument = try String(contentsOf: costFile, encoding: .utf8)
+        check(!costDocument.contains("sensitive fixture") && !costDocument.contains("fake-key"),
+              "The session cost snapshot omits prompts and credential values")
+        if case .sessionCost(let cost) = NotchAIUsageReader.read(bridge) {
+            check(cost.usd == 0.0234, "API-key mode displays the latest Claude session cost")
+        } else {
+            check(false, "API-key mode displays the latest Claude session cost")
+        }
+        _ = try runShell(wrappedCommand, input: fixture)
+        if case .available(let freshQuota) = NotchAIUsageReader.read(bridge) {
+            check(freshQuota.windows.first?.usedPercent == 28, "A newer subscription snapshot takes precedence over old cost")
+        } else {
+            check(false, "A newer subscription snapshot takes precedence over old cost")
+        }
+        _ = try runShell(wrappedCommand, input: apiInput)
+        if case .claudeUnverifiedCost(let cost) = NotchAIUsageReader.read(bridge, allowUnverifiedCost: true) {
+            check(cost.usd == 0.0234, "Cost without session authentication requires a separate API-key check")
+        } else {
+            check(false, "Cost without session authentication requires a separate API-key check")
+        }
+        check(availableLiveQuota(bridge),
+              "Unverified cost does not replace the local subscription snapshot")
         let quotaFile = bridgeFolder.appendingPathComponent("orbit-quota.json")
         let savedQuota = try String(contentsOf: quotaFile, encoding: .utf8)
         check(!savedQuota.contains("Fixture") && !savedQuota.contains("unrelated"), "The connection writes only quota data")
@@ -155,6 +181,47 @@ import Foundation
         check(NotchAIUsageReader.read(custom, now: now) == .invalid, "oversized snapshot is rejected")
         _ = try write("{", to: "custom/orbit-quota.json", in: root)
         check(NotchAIUsageReader.read(custom, now: now) == .invalid, "incomplete JSON is invalid")
+
+        let cliHome = root.appendingPathComponent("codex-account", isDirectory: true)
+        try FileManager.default.createDirectory(at: cliHome, withIntermediateDirectories: false)
+        let codexCLI = try write(#"""
+        #!/bin/sh
+        set -eu
+        test "$1" = app-server
+        test "${CODEX_HOME##*/}" = codex-account
+        IFS= read -r command
+        case "$command" in *initialize*) ;; *) exit 1 ;; esac
+        printf '%s\n' '{"id":1,"result":{}}'
+        IFS= read -r command
+        case "$command" in *initialized*) ;; *) exit 1 ;; esac
+        IFS= read -r command
+        case "$command" in *account/read*) ;; *) exit 1 ;; esac
+        printf '%s\n' '{"id":2,"result":{"account":{"type":"chatgpt"}}}'
+        IFS= read -r command
+        case "$command" in *account/rateLimits/read*) ;; *) exit 1 ;; esac
+        printf '%s\n' '{"method":"account/rateLimits/updated","params":{}}'
+        printf '%s\n' '{"id":3,"result":{"rateLimits":{"limitId":"other","primary":{"usedPercent":99,"windowDurationMins":300}},"rateLimitsByLimitId":{"codex":{"limitId":"codex","secondary":{"usedPercent":43.5,"windowDurationMins":10080}}}}}'
+        """#, to: "bin/codex", in: root)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: codexCLI.path)
+        if case .available(let quota) = NotchCodexQuota.read(executable: codexCLI, profile: cliHome, now: now) {
+            check(quota.windows.map(\.minutes) == [10_080] && quota.windows.first?.usedPercent == 43.5,
+                  "The official RPC handshake returns Codex quota without a session log")
+        } else {
+            check(false, "The official RPC handshake returns Codex quota without a session log")
+        }
+        let apiCodex = try write(#"""
+        #!/bin/sh
+        IFS= read -r command
+        printf '%s\n' '{"id":1,"result":{}}'
+        IFS= read -r command
+        IFS= read -r command
+        printf '%s\n' '{"id":2,"result":{"account":{"type":"apiKey"}}}'
+        """#, to: "bin/api-codex", in: root)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: apiCodex.path)
+        check(NotchCodexQuota.read(executable: apiCodex, profile: cliHome, now: now) == .missing,
+              "An API-key Codex account does not reuse historical subscription usage")
+        check(NotchCodexQuota.read(executable: URL(fileURLWithPath: "/usr/bin/false"), profile: cliHome, now: now) == nil,
+              "A closed Codex process falls back without killing Orbit")
 
         let grok = profile(.codexBar, "codexbar", in: root, key: "Grok")
         let antigravity = profile(.codexBar, "codexbar", in: root, key: "antigravity")
@@ -199,7 +266,12 @@ import Foundation
         return snapshot.windows
     }
 
-    private static func runShell(_ command: String, input: String) throws -> String {
+    private static func availableLiveQuota(_ profile: NotchAIProfile) -> Bool {
+        if case .available(let quota) = NotchAIUsageReader.read(profile) { return quota.windows.first?.usedPercent == 28 }
+        return false
+    }
+
+    private static func runShell(_ command: String, input: String, apiKey: Bool = false) throws -> String {
         let process = Process()
         let stdin = Pipe()
         let stdout = Pipe()
@@ -207,6 +279,8 @@ import Foundation
         process.arguments = ["-c", command]
         process.standardInput = stdin
         process.standardOutput = stdout
+        process.environment = ProcessInfo.processInfo.environment.filter { $0.key != "ANTHROPIC_API_KEY" }
+        if apiKey { process.environment?["ANTHROPIC_API_KEY"] = "fake-key" }
         try process.run()
         try stdin.fileHandleForWriting.write(contentsOf: Data(input.utf8))
         try stdin.fileHandleForWriting.close()

@@ -100,6 +100,7 @@ enum ClaudeStatusLineBridge {
         let script = #"""
         use strict;
         use warnings;
+        use Time::HiRes qw(time);
         binmode STDIN;
         binmode STDOUT;
         local $/;
@@ -107,16 +108,27 @@ enum ClaudeStatusLineBridge {
         my ($target, $forward) = @ARGV;
         eval {
             my $data = decode_json($input);
-            if (ref($data) eq 'HASH' && ref($data->{rate_limits}) eq 'HASH') {
+            if (ref($data) eq 'HASH') {
+                my %snapshot = (captured_at => time);
                 my %windows;
-                for my $key ('five_hour', 'seven_day') {
-                    my $window = $data->{rate_limits}->{$key};
-                    next unless ref($window) eq 'HASH' && defined $window->{used_percentage};
-                    $windows{$key} = { used_percentage => $window->{used_percentage}, resets_at => $window->{resets_at} };
+                if (ref($data->{rate_limits}) eq 'HASH') {
+                    for my $key ('five_hour', 'seven_day') {
+                        my $window = $data->{rate_limits}->{$key};
+                        next unless ref($window) eq 'HASH' && defined $window->{used_percentage};
+                        $windows{$key} = { used_percentage => $window->{used_percentage}, resets_at => $window->{resets_at} };
+                    }
                 }
-                if (%windows) {
+                my $api = $ENV{ANTHROPIC_API_KEY};
+                if (%windows && !$api) {
+                    $snapshot{rate_limits} = \%windows;
+                } elsif (ref($data->{cost}) eq 'HASH' && defined $data->{cost}->{total_cost_usd}) {
+                    $snapshot{session_cost_usd} = $data->{cost}->{total_cost_usd};
+                    $snapshot{api_key_session} = $api ? JSON::PP::true : JSON::PP::false;
+                    $target = dirname($target) . '/orbit-claude-cost.json';
+                }
+                if (keys(%snapshot) > 1) {
                     my ($file, $temp) = tempfile('.orbit-quota-XXXXXXXX', DIR => dirname($target), UNLINK => 1);
-                    print {$file} encode_json({ captured_at => time, rate_limits => \%windows }) or die $!;
+                    print {$file} encode_json(\%snapshot) or die $!;
                     close $file or die $!;
                     rename($temp, $target) or die $!;
                 }

@@ -6828,13 +6828,13 @@
         }
       }
     },
-    "Choose a Codex profile folder containing its sessions directory. Orbit reads the quota snapshots recorded by Codex.": {
+    "Choose a Codex profile folder. Orbit checks the signed-in account through the installed CLI, then uses saved quota snapshots when the CLI is unavailable.": {
       "extractionState": "manual",
       "localizations": {
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "sessions 폴더가 들어 있는 Codex 프로필 폴더를 고르면 Codex가 기록한 한도 정보를 읽어요."
+            "value": "Codex 프로필 폴더를 고르세요. 설치된 CLI로 로그인한 계정의 한도를 확인하고, CLI를 사용할 수 없으면 저장된 한도 정보를 읽어요."
           }
         }
       }
@@ -11674,6 +11674,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "기본"
+          }
+        }
+      }
+    },
+    "Estimated session cost": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세션 예상 비용"
           }
         }
       }
@@ -22217,17 +22228,6 @@
         }
       }
     },
-    "Orbit reads Claude Code’s local quota cache automatically when it’s current.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude Code의 최신 로컬 한도 캐시를 자동으로 읽어요."
-          }
-        }
-      }
-    },
     "Orbit reads quota snapshots from your selected folders.": {
       "extractionState": "manual",
       "localizations": {
@@ -22235,6 +22235,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "선택한 폴더에서 한도 정보를 읽어요."
+          }
+        }
+      }
+    },
+    "Orbit reads recent subscription quota automatically. Connect the status line for ongoing quota updates or API session cost.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최신 구독 한도를 자동으로 읽어요. 한도를 계속 갱신하거나 API 세션 비용을 보려면 상태줄을 연결하세요."
           }
         }
       }
@@ -27391,6 +27402,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "서비스 권장"
+          }
+        }
+      }
+    },
+    "Session cost found": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "세션 비용 데이터를 찾았어요"
           }
         }
       }
