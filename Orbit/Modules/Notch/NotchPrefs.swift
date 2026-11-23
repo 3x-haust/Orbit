@@ -25,6 +25,8 @@ enum NotchPrefs {
     static let tabMirror = "notch.tab.mirror"
     static let tabTimer = "notch.tab.timer"
     static let tabClipboard = "notch.tab.clipboard"
+    /// The folder the Folder tab shows; empty for none (and then there's no Folder tab).
+    static let folderPath = "notch.folder.path"
 
     // Live activities beside the closed notch
     static let liveMusic = "notch.live.music"
@@ -36,7 +38,7 @@ enum NotchPrefs {
     static let liveDownloads = "notch.live.downloads"
     static let liveBluetooth = "notch.live.bluetooth"
 
-    /// The tab an open shows: "home", or "last" (the one last looked at).
+    /// The tab an open shows: "home", "last" (the one last looked at) or "folder".
     static let openTab = "notch.openTab"
 
     /// Minutes for the "Start Notch Timer" shortcut.
@@ -50,7 +52,7 @@ enum NotchPrefs {
             enabled: true,
             hoverOpen: true, openDelay: 0.12, closeDelay: 0.35, swipe: true, haptics: true,
             scale: 1.0, radius: 30.0, shadow: true, screens: "notch", hideFullScreen: true,
-            tabHome: true, tabShelf: true, tabMirror: true, tabTimer: true, tabClipboard: true,
+            tabHome: true, tabShelf: true, tabMirror: true, tabTimer: true, tabClipboard: true, folderPath: "",
             liveMusic: true, liveCharging: true, liveTimer: true, liveRecording: true, liveAwake: true,
             liveFocus: true, liveDownloads: false, liveBluetooth: false,
             timerMinutes: 25, hudPlace: "bottom", openTab: "home",
