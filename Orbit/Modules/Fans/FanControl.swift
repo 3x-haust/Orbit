@@ -93,12 +93,15 @@ final class FanControl {
     }
 
     /// The update moves the old app to the Trash, so the helper still running from it fails its
-    /// signature check and every call to it fails. A slow or interrupted one is launchd's to restart.
+    /// signature check and every call to it fails. A legacy helper also rejects the new app ID,
+    /// which reaches the client as an interrupted handshake. launchd cannot repair that by starting
+    /// the same old binary again; re-register the helper bundled with this app. A slow one is left alone.
     nonisolated static func helperNeedsRestart(_ reply: Result<Int, Error>?) -> Bool {
         switch reply {
         case .success(let running): running < FanHelper.version
         case .failure(let error as NSError):
-            error.domain == NSCocoaErrorDomain && error.code == NSXPCConnectionCodeSigningRequirementFailure
+            error.domain == NSCocoaErrorDomain
+                && [NSXPCConnectionCodeSigningRequirementFailure, NSXPCConnectionInterrupted].contains(error.code)
         case nil: false
         }
     }

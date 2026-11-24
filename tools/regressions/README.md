@@ -255,8 +255,12 @@ bash tools/regressions/run-fan-helper-tests.sh \
 The runner imports the app's Debug module and checks when Orbit registers its
 privileged helper again at launch: when the running helper is older, or when
 macOS can no longer verify it because an update replaced its binary (every call
-then fails and closed-lid mode falls back to the password prompt). A helper
-that is current, interrupted or slow to answer is left running.
+then fails and closed-lid mode falls back to the password prompt). It also
+replaces a legacy helper that rejects the new app identity: an isolated,
+anonymous XPC listener reproduces the interrupted handshake returned by macOS.
+A current or newer helper, a slow response, an unrelated error domain, and an
+invalid connection alone do not trigger replacement. No installed helper,
+system sleep settings, or user preferences are changed by this runner.
 
 # Runner regression
 
