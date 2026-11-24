@@ -120,6 +120,7 @@ enum Shell {
     enum State { case ready }
     var helper: State = .ready
     private var connection: TestConnection?
+    private var upgrade: Task<Void, Never>?
     var lastError: String?
     func refresh() {}
 ''' + helper + once + proxy + "\n" + shared_proxy + r'''
