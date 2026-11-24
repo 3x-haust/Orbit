@@ -14,6 +14,8 @@ The built-in profile uses `CLAUDE_CONFIG_DIR` when available to Orbit, or `~/.cl
 
 For updates as you use Claude Code, edit the profile and click **Connect existing status line**. Orbit detects the user settings in the selected profile folder and wraps the existing command. Claude Code keeps displaying that command’s output, and Orbit saves its 5-hour and weekly quota data to `orbit-quota.json`. If the Claude Code session uses an API key, Orbit can show the estimated cost for the latest session from `orbit-claude-cost.json`. The estimate comes from Claude Code’s status line and can differ from the API bill. **Disconnect status line** restores the previous command. The connection uses tools included with macOS and reads the quota fields Claude Code already sends to its status line.
 
+Connecting, updating, or disconnecting rewrites `settings.json` with sorted keys and two-space indentation; existing values are preserved, but formatting and key order may change. The API authentication check inherits the running Claude Code session’s environment, including `CLAUDE_CONFIG_DIR` when set.
+
 Project or managed settings can override your user status line. See the [Claude Code status line guide](https://code.claude.com/docs/en/statusline) and [settings precedence](https://code.claude.com/docs/en/settings).
 
 ## CodexBar or another provider

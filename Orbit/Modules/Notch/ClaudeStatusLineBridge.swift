@@ -104,7 +104,7 @@ enum ClaudeStatusLineBridge {
     }
 
     private static let interpreter = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
-    private static let signature = "# Orbit Claude status line v3"
+    private static let signature = "# Orbit Claude status line v4"
     // SHA-256 fingerprints of the two unversioned bridge commands.
     private static let legacyScriptHashes: Set<String> = [
         "8f80c08b1949f6bdd235230e2f8710eadb4c9477d99e90dc27299f82ea5f9d5d",
@@ -115,7 +115,7 @@ enum ClaudeStatusLineBridge {
         guard command.hasPrefix(interpreter), let separator = command.range(of: " -- ") else { return nil }
         let script = command[command.index(command.startIndex, offsetBy: interpreter.count)..<separator.lowerBound]
         let currentVersion = script.hasPrefix("'" + signature + "\n")
-        if !currentVersion && !script.hasPrefix("'# Orbit Claude status line v2\n") {
+        if !currentVersion && !["v2", "v3"].contains(where: { script.hasPrefix("'# Orbit Claude status line " + $0 + "\n") }) {
             let hash = SHA256.hash(data: Data(script.utf8)).map { String(format: "%02x", $0) }.joined()
             guard legacyScriptHashes.contains(hash) else { return nil }
         }
@@ -154,7 +154,6 @@ enum ClaudeStatusLineBridge {
         }
 
         sub api_key_auth {
-            my ($folder) = @_;
             my @candidates = ('claude');
             push @candidates, "$ENV{HOME}/.local/bin/claude" if defined $ENV{HOME};
             push @candidates, '/opt/homebrew/bin/claude', '/usr/local/bin/claude';
@@ -167,7 +166,7 @@ enum ClaudeStatusLineBridge {
                 open STDOUT, '>&', $write or POSIX::_exit(1);
                 open STDERR, '>', '/dev/null' or POSIX::_exit(1);
                 close $write;
-                local $ENV{CLAUDE_CONFIG_DIR} = $folder;
+                # Inherit the session environment, including an absent CLAUDE_CONFIG_DIR.
                 for my $cli (@candidates) {
                     next if $cli ne 'claude' && !-x $cli;
                     exec {$cli} $cli, 'auth', 'status';
@@ -254,7 +253,7 @@ enum ClaudeStatusLineBridge {
                         $checked = $previous->{auth_checked_at};
                         $api = $previous->{api_key_session};
                     } else {
-                        $api = api_key_auth($folder);
+                        $api = api_key_auth();
                     }
                     $snapshot{session_cost_usd} = $data->{cost}->{total_cost_usd};
                     $snapshot{session_id} = $session;

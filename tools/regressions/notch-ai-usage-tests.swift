@@ -146,6 +146,9 @@ import Foundation
         let claudeCLI = try write(#"""
         #!/bin/sh
         test "$*" = "auth status" || exit 1
+        # The auth namespace must match the parent session, even for the default folder.
+        test "${CLAUDE_CONFIG_DIR+x}" = "${ORBIT_EXPECT_CONFIG_SET:-}" || exit 1
+        test "${CLAUDE_CONFIG_DIR:-}" = "${ORBIT_EXPECT_CONFIG_DIR:-}" || exit 1
         case "${ORBIT_FIXTURE_AUTH_MODE:-}" in
             blocked) exec /bin/sleep 10 ;;
             slow_api)
@@ -153,7 +156,11 @@ import Foundation
                 /bin/sleep 0.6
                 printf '%s\n' '{"loggedIn":true,"authMethod":"api_key"}'
                 ;;
-            api_key|claude.ai)
+            keychain_api)
+                test -z "${ANTHROPIC_API_KEY+x}" || exit 1
+                printf '%s\n' '{"loggedIn":true,"authMethod":"api_key"}'
+                ;;
+            api_key|api_key_helper|claude.ai)
                 printf '{"loggedIn":true,"authMethod":"%s"}\n' "$ORBIT_FIXTURE_AUTH_MODE"
                 ;;
         esac
@@ -171,6 +178,25 @@ import Foundation
         } else {
             check(false, "Verified API-key mode displays the latest Claude session cost")
         }
+        for mode in ["keychain_api", "api_key_helper"] {
+            for config in [nil, bridgeFolder.path, root.appendingPathComponent("separate-session-config").path] as [String?] {
+                let sessionInput = apiInput.replacingOccurrences(of: "fixture-api-session", with: UUID().uuidString)
+                let run = try startShell(wrappedCommand, input: sessionInput, path: fixturePath,
+                                         authMode: mode, configDirectory: config)
+                _ = run.stdout.fileHandleForReading.readDataToEndOfFile()
+                run.process.waitUntilExit()
+                let snapshot = try JSONSerialization.jsonObject(with: Data(contentsOf: costFile)) as? [String: Any]
+                check(snapshot?["api_key_session"] as? Bool == true,
+                      "Auth inherits the session config namespace (unset, default, or custom)")
+            }
+        }
+        let v3Command = wrappedCommand.replacingOccurrences(of: "status line v4", with: "status line v3")
+        var v3Settings = original
+        v3Settings["statusLine"] = ["type": "command", "command": v3Command, "padding": 3]
+        try JSONSerialization.data(withJSONObject: v3Settings).write(to: settings, options: .atomic)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .needsUpdate, "The auth environment fix upgrades v3 connections")
+        try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "The v3 connection upgrades without nesting")
         _ = try runShell(wrappedCommand, input: fixture, path: fixturePath, authMode: "api_key")
         check(availableLiveQuota(bridge), "Real subscription quota wins even if an API key is exported")
 
@@ -429,7 +455,7 @@ import Foundation
     }
 
     private static func startShell(_ command: String, input: String, path: String, authMode: String?,
-                                   marker: String? = nil) throws -> (process: Process, stdout: Pipe) {
+                                   marker: String? = nil, configDirectory: String? = nil) throws -> (process: Process, stdout: Pipe) {
         let process = Process()
         let stdin = Pipe()
         let stdout = Pipe()
@@ -438,8 +464,13 @@ import Foundation
         process.standardInput = stdin
         process.standardOutput = stdout
         process.environment = ["PATH": path]
+        if let configDirectory {
+            process.environment?["CLAUDE_CONFIG_DIR"] = configDirectory
+            process.environment?["ORBIT_EXPECT_CONFIG_SET"] = "x"
+            process.environment?["ORBIT_EXPECT_CONFIG_DIR"] = configDirectory
+        }
         if let authMode {
-            process.environment?["ANTHROPIC_API_KEY"] = "fake-key"
+            if authMode != "keychain_api" { process.environment?["ANTHROPIC_API_KEY"] = "fake-key" }
             process.environment?["ORBIT_FIXTURE_AUTH_MODE"] = authMode
         }
         if let marker { process.environment?["ORBIT_FIXTURE_AUTH_MARKER"] = marker }
