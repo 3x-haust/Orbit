@@ -2,7 +2,8 @@ import AppKit
 @testable import Orbit
 
 /// Checks the colors of the runner's percentages (menu bar and status card), and that the runner's own color
-/// isn't left dimmed after the menu bar showed it faded for a moment.
+/// isn't left dimmed: not when it first drew before macOS put it in the menu bar, and not after the menu bar
+/// showed it faded for a moment.
 @main struct RunnerTests {
     @MainActor static func main() async {
         var failed = 0
@@ -41,7 +42,36 @@ import AppKit
                                                 forName: UserDefaults.argumentDomain)
         let runner = MenuBarRunner.shared
         runner.start()
-        try? await Task.sleep(for: .milliseconds(800))
+        // Orbit starting up: the new item already has the dark menu bar's look before macOS has laid it out
+        // in the bar. A template drawn then comes back opaque grey, which must not become the runner's color;
+        // once in the bar it takes the same color as when measured again there (as turning the accent color
+        // on and off does).
+        if let button = runner.button {
+            func glyph() -> NSColor? {
+                button.layer?.sublayers?.last?.backgroundColor.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }
+            }
+            button.appearance = NSAppearance(named: .vibrantDark)
+            let early = glyph()
+            print("runner glyph before the item is in the bar: " + (early.map { String(format: "white %.2f alpha %.2f", $0.redComponent, $0.alphaComponent) } ?? "none"))
+            check(early == nil, "runner takes no color before it's in the menu bar")
+            try? await Task.sleep(for: .milliseconds(800))
+            let started = glyph()
+            for accent in [true, false] {
+                UserDefaults.standard.setVolatileDomain([Pref.runnerEnabled: true, Pref.runnerShowPercent: false, Pref.runnerAccent: accent],
+                                                        forName: UserDefaults.argumentDomain)
+                runner.refreshLook()
+            }
+            let measured = glyph()
+            print(String(format: "runner glyph at start white %.2f alpha %.2f, measured in the bar white %.2f alpha %.2f",
+                         started?.redComponent ?? -1, started?.alphaComponent ?? -1, measured?.redComponent ?? -1, measured?.alphaComponent ?? -1))
+            check(started != nil && measured != nil && abs(started!.redComponent - measured!.redComponent) < 0.02
+                  && abs(started!.alphaComponent - measured!.alphaComponent) < 0.02,
+                  "runner started before it was in the menu bar takes the bar's color")
+            button.appearance = nil
+            try? await Task.sleep(for: .milliseconds(300))
+        } else {
+            check(false, "runner started before it was in the menu bar takes the bar's color (no menu bar item)")
+        }
         if let button = runner.button {
             func alpha() -> CGFloat {
                 button.layer?.sublayers?.last?.backgroundColor.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB)?.alphaComponent } ?? -1

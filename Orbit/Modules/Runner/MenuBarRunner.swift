@@ -308,6 +308,8 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         }
         retime()
         drawTitle()
+        // A still runner has no next frame to pick up the menu bar's color once the item is in the bar.
+        if glyph == nil, frames.first?.isTemplate == true { drawFrame() }
         if menuOpen { refreshStats() }
     }
 
@@ -381,7 +383,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         // new layout, and Orbit's menu bar watcher re-read the whole bar.
         if layer.frame != rect { layer.frame = rect }
         if layer.contentsScale != scale { layer.contentsScale = scale }
-        if let color {
+        if frame.isTemplate {
             // One-color frames take the color macOS gives template images in the menu bar.
             let mask = layer.mask ?? CALayer()
             if mask.frame != layer.bounds { mask.frame = layer.bounds }
@@ -389,7 +391,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
             mask.contents = image
             if layer.mask !== mask { layer.mask = mask }
             if layer.contents != nil { layer.contents = nil }
-            if layer.backgroundColor != color { layer.backgroundColor = color }
+            if let color, layer.backgroundColor != color { layer.backgroundColor = color }
         } else {
             if layer.mask != nil { layer.mask = nil }
             if layer.backgroundColor != nil { layer.backgroundColor = nil }
@@ -432,9 +434,14 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
 
     /// Draws a solid template square the way the button draws its image and reads the color back:
     /// the menu bar's own glyph color for this appearance (or the accent, when that's on).
-    private func glyphColor(in button: NSStatusBarButton) -> CGColor {
+    /// Nil until macOS has laid the item out in the menu bar.
+    private func glyphColor(in button: NSStatusBarButton) -> CGColor? {
         let name = button.effectiveAppearance.name
         if let glyph, glyph.appearance == name { return glyph.color }
+        // A new item can have the dark bar's look before it's in the bar (its window still has no height).
+        // A template drawn then comes back opaque grey (82 of 255) instead of the bar's white at 0.90, and
+        // with the look unchanged once the item reached the bar, that grey was kept.
+        guard let window = button.window, window.frame.height > 0 else { return nil }
         let probe = NSImage(size: NSSize(width: 8, height: 8), flipped: false) { rect in
             NSColor.black.setFill()
             rect.fill()
