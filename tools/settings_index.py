@@ -21,6 +21,9 @@ for f in sorted(glob.glob('tools/i18n/ko*.json')):  # same order as tools/i18n.p
 syn = json.load(open('tools/settings_synonyms.json'))
 # Words too common to say which group a text belongs to ("screen" is in half the titles).
 no_trigger = {w.lower() for w in syn.get('noTrigger', [])}
+# Ambiguous labels on one page must not suppress discovery elsewhere.
+no_trigger_by_page = {page: {w.lower() for w in words}
+                      for page, words in syn.get('noTriggerByPage', {}).items()}
 
 literal = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 
@@ -91,8 +94,9 @@ for name, page in sorted(routes.items(), key=lambda kv: order.index(kv[1]) if kv
         if page not in owner[s]: owner[s].append(page)
         queue += sorted(uses.get(s, ()))
 
-def keywords_for(*texts):
+def keywords_for(*texts, page=None):
     """Synonym groups the entry's own words belong to, minus the words it already has."""
+    excluded = no_trigger | no_trigger_by_page.get(page, set())
     blob = ' '.join(t.lower() for t in texts if t)
     flat = blob.replace(' ', '')
     def has(w):
@@ -101,7 +105,7 @@ def keywords_for(*texts):
         return re.search(r'(?<![a-z])' + re.escape(w) + r'(?![a-z])', blob) is not None  # "lid" isn't in "slides"
     out = []
     for group in syn['groups']:
-        if any(has(w) for w in group if len(w) >= 2 and w.lower() not in no_trigger):
+        if any(has(w) for w in group if len(w) >= 2 and w.lower() not in excluded):
             out += [w for w in group if w.lower() not in blob]
     return out
 
@@ -112,8 +116,8 @@ def add(kind, page, group, titles_, subtitle, symbol, labels=(), extra=()):
     if key in seen: return
     seen.add(key)
     # Other words for the title count almost as much as the title; for the rest, less.
-    extra = list(extra) + keywords_for(title, ko.get(title))
-    related = [w for w in dict.fromkeys(keywords_for(title, ko.get(title), subtitle, ko.get(subtitle or ''), *labels)) if w not in extra]
+    extra = list(extra) + keywords_for(title, ko.get(title), page=page)
+    related = [w for w in dict.fromkeys(keywords_for(title, ko.get(title), subtitle, ko.get(subtitle or ''), *labels, page=page)) if w not in extra]
     entries.append(dict(kind=kind, page=page, group=group or '', groupKo=ko.get(group or '', '') or '',
                         title=title, titleKo=ko.get(title) or '', subtitle=subtitle or '', subtitleKo=ko.get(subtitle or '') or '',
                         symbol=symbol or '', anchors=titles_,

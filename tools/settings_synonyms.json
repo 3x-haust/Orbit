@@ -926,14 +926,18 @@
     "events",
     "calendar",
     "notification",
-    "알림",
-    "용량",
-    "windows",
-    "배치",
-    "사용량"
+    "알림"
   ],
   "skip": [],
   "keep": [
     "Trash"
-  ]
+  ],
+  "noTriggerByPage": {
+    "notch": [
+      "용량",
+      "windows",
+      "배치",
+      "사용량"
+    ]
+  }
 }
