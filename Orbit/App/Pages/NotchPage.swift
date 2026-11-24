@@ -71,7 +71,7 @@ struct NotchPage: View {
                 }
 
                 SettingsGroup(title: "Tabs", footer: "The mirror turns the camera on only when you ask it to, and off as soon as the notch closes.") {
-                    SettingsRow(title: "Home", subtitle: "Show your chosen widgets when the notch opens to Home.", symbol: "house") {
+                    SettingsRow(title: "Home", subtitle: "Show your chosen music, calendar, and AI usage widgets when the notch opens to Home.", symbol: "house") {
                         Toggle("", isOn: applied($tabHome)).toggleStyle(.switch).labelsHidden()
                     }
                     RowDivider()

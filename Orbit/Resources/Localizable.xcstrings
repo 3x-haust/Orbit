@@ -11289,6 +11289,17 @@
         }
       }
     },
+    "Edit…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "편집…"
+          }
+        }
+      }
+    },
     "Education": {
       "extractionState": "manual",
       "localizations": {
@@ -28253,6 +28264,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "실행한 기능 알림"
+          }
+        }
+      }
+    },
+    "Show your chosen music, calendar, and AI usage widgets when the notch opens to Home.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "노치 홈에서 선택한 음악, 캘린더, AI 사용량 위젯을 보여줘요."
           }
         }
       }
