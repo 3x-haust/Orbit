@@ -7841,6 +7841,17 @@
         }
       }
     },
+    "Color bars by remaining quota, or turn off for solid Orbit orange.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "남은 한도에 따라 막대 색을 바꿔요. 끄면 오빗 주황색으로 통일해요."
+          }
+        }
+      }
+    },
     "Color by usage": {
       "extractionState": "manual",
       "localizations": {
@@ -25456,6 +25467,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 초기화"
+          }
+        }
+      }
+    },
+    "Resets in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 후 초기화"
           }
         }
       }

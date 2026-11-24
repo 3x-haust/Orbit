@@ -2,6 +2,8 @@
 
 In **Notch → Home layout**, turn on **AI Usage** and choose which other widgets to show. In **Notch → AI Usage**, choose profiles, used or remaining percentages, and the limit windows to display. Edit a profile to choose a source folder or check its connection.
 
+**Color by usage** colors the bars by remaining quota: deep green at 75% or more, light green at 50% to below 75%, orange at 25% to below 50%, and red below 25%. This color meaning stays the same in used-percentage mode. Turn it off for solid Orbit orange. The 5-hour and weekly windows share a row when space allows. Narrow widgets use small rings with percentages and reset countdowns; only the narrowest widths stack the limits. Countdown labels show whole hours such as `48h`, or minutes such as `48m` below one hour. Unknown reset times are omitted.
+
 Orbit displays quota reported by the provider. Values reflect the latest local snapshot and expire when its reset time passes. A profile can have only one of the requested windows, and different providers can report different durations. Keep each account’s snapshots in a separate folder.
 
 ## Codex
@@ -12,7 +14,7 @@ The built-in profile uses `CODEX_HOME` when available to Orbit, or `~/.codex`. C
 
 The built-in profile uses `CLAUDE_CONFIG_DIR` when available to Orbit, or `~/.claude`. Orbit reads Claude Code’s recent local quota cache automatically. Run `/usage` in Claude Code to refresh that cache.
 
-For updates as you use Claude Code, edit the profile and click **Connect existing status line**. Orbit detects the user settings in the selected profile folder and wraps the existing command. Claude Code keeps displaying that command’s output, and Orbit saves its 5-hour and weekly quota data to `orbit-quota.json`. If the Claude Code session uses an API key, Orbit can show the estimated cost for the latest session from `orbit-claude-cost.json`. The estimate comes from Claude Code’s status line and can differ from the API bill. **Disconnect status line** restores the previous command. The connection uses tools included with macOS and reads the quota fields Claude Code already sends to its status line.
+For updates as you use Claude Code, edit the profile and click **Connect existing status line**. Orbit detects the user settings in the selected profile folder and wraps the existing command. Claude Code keeps displaying that command’s output, and Orbit saves its 5-hour and weekly quota data to `orbit-quota.json`. If the Claude Code session uses an API key or a keyless Claude Console OAuth login, Orbit can show the estimated cost for the latest session from `orbit-claude-cost.json`. The estimate comes from Claude Code’s status line and can differ from the API bill. **Disconnect status line** restores the previous command. The connection uses tools included with macOS and reads the quota fields Claude Code already sends to its status line.
 
 Connecting, updating, or disconnecting rewrites `settings.json` with sorted keys and two-space indentation; existing values are preserved, but formatting and key order may change. The API authentication check inherits the running Claude Code session’s environment, including `CLAUDE_CONFIG_DIR` when set.
 

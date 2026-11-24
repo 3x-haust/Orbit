@@ -92,6 +92,20 @@ enum NotchAIQuotaLevel: Equatable {
     }
 }
 
+struct NotchAIResetCountdown: Equatable {
+    enum Unit { case hours, minutes }
+    let value: Int
+    let unit: Unit
+
+    init?(resetAt: Date?, now: Date) {
+        guard let resetAt else { return nil }
+        let seconds = resetAt.timeIntervalSince(now)
+        guard seconds.isFinite, seconds > 0 else { return nil }
+        unit = seconds >= 3600 ? .hours : .minutes
+        value = max(1, Int(seconds / (unit == .hours ? 3600 : 60)))
+    }
+}
+
 struct NotchAIQuotaWindow: Identifiable, Equatable, Sendable {
     let minutes: Int
     let usedPercent: Double
@@ -99,6 +113,20 @@ struct NotchAIQuotaWindow: Identifiable, Equatable, Sendable {
     let observedAt: Date
 
     var id: Int { minutes }
+
+    static func pairs(_ windows: [Self]) -> [[Self]] {
+        var remaining = windows
+        var rows: [[Self]] = []
+        if let short = remaining.first(where: { $0.minutes == 300 }),
+           let weekly = remaining.first(where: { $0.minutes == 10080 }) {
+            rows.append([short, weekly])
+            remaining.removeAll { $0.minutes == 300 || $0.minutes == 10080 }
+        }
+        for index in stride(from: 0, to: remaining.count, by: 2) {
+            rows.append(Array(remaining[index..<min(index + 2, remaining.count)]))
+        }
+        return rows
+    }
 }
 
 struct NotchAIQuotaSnapshot: Equatable, Sendable {

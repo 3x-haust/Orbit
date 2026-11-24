@@ -96,6 +96,15 @@ struct NotchAIUsageSettings: View {
                 ), options: NotchAIUsagePeriod.allCases.map { ($0, $0.title) })
             }
             RowDivider()
+            SettingsRow(title: "Color by usage", subtitle: "Color bars by remaining quota, or turn off for solid Orbit orange.", symbol: "paintpalette") {
+                Toggle("", isOn: Binding(
+                    get: { options.colorByUsage },
+                    set: { enabled in update { $0.colorByUsage = enabled } }
+                ))
+                .toggleStyle(.switch)
+                .labelsHidden()
+            }
+            RowDivider()
             SettingsRow(title: "Usage profiles", subtitle: "Choose the providers shown in the AI Usage widget.", symbol: "person.2") {
                 Button("Add profile") {
                     editing = NotchAIProfile(name: "", provider: .custom)
