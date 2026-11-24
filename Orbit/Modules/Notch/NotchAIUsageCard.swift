@@ -75,15 +75,20 @@ struct NotchAIUsageCard: View {
                     .foregroundStyle(.white.opacity(0.6))
             } else {
                 TimelineView(.periodic(from: .now, by: 30)) { context in
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(profiles) { profile in
-                                profileView(profile, now: context.date)
-                            }
+                    let list = VStack(alignment: .leading, spacing: 8) {
+                        ForEach(profiles) { profile in
+                            profileView(profile, now: context.date)
                         }
-                        .padding(.trailing, 4)
                     }
-                    .defaultScrollAnchor(.topLeading)
+                    .padding(.trailing, 4)
+                    // A fitting ScrollView still consumes swipes before the notch can close.
+                    ViewThatFits(in: .vertical) {
+                        list.fixedSize(horizontal: false, vertical: true)
+                        ScrollView {
+                            list
+                        }
+                        .defaultScrollAnchor(.topLeading)
+                    }
                 }
             }
         }

@@ -193,9 +193,21 @@ final class NotchHostingView: NSHostingView<NotchRoot> {
     override func scrollWheel(with event: NSEvent) {
         super.scrollWheel(with: event)
         let point = convert(event.locationInWindow, from: nil)
-        if !isOverAIUsage(point) {
+        if !isOverAIUsage(point) || !hasScrollableContent(at: point) {
             NotchCenter.shared.scroll(event, on: display)
         }
+    }
+
+    private func hasScrollableContent(at point: NSPoint) -> Bool {
+        var view = hitTest(convert(point, to: superview))
+        while let current = view, current !== self {
+            if let scroll = current as? NSScrollView, let document = scroll.documentView,
+               document.frame.height > scroll.contentView.bounds.height + 1 {
+                return true
+            }
+            view = current.superview
+        }
+        return false
     }
 
     // Keep trackpad scrolling inside the quota list from closing Home.
