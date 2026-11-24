@@ -274,9 +274,12 @@ It checks where the menu bar percentage turns from green to orange to red:
 from the runner takes its colors from the same place, and both go plain when the
 "Color by usage" switch is off.
 
-It also puts a real runner in the menu bar (a logged-in desktop is required),
-fades its button while the menu bar's appearance changes back, as when waking
-from sleep, and checks the runner is back at full color once the fading ends.
+It also puts a real runner in the menu bar (a logged-in desktop is required).
+It gives the new item the dark menu bar's look before macOS has laid it out in
+the bar, as at launch, and checks the runner doesn't take the grey a template
+comes out in then, but the bar's own color once it's there. Then it fades its
+button while the menu bar's appearance changes back, as when waking from sleep,
+and checks the runner is back at full color once the fading ends.
 
 # Notch Folder tab regression
 
