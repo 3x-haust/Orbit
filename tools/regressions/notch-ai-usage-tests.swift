@@ -22,6 +22,22 @@ import Foundation
                   "Quota color boundary at \(100 - used)% remaining")
         }
 
+        for (seconds, value, unit) in [(172800.0, 48, NotchAIResetCountdown.Unit.hours),
+                                       (2880, 48, .minutes), (3600, 1, .hours), (3599, 59, .minutes), (30, 1, .minutes)] {
+            let countdown = NotchAIResetCountdown(resetAt: now.addingTimeInterval(seconds), now: now)
+            check(countdown?.value == value && countdown?.unit == unit, "Reset countdown at \(seconds) seconds")
+        }
+        check(NotchAIResetCountdown(resetAt: nil, now: now) == nil, "Unknown reset times are not invented")
+        check(NotchAIResetCountdown(resetAt: now, now: now) == nil, "Expired windows do not show a future countdown")
+
+        let pairWindows = [60, 300, 10080, 43200].map {
+            NotchAIQuotaWindow(minutes: $0, usedPercent: 50, resetAt: nil, observedAt: now)
+        }
+        check(NotchAIQuotaWindow.pairs(pairWindows).map { $0.map(\.minutes) } == [[300, 10080], [60, 43200]],
+              "The five-hour and weekly limits stay paired even with shorter and longer custom limits")
+        check(NotchAIQuotaWindow.pairs(Array(pairWindows.prefix(1))).map { $0.count } == [1], "A single limit remains visible")
+        check(NotchAIQuotaWindow.pairs([]).isEmpty, "An empty window list has no layout rows")
+
         var savedOptions = NotchAIUsageOptions()
         savedOptions.profiles = [NotchAIProfile(name: "Saved profile", provider: .custom, folder: "/fixture")]
         savedOptions.mode = .used
@@ -165,6 +181,14 @@ import Foundation
         let apiInput = #"{"session_id":"fixture-api-session","cost":{"total_cost_usd":0.0234},"unrelated":"sensitive fixture"}"#
         let claudeCLI = try write(#"""
         #!/bin/sh
+        if test "$*" = "auth status --text"; then
+            case "${ORBIT_FIXTURE_AUTH_MODE:-}" in
+                console_oauth|console_scopes|subscription_env|subscription_fd) printf '%s\n' 'Profile: Fixture · user_oauth · profile default' ;;
+                subscription_token) printf '%s\n' 'OAuth token: CLAUDE_CODE_OAUTH_TOKEN' ;;
+                ambiguous_oauth) printf '%s\n' 'Profile: Fixture · unexpected · user_oauth · profile default' ;;
+            esac
+            exit 0
+        fi
         test "$*" = "auth status" || exit 1
         # The auth namespace must match the parent session, even for the default folder.
         test "${CLAUDE_CONFIG_DIR+x}" = "${ORBIT_EXPECT_CONFIG_SET:-}" || exit 1
@@ -175,6 +199,12 @@ import Foundation
                 /usr/bin/touch "$ORBIT_FIXTURE_AUTH_MARKER"
                 /bin/sleep 0.6
                 printf '%s\n' '{"loggedIn":true,"authMethod":"api_key"}'
+                ;;
+            console_oauth|console_scopes|subscription_token|subscription_env|subscription_fd|ambiguous_oauth)
+                printf '%s\n' '{"loggedIn":true,"authMethod":"oauth_token","apiProvider":"firstParty"}'
+                ;;
+            other_oauth)
+                printf '%s\n' '{"loggedIn":true,"authMethod":"oauth_token","apiProvider":"thirdParty"}'
                 ;;
             keychain_api)
                 test -z "${ANTHROPIC_API_KEY+x}" || exit 1
@@ -198,7 +228,7 @@ import Foundation
         } else {
             check(false, "Verified API-key mode displays the latest Claude session cost")
         }
-        for mode in ["keychain_api", "api_key_helper"] {
+        for mode in ["keychain_api", "api_key_helper", "console_oauth", "console_scopes"] {
             for config in [nil, bridgeFolder.path, root.appendingPathComponent("separate-session-config").path] as [String?] {
                 let sessionInput = apiInput.replacingOccurrences(of: "fixture-api-session", with: UUID().uuidString)
                 let run = try startShell(wrappedCommand, input: sessionInput, path: fixturePath,
@@ -210,7 +240,24 @@ import Foundation
                       "Auth inherits the session config namespace (unset, default, or custom)")
             }
         }
-        let v3Command = wrappedCommand.replacingOccurrences(of: "status line v4", with: "status line v3")
+        for authMode in ["subscription_token", "subscription_env", "subscription_fd", "ambiguous_oauth"] {
+            let input = apiInput.replacingOccurrences(of: "fixture-api-session", with: UUID().uuidString)
+            _ = try runShell(wrappedCommand, input: input, path: fixturePath, authMode: authMode)
+            let snapshot = try JSONSerialization.jsonObject(with: Data(contentsOf: costFile)) as? [String: Any]
+            check(snapshot?["api_key_session"] as? Bool == false, "Subscription or ambiguous OAuth never asserts API billing (\(authMode))")
+        }
+        let otherOAuthInput = apiInput.replacingOccurrences(of: "fixture-api-session", with: "other-oauth")
+        _ = try runShell(wrappedCommand, input: otherOAuthInput, path: fixturePath, authMode: "other_oauth")
+        let otherOAuth = try JSONSerialization.jsonObject(with: Data(contentsOf: costFile)) as? [String: Any]
+        check(otherOAuth?["api_key_session"] as? Bool == false, "An unrelated OAuth provider cannot claim a Claude API cost session")
+        let v4Command = wrappedCommand.replacingOccurrences(of: "status line v5", with: "status line v4")
+        var v4Settings = original
+        v4Settings["statusLine"] = ["type": "command", "command": v4Command, "padding": 3]
+        try JSONSerialization.data(withJSONObject: v4Settings).write(to: settings, options: .atomic)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .needsUpdate, "The Console OAuth fix upgrades v4 connections")
+        try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
+        check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "The v4 connection upgrades without nesting")
+        let v3Command = wrappedCommand.replacingOccurrences(of: "status line v5", with: "status line v3")
         var v3Settings = original
         v3Settings["statusLine"] = ["type": "command", "command": v3Command, "padding": 3]
         try JSONSerialization.data(withJSONObject: v3Settings).write(to: settings, options: .atomic)
@@ -492,6 +539,9 @@ import Foundation
         if let authMode {
             if authMode != "keychain_api" { process.environment?["ANTHROPIC_API_KEY"] = "fake-key" }
             process.environment?["ORBIT_FIXTURE_AUTH_MODE"] = authMode
+            if authMode == "console_scopes" { process.environment?["CLAUDE_CODE_OAUTH_SCOPES"] = "user:inference" }
+            if authMode == "subscription_env" { process.environment?["CLAUDE_CODE_OAUTH_TOKEN"] = "fixture-only-token" }
+            if authMode == "subscription_fd" { process.environment?["CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR"] = "9" }
         }
         if let marker { process.environment?["ORBIT_FIXTURE_AUTH_MARKER"] = marker }
         try process.run()

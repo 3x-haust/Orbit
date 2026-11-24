@@ -104,7 +104,7 @@ enum ClaudeStatusLineBridge {
     }
 
     private static let interpreter = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
-    private static let signature = "# Orbit Claude status line v4"
+    private static let signature = "# Orbit Claude status line v5"
     // SHA-256 fingerprints of the two unversioned bridge commands.
     private static let legacyScriptHashes: Set<String> = [
         "8f80c08b1949f6bdd235230e2f8710eadb4c9477d99e90dc27299f82ea5f9d5d",
@@ -115,7 +115,7 @@ enum ClaudeStatusLineBridge {
         guard command.hasPrefix(interpreter), let separator = command.range(of: " -- ") else { return nil }
         let script = command[command.index(command.startIndex, offsetBy: interpreter.count)..<separator.lowerBound]
         let currentVersion = script.hasPrefix("'" + signature + "\n")
-        if !currentVersion && !["v2", "v3"].contains(where: { script.hasPrefix("'# Orbit Claude status line " + $0 + "\n") }) {
+        if !currentVersion && !["v2", "v3", "v4"].contains(where: { script.hasPrefix("'# Orbit Claude status line " + $0 + "\n") }) {
             let hash = SHA256.hash(data: Data(script.utf8)).map { String(format: "%02x", $0) }.joined()
             guard legacyScriptHashes.contains(hash) else { return nil }
         }
@@ -153,7 +153,8 @@ enum ClaudeStatusLineBridge {
             open STDOUT, '>', '/dev/null' or die $!;
         }
 
-        sub api_key_auth {
+        sub auth_status {
+            my ($as_text) = @_;
             my @candidates = ('claude');
             push @candidates, "$ENV{HOME}/.local/bin/claude" if defined $ENV{HOME};
             push @candidates, '/opt/homebrew/bin/claude', '/usr/local/bin/claude';
@@ -167,9 +168,12 @@ enum ClaudeStatusLineBridge {
                 open STDERR, '>', '/dev/null' or POSIX::_exit(1);
                 close $write;
                 # Inherit the session environment, including an absent CLAUDE_CONFIG_DIR.
+                local $ENV{LC_ALL} = 'C' if $as_text;
+                my @args = ('auth', 'status');
+                push @args, '--text' if $as_text;
                 for my $cli (@candidates) {
                     next if $cli ne 'claude' && !-x $cli;
-                    exec {$cli} $cli, 'auth', 'status';
+                    exec {$cli} $cli, @args;
                 }
                 POSIX::_exit(1);
             }
@@ -190,10 +194,24 @@ enum ClaudeStatusLineBridge {
                 kill 'KILL', $pid;
                 waitpid($pid, 0);
             }
-            return 0 unless $eof;
-            my $status = eval { decode_json($response) };
-            return ref($status) eq 'HASH' && $status->{loggedIn}
-                && ($status->{authMethod} // '') =~ /\Aapi_key(?:_helper)?\z/;
+            return $eof ? $response : undef;
+        }
+
+        sub api_billed_auth {
+            my $response = auth_status(0);
+            my $status = eval { decode_json($response // '') };
+            return 0 unless ref($status) eq 'HASH' && $status->{loggedIn};
+            my $method = $status->{authMethod} // '';
+            return 1 if $method =~ /\Aapi_key(?:_helper)?\z/;
+            return 0 unless $method eq 'oauth_token' && ($status->{apiProvider} // '') eq 'firstParty';
+            # Subscription setup-token and SDK token-fd sessions can report the same JSON method.
+            return 0 if grep { defined $ENV{$_} && length $ENV{$_} }
+                qw(CLAUDE_CODE_OAUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR CLAUDE_CODE_OAUTH_TOKEN_FD);
+            my $text = auth_status(1) // '';
+            my ($first) = split /\r?\n/, $text;
+            my @source = split / \xC2\xB7 /, ($first // '');
+            return @source == 3 && $source[0] =~ /\AProfile: [^\r\n]+\z/
+                && $source[1] eq 'user_oauth' && $source[2] =~ /\Aprofile [^\r\n]+\z/;
         }
 
         sub read_snapshot {
@@ -253,7 +271,7 @@ enum ClaudeStatusLineBridge {
                         $checked = $previous->{auth_checked_at};
                         $api = $previous->{api_key_session};
                     } else {
-                        $api = api_key_auth();
+                        $api = api_billed_auth();
                     }
                     $snapshot{session_cost_usd} = $data->{cost}->{total_cost_usd};
                     $snapshot{session_id} = $session;
