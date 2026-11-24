@@ -15,6 +15,26 @@ import Foundation
             if condition { passed += 1 } else { failed += 1 }
         }
 
+        for (used, expected) in [(0.0, NotchAIQuotaLevel.plentiful), (25, .plentiful),
+                                 (25.01, .comfortable), (50, .comfortable),
+                                 (50.01, .low), (75, .low), (75.01, .critical), (100, .critical)] {
+            check(NotchAIQuotaLevel(usedPercent: used) == expected,
+                  "Quota color boundary at \(100 - used)% remaining")
+        }
+
+        var savedOptions = NotchAIUsageOptions()
+        savedOptions.profiles = [NotchAIProfile(name: "Saved profile", provider: .custom, folder: "/fixture")]
+        savedOptions.mode = .used
+        savedOptions.period = .weekly
+        savedOptions.colorByUsage = false
+        let savedOptionsData = try JSONEncoder().encode(savedOptions)
+        check(NotchAIUsageOptions.decode(savedOptionsData) == savedOptions, "The bar color preference persists with the selected profiles and display modes")
+        var oldOptions = try JSONSerialization.jsonObject(with: savedOptionsData) as! [String: Any]
+        oldOptions.removeValue(forKey: "colorByUsage")
+        let migratedOptions = NotchAIUsageOptions.decode(try JSONSerialization.data(withJSONObject: oldOptions))
+        savedOptions.colorByUsage = true
+        check(migratedOptions == savedOptions, "Existing profile settings survive adding the quota color preference")
+
         let codex = profile(.codex, "codex", in: root)
         check(NotchAIUsageReader.read(codex, now: now) == .missing, "absent Codex folder reports missing")
         let sessions = "codex/sessions/2026/11/23"

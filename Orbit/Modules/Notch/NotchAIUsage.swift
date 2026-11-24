@@ -2,6 +2,33 @@ import CoreFoundation
 import Darwin
 import Foundation
 
+struct NotchAIUsageOptions: Codable, Equatable {
+    var profiles = NotchAIProfile.builtIns
+    var mode: NotchAIUsageMode = .remaining
+    var period: NotchAIUsagePeriod = .all
+    var colorByUsage = true
+
+    private enum CodingKeys: String, CodingKey { case profiles, mode, period, colorByUsage }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        profiles = try values.decode([NotchAIProfile].self, forKey: .profiles)
+        mode = try values.decode(NotchAIUsageMode.self, forKey: .mode)
+        period = try values.decode(NotchAIUsagePeriod.self, forKey: .period)
+        colorByUsage = try values.decodeIfPresent(Bool.self, forKey: .colorByUsage) ?? true
+    }
+
+    static func decode(_ data: Data) -> Self {
+        guard let options = try? JSONDecoder().decode(Self.self, from: data) else { return Self() }
+        var seen = Set<UUID>()
+        var result = options
+        result.profiles = options.profiles.filter { seen.insert($0.id).inserted }
+        return result
+    }
+}
+
 enum NotchAIProvider: String, Codable, CaseIterable, Identifiable, Sendable {
     case codex, claude, custom, codexBar
 
@@ -53,6 +80,16 @@ enum NotchAIUsageMode: String, Codable, CaseIterable, Sendable {
 
 enum NotchAIUsagePeriod: String, Codable, CaseIterable, Sendable {
     case fiveHours, weekly, all
+}
+
+/// Color always follows remaining allowance, independent of the displayed percentage mode.
+enum NotchAIQuotaLevel: Equatable {
+    case plentiful, comfortable, low, critical
+
+    init(usedPercent: Double) {
+        let remaining = 100 - usedPercent
+        self = remaining >= 75 ? .plentiful : remaining >= 50 ? .comfortable : remaining >= 25 ? .low : .critical
+    }
 }
 
 struct NotchAIQuotaWindow: Identifiable, Equatable, Sendable {

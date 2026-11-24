@@ -1,19 +1,5 @@
 import SwiftUI
 
-struct NotchAIUsageOptions: Codable, Equatable {
-    var profiles = NotchAIProfile.builtIns
-    var mode: NotchAIUsageMode = .remaining
-    var period: NotchAIUsagePeriod = .all
-
-    static func decode(_ data: Data) -> Self {
-        guard let options = try? JSONDecoder().decode(Self.self, from: data) else { return Self() }
-        var seen = Set<UUID>()
-        var result = options
-        result.profiles = options.profiles.filter { seen.insert($0.id).inserted }
-        return result
-    }
-}
-
 extension NotchAIUsageMode {
     var title: String {
         switch self {
