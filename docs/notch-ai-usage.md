@@ -2,7 +2,7 @@
 
 In **Notch → Home layout**, turn on **AI Usage** and choose which other widgets to show. In **Notch → AI Usage**, choose profiles, used or remaining percentages, and the limit windows to display. Edit a profile to choose a source folder or check its connection.
 
-**Color by usage** colors the bars by remaining quota: deep green at 75% or more, light green at 50% to below 75%, orange at 25% to below 50%, and red below 25%. This color meaning stays the same in used-percentage mode. Turn it off for solid Orbit orange. The 5-hour and weekly windows share a row when space allows. Narrow widgets use small rings with percentages and reset countdowns; only the narrowest widths stack the limits. Countdown labels show whole hours such as `48h`, or minutes such as `48m` below one hour. Unknown reset times are omitted.
+**Color by usage** colors the bars by remaining quota: deep green at 75% or more, light green at 50% to below 75%, orange at 25% to below 50%, and red below 25%. This color meaning stays the same in used-percentage mode. Turn it off for solid Orbit orange. The 5-hour and weekly windows share a row when space allows. Narrow widgets use small rings with percentages and reset countdowns; only the narrowest widths stack the limits. Countdown labels show whole days from 24 hours (`1d`, or `6d` for 150 hours), whole hours below one day such as `23h`, or minutes such as `48m` below one hour. Unknown or expired reset times are omitted.
 
 Orbit displays quota reported by the provider. Values reflect the latest local snapshot and expire when its reset time passes. A profile can have only one of the requested windows, and different providers can report different durations. Keep each account’s snapshots in a separate folder.
 

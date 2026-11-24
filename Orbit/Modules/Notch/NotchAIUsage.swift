@@ -93,7 +93,7 @@ enum NotchAIQuotaLevel: Equatable {
 }
 
 struct NotchAIResetCountdown: Equatable {
-    enum Unit { case hours, minutes }
+    enum Unit: String { case days = "d", hours = "h", minutes = "m" }
     let value: Int
     let unit: Unit
 
@@ -101,8 +101,16 @@ struct NotchAIResetCountdown: Equatable {
         guard let resetAt else { return nil }
         let seconds = resetAt.timeIntervalSince(now)
         guard seconds.isFinite, seconds > 0 else { return nil }
-        unit = seconds >= 3600 ? .hours : .minutes
-        value = max(1, Int(seconds / (unit == .hours ? 3600 : 60)))
+        if seconds >= 86400 {
+            unit = .days
+            value = Int(seconds / 86400)
+        } else if seconds >= 3600 {
+            unit = .hours
+            value = Int(seconds / 3600)
+        } else {
+            unit = .minutes
+            value = max(1, Int(seconds / 60))
+        }
     }
 }
 

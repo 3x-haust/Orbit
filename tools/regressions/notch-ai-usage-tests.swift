@@ -22,13 +22,21 @@ import Foundation
                   "Quota color boundary at \(100 - used)% remaining")
         }
 
-        for (seconds, value, unit) in [(172800.0, 48, NotchAIResetCountdown.Unit.hours),
+        for (seconds, value, unit) in [(540000.0, 6, NotchAIResetCountdown.Unit.days),
+                                       (172800, 2, .days), (86400, 1, .days), (86399, 23, .hours),
                                        (2880, 48, .minutes), (3600, 1, .hours), (3599, 59, .minutes), (30, 1, .minutes)] {
             let countdown = NotchAIResetCountdown(resetAt: now.addingTimeInterval(seconds), now: now)
             check(countdown?.value == value && countdown?.unit == unit, "Reset countdown at \(seconds) seconds")
         }
         check(NotchAIResetCountdown(resetAt: nil, now: now) == nil, "Unknown reset times are not invented")
         check(NotchAIResetCountdown(resetAt: now, now: now) == nil, "Expired windows do not show a future countdown")
+
+        check(NotchAIResetCountdown.Unit.days.rawValue == "d" && NotchAIResetCountdown.Unit.hours.rawValue == "h"
+              && NotchAIResetCountdown.Unit.minutes.rawValue == "m", "Countdown labels use day, hour, and minute suffixes")
+        for seconds in [-1.0, Double.infinity, -Double.infinity, Double.nan] {
+            check(NotchAIResetCountdown(resetAt: now.addingTimeInterval(seconds), now: now) == nil,
+                  "Past or nonfinite reset time is omitted (\(seconds))")
+        }
 
         let pairWindows = [60, 300, 10080, 43200].map {
             NotchAIQuotaWindow(minutes: $0, usedPercent: 50, resetAt: nil, observedAt: now)
