@@ -152,7 +152,7 @@ enum NotchCodexQuota {
 enum NotchClaudeQuota {
     struct Reading: Sendable {
         var result: NotchAIUsageResult?
-        var retryAfter: TimeInterval = 120
+        var retryAfter: TimeInterval = 60
     }
 
     struct Credentials: Decodable {
