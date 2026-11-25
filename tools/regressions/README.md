@@ -265,11 +265,14 @@ system sleep settings, or user preferences are changed by this runner.
 
 `python3 tools/regressions/run-fan-helper-startup-tests.py` compiles the production
 recovery, version probe, removal, and connection methods with isolated service
-and XPC stand-ins. Its eight scenarios cover transient interruption without
+and XPC stand-ins. Its eleven scenarios cover transient interruption without
 replacement, persistent rejection, an older helper, concurrent battery startup,
 stale enabled registration with unregister/register errors, approval after a
-failed recovery, timeouts, delayed invalidation, and explicit removal during
-recovery. Neither runner launches Orbit or changes the system service.
+failed recovery, timeouts, delayed invalidation, explicit removal during recovery,
+fan callbacks overwriting shared errors, and silent or outdated replacements
+without duplicate registration. Append scenario names to run a focused subset,
+for example `python3 tools/regressions/run-fan-helper-startup-tests.py fan-error-race`.
+Neither runner launches Orbit or changes the system service.
 
 # Runner regression
 

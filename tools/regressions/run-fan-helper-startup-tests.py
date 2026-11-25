@@ -2,6 +2,7 @@
 """Run production helper recovery with isolated service/XPC stand-ins, without launching Orbit."""
 import pathlib
 import subprocess
+import sys
 import tempfile
 
 root = pathlib.Path(__file__).resolve().parents[2]
@@ -29,12 +30,13 @@ final class TestService {
     var status: Status { Self.state }
     func unregister() async throws {
         Self.unregistrations += 1
-        if mode == "stale-enabled" { throw NSError(domain: "test.unregister", code: 1) }
+        if ["stale-enabled", "fan-error-race"].contains(mode) { throw NSError(domain: "test.unregister", code: 1) }
         Self.state = .notRegistered
     }
     func register() throws {
         Self.registrations += 1
-        if mode == "stale-enabled" { throw NSError(domain: "test.register", code: 2) }
+        if ["stale-enabled", "fan-error-race"].contains(mode) { throw NSError(domain: "test.register", code: 2) }
+        if Self.upgraded { throw NSError(domain: "test.already-registered", code: 12) }
         Self.upgraded = true
         Self.state = mode == "approval" ? .requiresApproval : .enabled
     }
@@ -45,7 +47,8 @@ final class TestProxy: FanHelperProtocol {
     init(_ error: @escaping (Error) -> Void) { self.error = error }
     func version(reply: @escaping (Int) -> Void) {
         Self.probes += 1
-        if mode == "timeout" { return }
+        if mode == "timeout" || (TestService.upgraded && mode == "silent-replacement") { return }
+        if TestService.upgraded && mode == "older-replacement" { reply(3); return }
         if TestService.upgraded || mode == "current" || (mode == "transient" && Self.probes > 1) {
             reply(4)
         } else if mode == "older" {
@@ -87,6 +90,14 @@ final class TestConnection {
     @MainActor static func main() async {
         let control = FanControl.shared
         control.start()
+        if mode == "fan-error-race" {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(900))
+                control.lastError = "unrelated fan reply"
+                try? await Task.sleep(for: .milliseconds(300))
+                control.lastError = nil
+            }
+        }
         if mode == "removal" {
             try? await Task.sleep(for: .milliseconds(600))
             control.removeHelper()
@@ -114,10 +125,16 @@ final class TestConnection {
             guard replacement != nil, control.connection === replacement else {
                 fatalError("late invalidation cleared the replacement")
             }
-        case "stale-enabled":
-            guard recovered == false, version == nil, TestService.registrations == 3,
+        case "stale-enabled", "fan-error-race":
+            guard recovered == false, version == nil, TestService.registrations == 1,
                   control.lastError?.contains("test.unregister") == true else {
                 fatalError("stale enabled service was reported as repaired or lost its registration error")
+            }
+        case "silent-replacement", "older-replacement":
+            guard recovered == false, TestService.registrations == 1,
+                  control.lastError?.contains("updated version") == true,
+                  version == (mode == "older-replacement" ? 3 : nil) else {
+                fatalError("verification retried registration or hid the failed version probe")
             }
         case "approval":
             guard recovered == false, version == nil, control.helper == .needsApproval else {
@@ -142,5 +159,10 @@ with tempfile.TemporaryDirectory(prefix="orbit-helper-startup-") as scratch:
     swift.write_text(harness)
     binary = path / "tests"
     subprocess.run(["swiftc", "-swift-version", "5", "-parse-as-library", str(swift), "-o", str(binary)], check=True)
-    for mode in ["current", "transient", "legacy", "older", "stale-enabled", "approval", "timeout", "removal"]:
-        subprocess.run([str(binary), mode], check=True, timeout=12)
+    modes = ["current", "transient", "legacy", "older", "stale-enabled", "approval", "timeout", "removal",
+             "fan-error-race", "silent-replacement", "older-replacement"]
+    selected = sys.argv[1:] or modes
+    if any(mode not in modes for mode in selected):
+        raise SystemExit("unknown scenario")
+    for mode in selected:
+        subprocess.run([str(binary), mode], check=True, timeout=20)
