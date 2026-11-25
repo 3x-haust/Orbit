@@ -191,6 +191,7 @@ final class NotchCenter {
         config = Config.load()
         NowPlaying.shared.update() // the music activity and Home tab need the current song
         guard Self.enabled else { teardown(); return }
+        prepareAIUsage()
         // The top shelf's own window gives way to the notch's Shelf tab.
         if Shelf.edge == .top, Shelf.shared.isVisible { Shelf.shared.hide() }
         if observers.isEmpty { observe() }
@@ -202,6 +203,13 @@ final class NotchCenter {
 
     func reloadHomeSettings() {
         config.loadHomeSettings(Pref.defaults)
+        prepareAIUsage()
+    }
+
+    private func prepareAIUsage() {
+        guard config.homeLayout.widgets.contains(.aiUsage) else { return }
+        let profiles = config.aiUsage.profiles
+        Task { await NotchAIUsageService.shared.prepare(profiles, preferences: Pref.defaults) }
     }
 
     private func teardown() {
