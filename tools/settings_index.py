@@ -242,7 +242,9 @@ for name in sorted(structs, key=lambda s: (min((order.index(p) for p in owner.ge
             accessory = body[start:balanced(body, start, '{', '}')]
             labels = [clean(x) for x in literal.findall(accessory) if ui(x) and not re.fullmatch(r'[a-z.]+', x)]
             labels = [l for l in labels if useful(l) and label_ok(l)]
-        for p in pages: add('row', p, group, t, ' '.join(sub[:1]), sym.group(1) if sym else '', labels)
+        for p in pages:
+            extra = syn.get('rows', {}).get(p, {}).get(t[0], [])
+            add('row', p, group, t, ' '.join(sub[:1]), sym.group(1) if sym else '', labels, extra=extra)
 
 # OrbitAction titles: searchable and runnable from the results.
 act = open('Orbit/Core/OrbitAction.swift').read()
