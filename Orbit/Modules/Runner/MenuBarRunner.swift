@@ -403,7 +403,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
     @ObservationIgnored private var frameLayer: CALayer?
     /// Clear, the size of the widest frame: keeps the item's width and layout as they were.
     @ObservationIgnored private var blank: NSImage?
-    @ObservationIgnored private var glyph: (appearance: NSAppearance.Name, color: CGColor)?
+    @ObservationIgnored private var glyph: (dark: Bool, color: CGColor)?
     @ObservationIgnored private var appearanceWatch: NSKeyValueObservation?
 
     private func stage(in button: NSStatusBarButton) -> CALayer {
@@ -414,9 +414,23 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         button.layer?.addSublayer(layer)
         frameLayer = layer
         appearanceWatch = button.observe(\.effectiveAppearance) { _, _ in
-            MainActor.assumeIsolated { MenuBarRunner.shared.glyph = nil; MenuBarRunner.shared.drawFrame() }
+            // Not measured from inside the change: macOS flips the item between DarkAqua and VibrantDark
+            // each time it redraws the menu bar, and a template drawn mid-flip comes back opaque grey.
+            DispatchQueue.main.async { MainActor.assumeIsolated { MenuBarRunner.shared.appearanceChanged() } }
         }
         return layer
+    }
+
+    /// Measures again only when the menu bar went light ↔ dark; its own DarkAqua ↔ VibrantDark flips draw
+    /// templates the same.
+    private func appearanceChanged() {
+        guard let button = item?.button, let glyph, glyph.dark != Self.isDark(button.effectiveAppearance) else { return }
+        self.glyph = nil
+        drawFrame()
+    }
+
+    private static func isDark(_ appearance: NSAppearance) -> Bool {
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
     }
 
     private func makeBlank() {
@@ -436,8 +450,8 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
     /// the menu bar's own glyph color for this appearance (or the accent, when that's on).
     /// Nil until macOS has laid the item out in the menu bar.
     private func glyphColor(in button: NSStatusBarButton) -> CGColor? {
-        let name = button.effectiveAppearance.name
-        if let glyph, glyph.appearance == name { return glyph.color }
+        let dark = Self.isDark(button.effectiveAppearance)
+        if let glyph, glyph.dark == dark { return glyph.color }
         // A new item can have the dark bar's look before it's in the bar (its window still has no height).
         // A template drawn then comes back opaque grey (82 of 255) instead of the bar's white at 0.90, and
         // with the look unchanged once the item reached the bar, that grey was kept.
@@ -466,7 +480,7 @@ final class MenuBarRunner: NSObject, NSMenuDelegate {
         button.attributedTitle = title
         button.alphaValue = alpha
         frameLayer?.isHidden = false
-        glyph = (name, color)
+        glyph = (dark, color)
         return color
     }
 
