@@ -194,7 +194,7 @@ final class HotCorners {
         // Re-arm a corner once the pointer has clearly left it.
         for c in armed.symmetricDifference(Set(Corner.allCases)) where !near(c, p, within: 40) { armed.insert(c) }
 
-        guard let corner = Corner.allCases.first(where: { near($0, p, within: 3) }) else {
+        guard let corner = Self.corner(at: p, screens: NSScreen.screens.map(\.frame)) else {
             leave()
             return
         }
@@ -227,17 +227,26 @@ final class HotCorners {
         active = nil
     }
 
-    /// Is `p` within `d` points of a real outer corner of some screen — one the pointer stops at,
-    /// not a corner that runs on into a neighbouring display?
+    /// Is `p` within `d` points of a real outer corner of the screen it's on — one the pointer stops
+    /// at, not a corner that runs on into a neighbouring display? A neighbour's corner touching this
+    /// one diagonally is that screen's own corner, not this one's.
     private func near(_ c: Corner, _ p: CGPoint, within d: CGFloat) -> Bool {
-        for s in NSScreen.screens {
-            let f = s.frame
+        Self.near(c, p, within: d, screens: NSScreen.screens.map(\.frame))
+    }
+
+    /// The corner the pointer at `p` has reached on displays laid out as `screens`, if any.
+    static func corner(at p: CGPoint, screens: [CGRect]) -> Corner? {
+        Corner.allCases.first { near($0, p, within: 3, screens: screens) }
+    }
+
+    private static func near(_ c: Corner, _ p: CGPoint, within d: CGFloat, screens: [CGRect]) -> Bool {
+        for f in screens where NSMouseInRect(p, f, false) {
             let x = c.isLeft ? f.minX : f.maxX - 1
             let y = c.isTop ? f.maxY - 1 : f.minY
             guard abs(p.x - x) <= d, abs(p.y - y) <= d else { continue }
             let beyondX = CGPoint(x: c.isLeft ? f.minX - 2 : f.maxX + 1, y: y)
             let beyondY = CGPoint(x: x, y: c.isTop ? f.maxY + 1 : f.minY - 2)
-            if NSScreen.screens.contains(where: { $0.frame.contains(beyondX) || $0.frame.contains(beyondY) }) { continue }
+            if screens.contains(where: { $0.contains(beyondX) || $0.contains(beyondY) }) { continue }
             return true
         }
         return false
