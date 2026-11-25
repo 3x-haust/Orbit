@@ -212,7 +212,7 @@ enum NotchClaudeQuota {
     }
 
     static func credentials(from source: Source, now: Date = .now,
-                            keychain: (String) -> StoredCredentials = readKeychain) -> Credentials? {
+                            keychain: (String) -> StoredCredentials = { readKeychain($0) }) -> Credentials? {
         // Match Claude Code's Keychain-first document selection. A present but unusable
         // account must not fall through to an older still-valid account in the plaintext file.
         switch keychain(source.keychainService) {
@@ -238,7 +238,53 @@ enum NotchClaudeQuota {
         return nil
     }
 
-    private static func readKeychain(_ service: String) -> StoredCredentials {
+    private static let credentialHelperArgument = "--orbit-claude-credentials"
+
+    static func readKeychain(_ service: String, executable: URL? = Bundle.main.executableURL) -> StoredCredentials {
+        guard let executable else { return .unavailable }
+        return NotchUsageCLI.run(executable, arguments: [credentialHelperArgument, service], overrides: [:]) { stdin, stdout in
+            try stdin.close()
+            var stdout = stdout
+            let packet = try stdout.readDocument()
+            if packet == Data("missing\n".utf8) { return .missing }
+            let prefix = Data("document\n".utf8)
+            guard packet.starts(with: prefix) else { return .unavailable }
+            return .document(Data(packet.dropFirst(prefix.count)))
+        } ?? .unavailable
+    }
+
+    /// Dispatched before SwiftUI startup in a short-lived copy of Orbit. Legacy Keychain's
+    /// UI switch is process-wide, so it must never be changed in the normal app process.
+    static func runCredentialHelperIfRequested(arguments: [String] = CommandLine.arguments) -> Bool {
+        guard arguments.dropFirst().first == credentialHelperArgument else { return false }
+        var result: StoredCredentials = .unavailable
+        if arguments.count == 3,
+           arguments[2].range(of: #"^Claude Code-credentials(?:-[0-9a-f]{8})?$"#, options: .regularExpression) != nil,
+           SecKeychainSetUserInteractionAllowed(false) == errSecSuccess {
+            result = readKeychainDirect(arguments[2])
+        }
+        try? FileHandle.standardOutput.write(contentsOf: credentialPacket(result))
+        return true
+    }
+
+    static func credentialPacket(_ result: StoredCredentials) -> Data {
+        var packet: Data
+        switch result {
+        case .missing: packet = Data("missing\n".utf8)
+        case .unavailable: packet = Data("unavailable\n".utf8)
+        case .document(let data):
+            packet = Data("document\n".utf8)
+            // Never export unrelated MCP credentials held in the same Keychain document.
+            if let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+               let oauth = object["claudeAiOauth"],
+               let minimal = try? JSONSerialization.data(withJSONObject: ["claudeAiOauth": oauth]) {
+                packet.append(minimal)
+            }
+        }
+        return packet
+    }
+
+    private static func readKeychainDirect(_ service: String) -> StoredCredentials {
         let context = LAContext()
         context.interactionNotAllowed = true
         let query: [String: Any] = [

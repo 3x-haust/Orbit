@@ -3,6 +3,13 @@ import QuartzCore
 import KeyboardShortcuts
 
 @main
+enum OrbitEntryPoint {
+    @MainActor static func main() {
+        if NotchClaudeQuota.runCredentialHelperIfRequested() { return }
+        OrbitApp.main()
+    }
+}
+
 struct OrbitApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
