@@ -281,6 +281,23 @@ comes out in then, but the bar's own color once it's there. Then it fades its
 button while the menu bar's appearance changes back, as when waking from sleep,
 and checks the runner is back at full color once the fading ends.
 
+# Menu bar hidden icons regression
+
+Build the Debug app, then run:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-menubar-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-menubar-removal-tests.sh \
+  /tmp/orbit-menubar-build/Build/Products/Debug /tmp/orbit-menubar-tests
+```
+
+It reads app locations the way MenuBarAgent's tracked list holds them: an app
+bundle, a binary inside one, a file reference URL and file URLs with no path.
+None may raise an exception or loop forever. It also checks that Orbit's own
+icons are never taken for an app whose switch Orbit turns off. Nothing is written
+to MenuBarAgent's settings.
+
 # Notch Folder tab regression
 
 Build the Debug app, then run:
