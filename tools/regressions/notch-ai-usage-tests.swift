@@ -37,6 +37,7 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
     init(now: Date, result: NotchClaudeQuota.Reading) { time = now; self.result = result }
     var now: Date { lock.withLock { time } }
     var count: Int { lock.withLock { requests } }
+    var identity: String? { lock.withLock { result.credentialID } }
     func advance(_ seconds: TimeInterval) { lock.withLock { time.addTimeInterval(seconds) } }
     func setReading(_ value: NotchClaudeQuota.Reading) { lock.withLock { result = value } }
     func read(_ folder: URL) async -> NotchClaudeQuota.Reading {
@@ -598,6 +599,8 @@ private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
         check(defaultSource.folder == explicitDefault.folder && defaultSource != explicitDefault
               && defaultSource.keychainService != explicitDefault.keychainService,
               "An explicitly configured default folder keeps its distinct Claude Keychain and cache namespace")
+        check(NotchClaudeQuota.source(for: defaultProfile, environment: ["CLAUDE_CONFIG_DIR": ""], home: home) == defaultSource,
+              "An empty config-dir override uses default credentials without a relative-file fallback")
         check(NotchClaudeQuota.keychainService(configDirectory: root.path + "/") != NotchClaudeQuota.keychainService(configDirectory: root.path),
               "Credential namespace hashing preserves the configured trailing slash")
         check(NotchClaudeQuota.keychainService(configDirectory: "/fixture/caf\u{e9}") == NotchClaudeQuota.keychainService(configDirectory: "/fixture/cafe\u{301}"),
@@ -637,7 +640,7 @@ private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
         for status in [401, 403, 500, 302] {
             ClaudeUsageHTTPFixture.set(status: status, body: "{}")
             let failure = await NotchClaudeQuota.fetch(credentials, session: session, now: now)
-            check(failure.result == (status == 401 || status == 403 ? .missing : nil),
+            check(failure.result == nil,
                   "HTTP \(status) leaves local sources available without asserting fresh quota")
         }
         ClaudeUsageHTTPFixture.set(status: 200, body: "{")
@@ -652,7 +655,7 @@ private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
         check(limited.result == nil && limited.retryAfter == 600, "Anthropic rate limits back off instead of polling every minute")
 
         let probe = ClaudeUsageReadProbe(now: now, result: live)
-        let service = NotchAIUsageService(claudeRead: { await probe.read($0.folder) }, clock: { probe.now })
+        let service = NotchAIUsageService(claudeRead: { await probe.read($0.folder) }, claudeIdentity: { _ in probe.identity }, clock: { probe.now })
         async let first = service.read(automatic)
         async let second = service.read(automatic)
         _ = await (first, second)
@@ -672,30 +675,73 @@ private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
 
         let desktopOnly = profile(.claude, "desktop-only", in: root)
         let backoffProbe = ClaudeUsageReadProbe(now: now, result: live)
-        let backoffService = NotchAIUsageService(claudeRead: { await backoffProbe.read($0.folder) }, clock: { backoffProbe.now })
+        let backoffService = NotchAIUsageService(claudeRead: { await backoffProbe.read($0.folder) }, claudeIdentity: { _ in backoffProbe.identity }, clock: { backoffProbe.now })
         let originalQuota = await backoffService.read(desktopOnly)
         backoffProbe.advance(60)
         backoffProbe.setReading(limited)
         check(await backoffService.read(desktopOnly) == originalQuota,
               "A desktop-only quota keeps its original observation during rate-limit backoff")
-        backoffProbe.advance(599)
+        backoffProbe.advance(60)
         check(await backoffService.read(desktopOnly) == originalQuota && backoffProbe.count == 2,
               "Backoff preserves a valid quota without issuing extra requests")
         var changedAccount = limited
         changedAccount.credentialID = "different-account"
         backoffProbe.setReading(changedAccount)
-        backoffProbe.advance(1)
         check(await backoffService.read(desktopOnly) == .missing,
-              "A credential change cannot reuse the previous account's quota during backoff")
+              "A credential change invalidates the previous account's quota before backoff expires")
+        backoffProbe.setReading(live)
+        _ = await backoffService.read(desktopOnly)
+        backoffProbe.setReading(limited)
+        backoffProbe.advance(60)
+        _ = await backoffService.read(desktopOnly)
+        backoffProbe.setReading(.init())
+        check(await backoffService.read(desktopOnly) == .missing,
+              "Logout invalidates retained quota before backoff expires")
         let authProbe = ClaudeUsageReadProbe(now: now, result: live)
-        let authService = NotchAIUsageService(claudeRead: { await authProbe.read($0.folder) }, clock: { authProbe.now })
+        let authService = NotchAIUsageService(claudeRead: { await authProbe.read($0.folder) }, claudeIdentity: { _ in authProbe.identity }, clock: { authProbe.now })
         _ = await authService.read(desktopOnly)
         ClaudeUsageHTTPFixture.set(status: 401, body: "{}")
         authProbe.setReading(await NotchClaudeQuota.fetch(credentials, session: session, now: now))
         authProbe.advance(60)
         check(await authService.read(desktopOnly) == .missing, "An authentication failure invalidates the retained subscription snapshot")
+        for status in [401, 403] {
+            let localProfile = profile(.claude, "local-fallback-\(status)", in: root)
+            if status == 401 {
+                _ = try write("{\"captured_at\":\(now.timeIntervalSince1970),\"rate_limits\":{\"five_hour\":{\"used_percentage\":57}}}",
+                              to: "local-fallback-\(status)/orbit-quota.json", in: root)
+            } else {
+                _ = try write("""
+                {"oauthAccount":{"accountUuid":"fixture-account"},"cachedUsageUtilization":{
+                "accountUuid":"fixture-account","fetchedAtMs":\(now.timeIntervalSince1970 * 1000),
+                "utilization":{"five_hour":{"utilization":57}}}}
+                """, to: "local-fallback-\(status)/.claude.json", in: root)
+            }
+            ClaudeUsageHTTPFixture.set(status: status, body: "{}")
+            let rejected = await NotchClaudeQuota.fetch(credentials, session: session, now: now)
+            let rejectionProbe = ClaudeUsageReadProbe(now: now, result: rejected)
+            let localService = NotchAIUsageService(claudeRead: { await rejectionProbe.read($0.folder) },
+                claudeIdentity: { _ in rejectionProbe.identity }, clock: { rejectionProbe.now })
+            if case .available(let quota) = await localService.read(localProfile) {
+                check(quota.windows.map(\.usedPercent) == [57], "HTTP \(status) preserves valid local quota while invalidating direct cache")
+            } else { check(false, "HTTP \(status) preserves valid local quota while invalidating direct cache") }
+        }
+        let localBackoffProfile = profile(.claude, "newer-local-backoff", in: root)
+        let localBackoffProbe = ClaudeUsageReadProbe(now: now, result: live)
+        let localBackoffService = NotchAIUsageService(claudeRead: { await localBackoffProbe.read($0.folder) },
+            claudeIdentity: { _ in localBackoffProbe.identity }, clock: { localBackoffProbe.now })
+        _ = await localBackoffService.read(localBackoffProfile)
+        localBackoffProbe.advance(60)
+        localBackoffProbe.setReading(limited)
+        _ = await localBackoffService.read(localBackoffProfile)
+        localBackoffProbe.advance(1)
+        _ = try write("{\"captured_at\":\(localBackoffProbe.now.timeIntervalSince1970),\"rate_limits\":{\"five_hour\":{\"used_percentage\":63}}}",
+                      to: "newer-local-backoff/orbit-quota.json", in: root)
+        if case .available(let quota) = await localBackoffService.read(localBackoffProfile) {
+            check(quota.windows.map(\.usedPercent) == [63] && localBackoffProbe.count == 2,
+                  "A newer local snapshot wins over retained quota without violating request backoff")
+        } else { check(false, "A newer local snapshot wins over retained quota without violating request backoff") }
         let expiryProbe = ClaudeUsageReadProbe(now: now, result: live)
-        let expiryService = NotchAIUsageService(claudeRead: { await expiryProbe.read($0.folder) }, clock: { expiryProbe.now })
+        let expiryService = NotchAIUsageService(claudeRead: { await expiryProbe.read($0.folder) }, claudeIdentity: { _ in expiryProbe.identity }, clock: { expiryProbe.now })
         _ = await expiryService.read(desktopOnly)
         expiryProbe.setReading(limited)
         expiryProbe.advance(3600)
@@ -710,7 +756,7 @@ private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
         """
         _ = try write(currentCost, to: "active-api-session/orbit-claude-cost.json", in: root)
         let costProbe = ClaudeUsageReadProbe(now: now, result: live)
-        let costService = NotchAIUsageService(claudeRead: { await costProbe.read($0.folder) }, clock: { costProbe.now })
+        let costService = NotchAIUsageService(claudeRead: { await costProbe.read($0.folder) }, claudeIdentity: { _ in costProbe.identity }, clock: { costProbe.now })
         check(await costService.read(apiProfile) == .sessionCost(.init(usd: 0.42, observedAt: now)) && costProbe.count == 0,
               "A recently verified active API session keeps its cost display despite a stored subscription login")
         costProbe.advance(121)

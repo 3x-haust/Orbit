@@ -173,7 +173,7 @@ enum NotchClaudeQuota {
         // A selected custom profile must not inherit a different profile's storage override.
         let secure = profile.folder.isEmpty ? environment["CLAUDE_SECURESTORAGE_CONFIG_DIR"] : nil
         if let secure, !secure.isEmpty, !secure.hasPrefix("/") { return nil }
-        let storagePath = secure.map { $0.isEmpty ? standard : $0 } ?? configured ?? standard
+        let storagePath = secure.map { $0.isEmpty ? standard : $0 } ?? configured.flatMap { $0.isEmpty ? nil : $0 } ?? standard
         guard let credentialFolder = NotchAIProfile.folderURL(storagePath.precomposedStringWithCanonicalMapping) else { return nil }
         return Source(folder: folder, credentialFolder: credentialFolder,
                       keychainService: keychainService(configDirectory: secure ?? configured))
@@ -184,6 +184,10 @@ enum NotchClaudeQuota {
         let expiresAt: Double
         let scopes: [String]
         let subscriptionType: String?
+
+        var identity: String {
+            SHA256.hash(data: Data(accessToken.utf8)).map { String(format: "%02x", $0) }.joined()
+        }
 
         static func decode(_ data: Data, now: Date) -> Self? {
             struct Document: Decodable { let claudeAiOauth: Credentials }
@@ -273,7 +277,7 @@ enum NotchClaudeQuota {
     }
 
     static func fetch(_ credentials: Credentials, session: URLSession, now: Date = .now) async -> Reading {
-        let identity = SHA256.hash(data: Data(credentials.accessToken.utf8)).map { String(format: "%02x", $0) }.joined()
+        let identity = credentials.identity
         let transient = Reading(credentialID: identity, allowsPrevious: true)
         var request = URLRequest(url: URL(string: "https://api.anthropic.com/api/oauth/usage")!)
         request.timeoutInterval = 8
@@ -289,7 +293,7 @@ enum NotchClaudeQuota {
                 return Reading(retryAfter: delay.isFinite ? max(300, min(delay, 3600)) : 300,
                                credentialID: identity, allowsPrevious: true)
             }
-            if response.statusCode == 401 || response.statusCode == 403 { return Reading(result: .missing, credentialID: identity) }
+            if response.statusCode == 401 || response.statusCode == 403 { return Reading(credentialID: identity) }
             guard response.statusCode == 200, data.count <= 256 * 1024,
                   let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return transient }
             let result = NotchAIUsageReader.claudeAccountSnapshot(payload, now: now)
@@ -319,11 +323,14 @@ actor NotchAIUsageService {
     private var claude: [NotchClaudeQuota.Source: ClaudeReading] = [:]
     private var claudeTasks: [NotchClaudeQuota.Source: Task<NotchClaudeQuota.Reading, Never>] = [:]
     private let claudeRead: @Sendable (NotchClaudeQuota.Source) async -> NotchClaudeQuota.Reading
+    private let claudeIdentity: @Sendable (NotchClaudeQuota.Source) -> String?
     private let clock: @Sendable () -> Date
 
     init(claudeRead: @escaping @Sendable (NotchClaudeQuota.Source) async -> NotchClaudeQuota.Reading = { await NotchClaudeQuota.read(from: $0) },
+         claudeIdentity: @escaping @Sendable (NotchClaudeQuota.Source) -> String? = { NotchClaudeQuota.credentials(from: $0)?.identity },
          clock: @escaping @Sendable () -> Date = { Date() }) {
         self.claudeRead = claudeRead
+        self.claudeIdentity = claudeIdentity
         self.clock = clock
     }
 
@@ -341,7 +348,14 @@ actor NotchAIUsageService {
             if case .sessionCost(let cost) = local, (0...120).contains(clock().timeIntervalSince(cost.observedAt)) {
                 return local
             }
-            if let source = NotchClaudeQuota.source(for: profile), let result = await readClaude(source) { return result }
+            if let source = NotchClaudeQuota.source(for: profile), let result = await readClaude(source) {
+                if case .available(let direct) = result, case .available(let snapshot) = local,
+                   let localTime = snapshot.windows.map(\.observedAt).max(),
+                   let directTime = direct.windows.map(\.observedAt).max(), localTime > directTime {
+                    return local
+                }
+                return result
+            }
             return local
         }
         return await readLocal(profile)
@@ -355,7 +369,16 @@ actor NotchAIUsageService {
 
     private func readClaude(_ source: NotchClaudeQuota.Source) async -> NotchAIUsageResult? {
         let now = clock()
-        if let reading = claude[source], reading.expires > now { return currentQuota(reading.result, now: now) }
+        if let reading = claude[source], reading.expires > now {
+            // Retry-After limits network requests, not local account-change detection.
+            let identify = claudeIdentity
+            let identity = await Task.detached(priority: .utility) { identify(source) }.value
+            guard let identity else { claude[source] = nil; return nil }
+            if let current = claude[source], current.credentialID == identity, current.expires > clock() {
+                return currentQuota(current.result, now: clock())
+            }
+            claude[source] = nil
+        }
         let task: Task<NotchClaudeQuota.Reading, Never>
         if let pending = claudeTasks[source] {
             task = pending
@@ -369,14 +392,12 @@ actor NotchAIUsageService {
         let previous = claude[source]
         let retained = reading.allowsPrevious && reading.credentialID != nil && previous?.credentialID == reading.credentialID
             ? currentQuota(previous?.result, now: clock()) : nil
-        let changedIdentity = previous?.credentialID != nil && reading.credentialID != nil && previous?.credentialID != reading.credentialID
-        let result = reading.result ?? (changedIdentity ? .missing : retained)
+        let result = reading.result ?? retained
         claude[source] = ClaudeReading(result: result, expires: clock().addingTimeInterval(reading.retryAfter), credentialID: reading.credentialID)
         return result
     }
 
     private func currentQuota(_ result: NotchAIUsageResult?, now: Date) -> NotchAIUsageResult? {
-        if result == .missing { return .missing }
         guard case .available(let quota) = result else { return nil }
         let windows = quota.windows.filter {
             now < ($0.resetAt ?? $0.observedAt.addingTimeInterval(Double($0.minutes) * 60))
