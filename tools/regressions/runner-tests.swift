@@ -72,6 +72,33 @@ import AppKit
         } else {
             check(false, "runner started before it was in the menu bar takes the bar's color (no menu bar item)")
         }
+        // macOS 27 flips a menu bar item between DarkAqua and VibrantDark each time it redraws the bar. A template
+        // drawn in the middle of a flip can come back opaque grey, so the flips must not make the runner draw its
+        // probe again; a real switch to the light bar still does.
+        if let button = runner.button {
+            var probes = 0
+            let watch = button.observe(\.image) { button, _ in
+                if button.image?.size == NSSize(width: 8, height: 8) { probes += 1 }
+            }
+            button.appearance = NSAppearance(named: .vibrantDark)
+            try? await Task.sleep(for: .milliseconds(300))
+            probes = 0
+            for _ in 0..<4 {
+                button.appearance = NSAppearance(named: .darkAqua)
+                button.appearance = NSAppearance(named: .vibrantDark)
+            }
+            try? await Task.sleep(for: .milliseconds(300))
+            print("runner probes during DarkAqua/VibrantDark flips: \(probes)")
+            check(probes == 0, "runner keeps its color through the menu bar's DarkAqua/VibrantDark flips")
+            button.appearance = NSAppearance(named: .aqua)
+            try? await Task.sleep(for: .milliseconds(300))
+            check(probes > 0, "runner measures again when the menu bar turns light")
+            watch.invalidate()
+            button.appearance = nil
+            try? await Task.sleep(for: .milliseconds(300))
+        } else {
+            check(false, "runner keeps its color through the menu bar's DarkAqua/VibrantDark flips (no menu bar item)")
+        }
         if let button = runner.button {
             func alpha() -> CGFloat {
                 button.layer?.sublayers?.last?.backgroundColor.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB)?.alphaComponent } ?? -1
