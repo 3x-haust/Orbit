@@ -570,6 +570,8 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
               && request?.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-token"
               && request?.value(forHTTPHeaderField: "anthropic-beta") == "oauth-2025-04-20",
               "The usage request sends the subscription bearer only to the fixed Anthropic endpoint")
+        check(request?.httpMethod == "GET" && request?.httpBody == nil,
+              "Quota refresh only reads usage metadata without submitting a model prompt")
         for status in [401, 403, 500, 302] {
             ClaudeUsageHTTPFixture.set(status: status, body: "{}")
             check(await NotchClaudeQuota.fetch(credentials, session: session, now: now).result == nil,
@@ -593,9 +595,12 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
         _ = await (first, second)
         _ = await service.read(automatic)
         check(probe.count == 1, "Concurrent card reads and repeated refreshes share one subscription request")
-        probe.advance(121)
+        probe.advance(59)
         _ = await service.read(automatic)
-        check(probe.count == 2, "Shared quota is queried again after two minutes")
+        check(probe.count == 1, "Shared quota stays cached until one minute has elapsed")
+        probe.advance(1)
+        _ = await service.read(automatic)
+        check(probe.count == 2, "Shared quota is queried again exactly one minute after the last read")
         _ = await service.read(hidden)
         check(probe.count == 3, "Separate source folders do not reuse another account's cached quota")
         let fallbackService = NotchAIUsageService(claudeRead: { _ in .init() })
