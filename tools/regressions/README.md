@@ -295,8 +295,10 @@ bash tools/regressions/run-menubar-removal-tests.sh \
 It reads app locations the way MenuBarAgent's tracked list holds them: an app
 bundle, a binary inside one, a file reference URL and file URLs with no path.
 None may raise an exception or loop forever. It also checks that Orbit's own
-icons are never taken for an app whose switch Orbit turns off. Nothing is written
-to MenuBarAgent's settings.
+icons are never taken for an app whose switch Orbit turns off, and that what an
+earlier build kept is listed once per icon: an icon whose label changed under one
+entry, an app that isn't running not at all. Nothing is written to
+MenuBarAgent's settings.
 
 # Notch Folder tab regression
 

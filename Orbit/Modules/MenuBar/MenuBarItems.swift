@@ -896,6 +896,10 @@ final class MenuBarItems {
         let always = hider.hasAlwaysSection ? hider.alwaysFrame : nil
         let removal = MenuBarRemoval.shared
         let byRemoving = removal.active
+        if byRemoving {
+            let theirs = Dictionary(grouping: raw.filter { $0.button == nil }) { MenuBarRemoval.bundleID(ofItem: $0.id) }
+            removal.follow(theirs.mapValues { $0.map { (id: $0.id, name: $0.name) } })
+        }
         var placed = raw.map { r in
             // Only an item on screen can be placed against the dividers; anything pushed away (or
             // squeezed behind the notch) keeps the section it was last seen in.
@@ -929,7 +933,7 @@ final class MenuBarItems {
         if byRemoving {
             // Switched-off icons aren't on the bar at all; list them from what Orbit kept.
             let present = Set(placed.map(\.id))
-            for (id, r) in removal.removed where !present.contains(id) {
+            for (id, r) in removal.listable where !present.contains(id) {
                 let section = Section(rawValue: r.section) ?? .hidden
                 known[id] = section
                 placed.append(Item(id: id, name: r.name, appIcon: Self.appIcon(r.bundleID), element: nil, button: nil, frame: .zero,

@@ -39,6 +39,31 @@ final class MenuBarRemoval {
     }
 
     func isRemoved(_ id: String) -> Bool { removed[id] != nil }
+
+    /// Switched-off icons there's something to show for: macOS's own, and those of apps that are
+    /// running. An app that quit has no icon; its entry stays for when it's back.
+    var listable: [String: Removed] {
+        let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
+        return removed.filter { $0.value.system != nil || running.contains($0.value.bundleID) }
+    }
+
+    /// The icons switched-off apps have now, by bundle id, as the apps themselves list them (they go on
+    /// doing so while switched off). An icon's label can change — a counter, a meter — and every
+    /// label is a new id: an app's entries become exactly its icons now, in the section it's in.
+    func follow(_ current: [String: [(id: String, name: String)]]) {
+        for (bundle, icons) in current where !icons.isEmpty && Self.switchable(bundle) {
+            let mine = removed.filter { $0.value.bundleID == bundle && $0.value.system == nil }
+            guard let first = mine.values.min(by: { $0.order < $1.order }),
+                  Set(mine.keys) != Set(icons.map(\.id)) else { continue }
+            var next = removed.filter { !($0.value.bundleID == bundle && $0.value.system == nil) }
+            for (k, icon) in icons.enumerated() {
+                next[icon.id] = mine[icon.id]
+                    ?? Removed(bundleID: bundle, name: icon.name, section: first.section, order: first.order + Double(k) / 100)
+            }
+            removed = next
+        }
+    }
+
     /// Apps to switch off. Never Orbit itself (✦ is how hidden icons come back) or macOS's own owners,
     /// which aren't in the list of switches.
     var removedBundles: Set<String> { Set(removed.values.filter { $0.system == nil }.map(\.bundleID)).filter(Self.switchable) }
