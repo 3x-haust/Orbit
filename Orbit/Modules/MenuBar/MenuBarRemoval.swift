@@ -50,7 +50,8 @@ final class MenuBarRemoval {
     }
 
     static func switchable(_ bundle: String) -> Bool {
-        bundle != Bundle.main.bundleIdentifier && !MenuBarItems.isSystem(bundle + "|")
+        // Orbit's own icons keep the id prefix of its first bundle id (``MenuBarItems/toggleID``).
+        bundle != Bundle.main.bundleIdentifier && bundle != bundleID(ofItem: MenuBarItems.toggleID) && !MenuBarItems.isSystem(bundle + "|")
     }
 
     static func bundleID(ofItem id: String) -> String { String(id.split(separator: "|", maxSplits: 1).first ?? "") }
