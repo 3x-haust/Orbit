@@ -200,14 +200,21 @@ enum MenuBarAgentPrefs {
 
     /// An app bundle, or a binary — tracked "ad hoc" by its path, like Electron apps run from a
     /// project — matched to the running app it is, else to the .app around it.
+    ///
+    /// The location is whatever MenuBarAgent wrote, so the app's Info.plist is read directly: NSBundle
+    /// raises an Objective-C exception for a URL that isn't a file path (a file reference URL), which
+    /// Swift can't catch. A URL with no path at all has no folder to look in.
     private static func appBundleID(at url: URL) -> String? {
-        if let id = Bundle(url: url)?.bundleIdentifier, url.pathExtension == "app" { return id }
         let path = url.standardizedFileURL.path
+        guard path.hasPrefix("/") else { return nil }
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.executableURL?.standardizedFileURL.path == path }),
            let id = app.bundleIdentifier { return id }
-        var dir = url.standardizedFileURL
+        var dir = URL(fileURLWithPath: path)
         while dir.path != "/" {
-            if dir.pathExtension == "app" { return Bundle(url: dir)?.bundleIdentifier }
+            if dir.pathExtension == "app" {
+                let info = NSDictionary(contentsOf: dir.appendingPathComponent("Contents/Info.plist"))
+                return info?["CFBundleIdentifier"] as? String
+            }
             dir.deleteLastPathComponent()
         }
         return nil
