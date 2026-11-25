@@ -263,9 +263,8 @@ enum NotchClaudeQuota {
     static func readHelper(_ source: Source, identityOnly: Bool = false,
                            executable: URL? = Bundle.main.executableURL) -> Reading {
         guard let executable, let input = try? JSONEncoder().encode(source), input.count <= 16384 else { return Reading() }
-        return NotchUsageCLI.run(executable, arguments: [usageHelperArgument, identityOnly ? "identity" : "quota"],
+        return NotchUsageCLI.run(executable, arguments: [usageHelperArgument, identityOnly ? "identity" : "quota", String(decoding: input, as: UTF8.self)],
                                 overrides: [:], timeout: identityOnly ? 8 : 12) { stdin, stdout in
-            try stdin.write(contentsOf: input)
             try stdin.close()
             var stdout = stdout
             let packet = try JSONDecoder().decode(UsagePacket.self, from: stdout.readDocument())
@@ -285,12 +284,13 @@ enum NotchClaudeQuota {
         guard arguments.dropFirst().first == usageHelperArgument else { return false }
         // Bound even a blocked Security.framework call if the parent exits unexpectedly.
         signal(SIGALRM, SIG_DFL)
-        alarm(arguments.last == "identity" ? 8 : 12)
+        alarm(arguments.dropFirst(2).first == "identity" ? 8 : 12)
         defer { alarm(0) }
         var reading = Reading()
-        if arguments.count == 3,
+        if arguments.count == 4,
            ["identity", "quota"].contains(arguments[2]),
-           let source = readHelperSource(),
+           arguments[3].utf8.count <= 16384,
+           let source = try? JSONDecoder().decode(Source.self, from: Data(arguments[3].utf8)),
            source.keychainService.range(of: #"\AClaude Code-credentials(?:-[0-9a-f]{8})?\z"#, options: .regularExpression) != nil,
            source.credentialFolder.isFileURL, source.credentialFolder.path.hasPrefix("/"),
            SecKeychainSetUserInteractionAllowed(false) == errSecSuccess,
@@ -305,17 +305,6 @@ enum NotchClaudeQuota {
         }
         try? FileHandle.standardOutput.write(contentsOf: usagePacket(reading))
         return true
-    }
-
-    private static func readHelperSource() -> Source? {
-        var input = Data()
-        do {
-            while let chunk = try FileHandle.standardInput.read(upToCount: min(4096, 16385 - input.count)), !chunk.isEmpty {
-                input.append(chunk)
-                guard input.count <= 16384 else { return nil }
-            }
-            return try JSONDecoder().decode(Source.self, from: input)
-        } catch { return nil }
     }
 
     private static func readKeychainDirect(_ service: String) -> StoredCredentials {
