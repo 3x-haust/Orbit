@@ -67,7 +67,7 @@ struct NotchAIProfile: Identifiable, Codable, Equatable, Sendable {
         folder.isEmpty ? provider.defaultFolder : Self.folderURL(folder)
     }
 
-    fileprivate static func folderURL(_ path: String) -> URL? {
+    static func folderURL(_ path: String) -> URL? {
         let expanded = (path as NSString).expandingTildeInPath
         guard expanded.hasPrefix("/"), !expanded.utf8.contains(0) else { return nil }
         return URL(fileURLWithPath: expanded, isDirectory: true).standardizedFileURL
