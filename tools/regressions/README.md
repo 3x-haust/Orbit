@@ -375,3 +375,24 @@ This does not replace a real two-hop update through download, replacement and
 relaunch. That check must use a disposable macOS account because both app IDs
 share Orbit's storage and single-instance lock. See `docs/releasing.md` for the
 legacy release route that must stay available.
+
+# Hot corners regression
+
+Build the Debug app, then run:
+
+```sh
+xcodebuild -project Orbit.xcodeproj -scheme Orbit -configuration Debug \
+  -derivedDataPath /tmp/orbit-corners-build CODE_SIGNING_ALLOWED=NO build
+bash tools/regressions/run-hot-corners-tests.sh \
+  /tmp/orbit-corners-build/Build/Products/Debug /tmp/orbit-corners-tests
+```
+
+The runner imports the app's Debug module and asks which corner the pointer is in
+on display layouts given as frames, so no display or pointer on this Mac is used.
+It covers the four corners of one display, an edge with no corner, displays side
+by side (the shared edge has no corners), and a display whose top-left corner
+touches the laptop's bottom-right one diagonally: each of those two corners must
+be its own display's corner, or the bottom-right corner runs the top-left action.
+
+Not covered: the pointer's dwell and the corner's action. Check by hand: set one
+corner to an action and the others to Nothing, then rest the pointer in each.
