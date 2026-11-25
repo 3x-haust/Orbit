@@ -147,7 +147,8 @@ private struct DragIf: ViewModifier {
 }
 
 #if DEBUG
-/// `com.lyu.orbit.debug` "menubar-editor" opens the editor on its own, for screenshots.
+/// `com.lyu.orbit.debug` "menubar-editor" opens the editor on its own, for screenshots; "hidden-bar"
+/// opens the row of hidden icons, as clicking Orbit's button does.
 enum MenuBarLayoutEditorDebug {
     nonisolated(unsafe) private static var window: NSWindow?
 
@@ -155,6 +156,10 @@ enum MenuBarLayoutEditorDebug {
         DistributedNotificationCenter.default().addObserver(forName: .init("com.lyu.orbit.debug"), object: nil, queue: .main) { note in
             if let cmd = note.object as? String, cmd == "collapse" || cmd == "expand" {
                 MainActor.assumeIsolated { MenuBarHider.shared.setCollapsed(cmd == "collapse", quietly: true) }
+                return
+            }
+            if note.object as? String == "hidden-bar" {
+                MainActor.assumeIsolated { MenuBarHider.shared.showHidden() }
                 return
             }
             if let cmd = note.object as? String, cmd == "reveal-on" || cmd == "reveal-off" {
