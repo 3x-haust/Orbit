@@ -1,5 +1,9 @@
 import Foundation
 
+private func waitForClaudeSignal(_ signal: DispatchSemaphore, timeout: DispatchTime) -> DispatchTimeoutResult {
+    signal.wait(timeout: timeout)
+}
+
 private final class ClaudeUsageHTTPFixture: URLProtocol, @unchecked Sendable {
     private static let lock = NSLock()
     private static var status = 200
@@ -29,15 +33,34 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
     private let lock = NSLock()
     private var time: Date
     private var requests = 0
-    private let result: NotchClaudeQuota.Reading
+    private var result: NotchClaudeQuota.Reading
     init(now: Date, result: NotchClaudeQuota.Reading) { time = now; self.result = result }
     var now: Date { lock.withLock { time } }
     var count: Int { lock.withLock { requests } }
     func advance(_ seconds: TimeInterval) { lock.withLock { time.addTimeInterval(seconds) } }
+    func setReading(_ value: NotchClaudeQuota.Reading) { lock.withLock { result = value } }
     func read(_ folder: URL) async -> NotchClaudeQuota.Reading {
         lock.withLock { requests += 1 }
         try? await Task.sleep(for: .milliseconds(20))
-        return result
+        return lock.withLock { result }
+    }
+}
+
+private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
+    let captured = DispatchSemaphore(value: 0)
+    let resume = DispatchSemaphore(value: 0)
+    private let gateLock = NSLock()
+    private var gated = false
+
+    override func stringArray(forKey key: String) -> [String]? {
+        let value = super.stringArray(forKey: key)
+        let shouldGate = gateLock.withLock {
+            if gated { return false }
+            gated = true
+            return true
+        }
+        if shouldGate { captured.signal(); resume.wait() }
+        return value
     }
 }
 
@@ -541,19 +564,58 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
         check(NotchClaudeQuota.Credentials.decode(Data(credentialJSON.utf8), now: now.addingTimeInterval(3601)) == nil,
               "Expired credentials are left for Claude to refresh")
         let credentialFile = try write(credentialJSON, to: "credential-profile/.credentials.json", in: root)
-        check(NotchClaudeQuota.credentials(in: credentialFile.deletingLastPathComponent(), now: now)?.accessToken == "fixture-token",
+        let credentialProfile = profile(.claude, "credential-profile", in: root)
+        let credentialSource = NotchClaudeQuota.source(for: credentialProfile, environment: [:])!
+        check(NotchClaudeQuota.credentials(from: credentialSource, now: now, keychain: { _ in .missing })?.accessToken == "fixture-token",
               "Custom profile credentials come from that profile")
+        let currentAccount = Data(credentialJSON.replacingOccurrences(of: "fixture-token", with: "current-account-token").utf8)
+        check(NotchClaudeQuota.credentials(from: credentialSource, now: now, keychain: { _ in .document(currentAccount) })?.accessToken == "current-account-token",
+              "Current Keychain account wins over an older still-valid plaintext login")
+        for document in ["{}", "{", credentialJSON.replacingOccurrences(of: "max", with: "api")] {
+            check(NotchClaudeQuota.credentials(from: credentialSource, now: now, keychain: { _ in .document(Data(document.utf8)) }) == nil,
+                  "A present unusable Keychain document cannot select the plaintext account")
+        }
+        check(NotchClaudeQuota.credentials(from: credentialSource, now: now.addingTimeInterval(3601), keychain: { _ in .document(currentAccount) }) == nil,
+              "An expired Keychain account does not fall back to a different plaintext account")
+        check(NotchClaudeQuota.credentials(from: credentialSource, now: now, keychain: { _ in .unavailable }) == nil,
+              "An inaccessible Keychain item fails closed without switching accounts")
         let linkedCredentials = root.appendingPathComponent("linked-credentials")
         try FileManager.default.createDirectory(at: linkedCredentials, withIntermediateDirectories: false)
         try FileManager.default.createSymbolicLink(at: linkedCredentials.appendingPathComponent(".credentials.json"), withDestinationURL: credentialFile)
-        check(NotchClaudeQuota.credentials(in: linkedCredentials, now: now) == nil,
+        let linkedSource = NotchClaudeQuota.source(for: profile(.claude, "linked-credentials", in: root), environment: [:])!
+        check(NotchClaudeQuota.credentials(from: linkedSource, now: now, keychain: { _ in .missing }) == nil,
               "A replaced credential symlink cannot select credentials from another profile")
         let home = root.appendingPathComponent("home")
-        check(NotchClaudeQuota.keychainService(for: home.appendingPathComponent(".claude"), home: home) == "Claude Code-credentials",
+        check(NotchClaudeQuota.keychainService(configDirectory: nil) == "Claude Code-credentials",
               "The default profile selects Claude Code's existing Keychain service")
-        check(NotchClaudeQuota.keychainService(for: autoFolder, home: home) != "Claude Code-credentials"
-              && NotchClaudeQuota.keychainService(for: autoFolder) != NotchClaudeQuota.keychainService(for: root),
+        check(NotchClaudeQuota.keychainService(configDirectory: autoFolder.path) != "Claude Code-credentials"
+              && NotchClaudeQuota.keychainService(configDirectory: autoFolder.path) != NotchClaudeQuota.keychainService(configDirectory: root.path),
               "Separate profile folders never read the global or another profile's Keychain item")
+        let defaultProfile = NotchAIProfile(name: "Default Claude", provider: .claude)
+        let defaultSource = NotchClaudeQuota.source(for: defaultProfile, environment: [:], home: home)!
+        let explicitDefault = NotchClaudeQuota.source(for: defaultProfile,
+            environment: ["CLAUDE_CONFIG_DIR": home.appendingPathComponent(".claude").path], home: home)!
+        check(defaultSource.folder == explicitDefault.folder && defaultSource != explicitDefault
+              && defaultSource.keychainService != explicitDefault.keychainService,
+              "An explicitly configured default folder keeps its distinct Claude Keychain and cache namespace")
+        check(NotchClaudeQuota.keychainService(configDirectory: root.path + "/") != NotchClaudeQuota.keychainService(configDirectory: root.path),
+              "Credential namespace hashing preserves the configured trailing slash")
+        check(NotchClaudeQuota.keychainService(configDirectory: "/fixture/caf\u{e9}") == NotchClaudeQuota.keychainService(configDirectory: "/fixture/cafe\u{301}"),
+              "Credential namespace hashing uses Claude's NFC normalization")
+        let securePath = root.appendingPathComponent("separate-credential-store").path
+        let secureSource = NotchClaudeQuota.source(for: defaultProfile,
+            environment: ["CLAUDE_SECURESTORAGE_CONFIG_DIR": securePath], home: home)!
+        check(secureSource.folder == defaultSource.folder && secureSource.credentialFolder.path == securePath
+              && secureSource.keychainService == NotchClaudeQuota.keychainService(configDirectory: securePath),
+              "Secure storage override selects both the credential file folder and Keychain namespace")
+        let emptySecure = NotchClaudeQuota.source(for: defaultProfile,
+            environment: ["CLAUDE_CONFIG_DIR": autoFolder.path, "CLAUDE_SECURESTORAGE_CONFIG_DIR": ""], home: home)!
+        check(emptySecure.folder == autoFolder && emptySecure.credentialFolder == defaultSource.credentialFolder
+              && emptySecure.keychainService == defaultSource.keychainService,
+              "An explicitly empty secure override selects default credentials while keeping the profile data folder")
+        let independent = NotchClaudeQuota.source(for: credentialProfile,
+            environment: ["CLAUDE_CONFIG_DIR": autoFolder.path, "CLAUDE_SECURESTORAGE_CONFIG_DIR": securePath], home: home)!
+        check(independent == credentialSource, "Custom profiles do not inherit another profile's ambient credential overrides")
 
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [ClaudeUsageHTTPFixture.self]
@@ -574,7 +636,8 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
               "Quota refresh only reads usage metadata without submitting a model prompt")
         for status in [401, 403, 500, 302] {
             ClaudeUsageHTTPFixture.set(status: status, body: "{}")
-            check(await NotchClaudeQuota.fetch(credentials, session: session, now: now).result == nil,
+            let failure = await NotchClaudeQuota.fetch(credentials, session: session, now: now)
+            check(failure.result == (status == 401 || status == 403 ? .missing : nil),
                   "HTTP \(status) leaves local sources available without asserting fresh quota")
         }
         ClaudeUsageHTTPFixture.set(status: 200, body: "{")
@@ -589,7 +652,7 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
         check(limited.result == nil && limited.retryAfter == 600, "Anthropic rate limits back off instead of polling every minute")
 
         let probe = ClaudeUsageReadProbe(now: now, result: live)
-        let service = NotchAIUsageService(claudeRead: { await probe.read($0) }, clock: { probe.now })
+        let service = NotchAIUsageService(claudeRead: { await probe.read($0.folder) }, clock: { probe.now })
         async let first = service.read(automatic)
         async let second = service.read(automatic)
         _ = await (first, second)
@@ -606,6 +669,77 @@ private final class ClaudeUsageReadProbe: @unchecked Sendable {
         let fallbackService = NotchAIUsageService(claudeRead: { _ in .init() })
         check(await fallbackService.read(automatic) == NotchAIUsageReader.read(automatic),
               "Unavailable subscription login keeps the existing status line source working")
+
+        let desktopOnly = profile(.claude, "desktop-only", in: root)
+        let backoffProbe = ClaudeUsageReadProbe(now: now, result: live)
+        let backoffService = NotchAIUsageService(claudeRead: { await backoffProbe.read($0.folder) }, clock: { backoffProbe.now })
+        let originalQuota = await backoffService.read(desktopOnly)
+        backoffProbe.advance(60)
+        backoffProbe.setReading(limited)
+        check(await backoffService.read(desktopOnly) == originalQuota,
+              "A desktop-only quota keeps its original observation during rate-limit backoff")
+        backoffProbe.advance(599)
+        check(await backoffService.read(desktopOnly) == originalQuota && backoffProbe.count == 2,
+              "Backoff preserves a valid quota without issuing extra requests")
+        var changedAccount = limited
+        changedAccount.credentialID = "different-account"
+        backoffProbe.setReading(changedAccount)
+        backoffProbe.advance(1)
+        check(await backoffService.read(desktopOnly) == .missing,
+              "A credential change cannot reuse the previous account's quota during backoff")
+        let authProbe = ClaudeUsageReadProbe(now: now, result: live)
+        let authService = NotchAIUsageService(claudeRead: { await authProbe.read($0.folder) }, clock: { authProbe.now })
+        _ = await authService.read(desktopOnly)
+        ClaudeUsageHTTPFixture.set(status: 401, body: "{}")
+        authProbe.setReading(await NotchClaudeQuota.fetch(credentials, session: session, now: now))
+        authProbe.advance(60)
+        check(await authService.read(desktopOnly) == .missing, "An authentication failure invalidates the retained subscription snapshot")
+        let expiryProbe = ClaudeUsageReadProbe(now: now, result: live)
+        let expiryService = NotchAIUsageService(claudeRead: { await expiryProbe.read($0.folder) }, clock: { expiryProbe.now })
+        _ = await expiryService.read(desktopOnly)
+        expiryProbe.setReading(limited)
+        expiryProbe.advance(3600)
+        if case .available(let quota) = await expiryService.read(desktopOnly) {
+            check(quota.windows.map(\.minutes) == [10080], "Retained quota drops expired windows instead of inventing a fresh observation")
+        } else { check(false, "Retained quota drops expired windows instead of inventing a fresh observation") }
+
+        let apiProfile = profile(.claude, "active-api-session", in: root)
+        let currentCost = """
+        {"api_key_session":true,"session_cost_usd":0.42,"captured_at":\(now.timeIntervalSince1970),
+        "auth_checked_at":\(now.timeIntervalSince1970)}
+        """
+        _ = try write(currentCost, to: "active-api-session/orbit-claude-cost.json", in: root)
+        let costProbe = ClaudeUsageReadProbe(now: now, result: live)
+        let costService = NotchAIUsageService(claudeRead: { await costProbe.read($0.folder) }, clock: { costProbe.now })
+        check(await costService.read(apiProfile) == .sessionCost(.init(usd: 0.42, observedAt: now)) && costProbe.count == 0,
+              "A recently verified active API session keeps its cost display despite a stored subscription login")
+        costProbe.advance(121)
+        check(await costService.read(apiProfile) == live.result && costProbe.count == 1,
+              "Historical API session cost cannot hide current desktop subscription quota")
+
+        let raceSuite = "dev.orbit.claude-race.\(UUID())"
+        let racePreferences = GatedClaudePreferences(suiteName: raceSuite)!
+        defer { racePreferences.removePersistentDomain(forName: raceSuite) }
+        let racing = profile(.claude, "disconnect-race", in: root)
+        _ = try write("{}", to: "disconnect-race/settings.json", in: root)
+        try ClaudeStatusLineBridge.setConnected(true, in: racing.sourceFolder!)
+        let automaticRace = Task.detached { ClaudeStatusLineBridge.automaticallyConnect([racing], preferences: racePreferences) }
+        let capturedBeforeDisconnect = await Task.detached { waitForClaudeSignal(racePreferences.captured, timeout: .now() + 5) }.value
+        precondition(capturedBeforeDisconnect == .success)
+        let disconnectFinished = DispatchSemaphore(value: 0)
+        let manualRace = Task.detached {
+            defer { disconnectFinished.signal() }
+            try! ClaudeStatusLineBridge.setConnected(false, in: racing.sourceFolder!, preferences: racePreferences)
+        }
+        _ = await Task.detached { waitForClaudeSignal(disconnectFinished, timeout: .now() + 1) }.value
+        racePreferences.resume.signal()
+        await automaticRace.value
+        await manualRace.value
+        check(ClaudeStatusLineBridge.state(in: racing.sourceFolder!) == .available,
+              "A concurrent automatic preparation cannot undo a manual disconnect")
+        ClaudeStatusLineBridge.automaticallyConnect([racing], preferences: racePreferences)
+        check(ClaudeStatusLineBridge.state(in: racing.sourceFolder!) == .available,
+              "The concurrent disconnect persists its automatic-connection opt-out")
 
         print("\(passed) passed, \(failed) failed")
         if failed > 0 { exit(1) }

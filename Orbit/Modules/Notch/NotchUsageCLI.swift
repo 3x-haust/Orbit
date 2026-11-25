@@ -153,6 +153,30 @@ enum NotchClaudeQuota {
     struct Reading: Sendable {
         var result: NotchAIUsageResult?
         var retryAfter: TimeInterval = 60
+        var credentialID: String?
+        var allowsPrevious = false
+    }
+
+    struct Source: Hashable, Sendable {
+        let folder: URL
+        let credentialFolder: URL
+        let keychainService: String
+    }
+
+    static func source(for profile: NotchAIProfile,
+                       environment: [String: String] = ProcessInfo.processInfo.environment,
+                       home: URL = FileManager.default.homeDirectoryForCurrentUser) -> Source? {
+        let standard = home.appendingPathComponent(".claude").path
+        let configured = profile.folder.isEmpty ? environment["CLAUDE_CONFIG_DIR"] : (profile.folder as NSString).expandingTildeInPath
+        if profile.folder.isEmpty, let configured, !configured.isEmpty, !configured.hasPrefix("/") { return nil }
+        guard let folder = NotchAIProfile.folderURL(configured?.isEmpty == false ? configured! : standard) else { return nil }
+        // A selected custom profile must not inherit a different profile's storage override.
+        let secure = profile.folder.isEmpty ? environment["CLAUDE_SECURESTORAGE_CONFIG_DIR"] : nil
+        if let secure, !secure.isEmpty, !secure.hasPrefix("/") { return nil }
+        let storagePath = secure.map { $0.isEmpty ? standard : $0 } ?? configured ?? standard
+        guard let credentialFolder = NotchAIProfile.folderURL(storagePath.precomposedStringWithCanonicalMapping) else { return nil }
+        return Source(folder: folder, credentialFolder: credentialFolder,
+                      keychainService: keychainService(configDirectory: secure ?? configured))
     }
 
     struct Credentials: Decodable {
@@ -172,15 +196,29 @@ enum NotchClaudeQuota {
         }
     }
 
-    static func keychainService(for folder: URL, home: URL = FileManager.default.homeDirectoryForCurrentUser) -> String {
-        let path = folder.standardizedFileURL.path
-        let standard = home.appendingPathComponent(".claude").standardizedFileURL.path
-        if path == standard { return "Claude Code-credentials" }
+    static func keychainService(configDirectory: String?) -> String {
+        guard let path = configDirectory?.precomposedStringWithCanonicalMapping, !path.isEmpty else { return "Claude Code-credentials" }
         let hash = SHA256.hash(data: Data(path.utf8)).prefix(4).map { String(format: "%02x", $0) }.joined()
         return "Claude Code-credentials-" + hash
     }
 
-    static func credentials(in folder: URL, now: Date = .now) -> Credentials? {
+    enum StoredCredentials {
+        case missing, unavailable
+        case document(Data)
+    }
+
+    static func credentials(from source: Source, now: Date = .now,
+                            keychain: (String) -> StoredCredentials = readKeychain) -> Credentials? {
+        // Match Claude Code's Keychain-first document selection. A present but unusable
+        // account must not fall through to an older still-valid account in the plaintext file.
+        switch keychain(source.keychainService) {
+        case .document(let data): return Credentials.decode(data, now: now)
+        case .unavailable: return nil
+        case .missing: return fileCredentials(in: source.credentialFolder, now: now)
+        }
+    }
+
+    private static func fileCredentials(in folder: URL, now: Date) -> Credentials? {
         let file = folder.appendingPathComponent(".credentials.json")
         let descriptor = file.withUnsafeFileSystemRepresentation { path in
             path.map { open($0, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC) } ?? -1
@@ -193,21 +231,25 @@ enum NotchClaudeQuota {
                   let data = try? handle.read(upToCount: 256 * 1024 + 1), data.count <= 256 * 1024 else { return nil }
             return Credentials.decode(data, now: now)
         }
-        // An unreadable or replaced file must not select another identity from Keychain.
-        guard errno == ENOENT else { return nil }
+        return nil
+    }
+
+    private static func readKeychain(_ service: String) -> StoredCredentials {
         let context = LAContext()
         context.interactionNotAllowed = true
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: keychainService(for: folder),
+            kSecAttrService as String: service,
             kSecAttrAccount as String: NSUserName(),
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecUseAuthenticationContext as String: context,
         ]
         var item: CFTypeRef?
-        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess, let data = item as? Data else { return nil }
-        return Credentials.decode(data, now: now)
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        if status == errSecItemNotFound { return .missing }
+        guard status == errSecSuccess, let data = item as? Data else { return .unavailable }
+        return .document(data)
     }
 
     private final class NoRedirect: NSObject, URLSessionTaskDelegate {
@@ -225,12 +267,14 @@ enum NotchClaudeQuota {
         return URLSession(configuration: configuration, delegate: NoRedirect(), delegateQueue: nil)
     }()
 
-    static func read(in folder: URL) async -> Reading {
-        guard let credentials = credentials(in: folder) else { return Reading() }
+    static func read(from source: Source) async -> Reading {
+        guard let credentials = credentials(from: source) else { return Reading() }
         return await fetch(credentials, session: session)
     }
 
     static func fetch(_ credentials: Credentials, session: URLSession, now: Date = .now) async -> Reading {
+        let identity = SHA256.hash(data: Data(credentials.accessToken.utf8)).map { String(format: "%02x", $0) }.joined()
+        let transient = Reading(credentialID: identity, allowsPrevious: true)
         var request = URLRequest(url: URL(string: "https://api.anthropic.com/api/oauth/usage")!)
         request.timeoutInterval = 8
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -239,17 +283,19 @@ enum NotchClaudeQuota {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         do {
             let (data, response) = try await session.data(for: request)
-            guard let response = response as? HTTPURLResponse else { return Reading() }
+            guard let response = response as? HTTPURLResponse else { return transient }
             if response.statusCode == 429 {
                 let delay = response.value(forHTTPHeaderField: "Retry-After").flatMap(Double.init) ?? 300
-                return Reading(retryAfter: delay.isFinite ? max(300, min(delay, 3600)) : 300)
+                return Reading(retryAfter: delay.isFinite ? max(300, min(delay, 3600)) : 300,
+                               credentialID: identity, allowsPrevious: true)
             }
+            if response.statusCode == 401 || response.statusCode == 403 { return Reading(result: .missing, credentialID: identity) }
             guard response.statusCode == 200, data.count <= 256 * 1024,
-                  let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return Reading() }
+                  let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return transient }
             let result = NotchAIUsageReader.claudeAccountSnapshot(payload, now: now)
-            return Reading(result: result == .missing ? nil : result)
+            return Reading(result: result == .missing ? nil : result, credentialID: identity, allowsPrevious: true)
         } catch {
-            return Reading()
+            return transient
         }
     }
 }
@@ -262,14 +308,20 @@ actor NotchAIUsageService {
         let expires: Date
     }
 
+    private struct ClaudeReading {
+        let result: NotchAIUsageResult?
+        let expires: Date
+        let credentialID: String?
+    }
+
     private var codex: [URL: CachedReading] = [:]
     private var codexTasks: [URL: Task<NotchAIUsageResult?, Never>] = [:]
-    private var claude: [URL: CachedReading] = [:]
-    private var claudeTasks: [URL: Task<NotchClaudeQuota.Reading, Never>] = [:]
-    private let claudeRead: @Sendable (URL) async -> NotchClaudeQuota.Reading
+    private var claude: [NotchClaudeQuota.Source: ClaudeReading] = [:]
+    private var claudeTasks: [NotchClaudeQuota.Source: Task<NotchClaudeQuota.Reading, Never>] = [:]
+    private let claudeRead: @Sendable (NotchClaudeQuota.Source) async -> NotchClaudeQuota.Reading
     private let clock: @Sendable () -> Date
 
-    init(claudeRead: @escaping @Sendable (URL) async -> NotchClaudeQuota.Reading = { await NotchClaudeQuota.read(in: $0) },
+    init(claudeRead: @escaping @Sendable (NotchClaudeQuota.Source) async -> NotchClaudeQuota.Reading = { await NotchClaudeQuota.read(from: $0) },
          clock: @escaping @Sendable () -> Date = { Date() }) {
         self.claudeRead = claudeRead
         self.clock = clock
@@ -284,26 +336,52 @@ actor NotchAIUsageService {
         if profile.provider == .codex, let folder, let result = await readCodex(folder) {
             return result
         }
-        if profile.provider == .claude, let folder, let result = await readClaude(folder) {
-            return result
+        if profile.provider == .claude {
+            let local = await readLocal(profile)
+            if case .sessionCost(let cost) = local, (0...120).contains(clock().timeIntervalSince(cost.observedAt)) {
+                return local
+            }
+            if let source = NotchClaudeQuota.source(for: profile), let result = await readClaude(source) { return result }
+            return local
         }
-        let local = Task.detached(priority: .utility) { NotchAIUsageReader.read(profile) }
+        return await readLocal(profile)
+    }
+
+    private func readLocal(_ profile: NotchAIProfile) async -> NotchAIUsageResult {
+        let now = clock()
+        let local = Task.detached(priority: .utility) { NotchAIUsageReader.read(profile, now: now) }
         return await withTaskCancellationHandler { await local.value } onCancel: { local.cancel() }
     }
 
-    private func readClaude(_ folder: URL) async -> NotchAIUsageResult? {
-        let folder = folder.standardizedFileURL
+    private func readClaude(_ source: NotchClaudeQuota.Source) async -> NotchAIUsageResult? {
         let now = clock()
-        claude = claude.filter { $0.value.expires > now }
-        if let reading = claude[folder] { return reading.result }
-        if let task = claudeTasks[folder] { return await task.value.result }
-        let read = claudeRead
-        let task = Task.detached(priority: .utility) { await read(folder) }
-        claudeTasks[folder] = task
+        if let reading = claude[source], reading.expires > now { return currentQuota(reading.result, now: now) }
+        let task: Task<NotchClaudeQuota.Reading, Never>
+        if let pending = claudeTasks[source] {
+            task = pending
+        } else {
+            let read = claudeRead
+            task = Task.detached(priority: .utility) { await read(source) }
+            claudeTasks[source] = task
+        }
         let reading = await task.value
-        claudeTasks[folder] = nil
-        claude[folder] = CachedReading(result: reading.result, expires: clock().addingTimeInterval(reading.retryAfter))
-        return reading.result
+        claudeTasks[source] = nil
+        let previous = claude[source]
+        let retained = reading.allowsPrevious && reading.credentialID != nil && previous?.credentialID == reading.credentialID
+            ? currentQuota(previous?.result, now: clock()) : nil
+        let changedIdentity = previous?.credentialID != nil && reading.credentialID != nil && previous?.credentialID != reading.credentialID
+        let result = reading.result ?? (changedIdentity ? .missing : retained)
+        claude[source] = ClaudeReading(result: result, expires: clock().addingTimeInterval(reading.retryAfter), credentialID: reading.credentialID)
+        return result
+    }
+
+    private func currentQuota(_ result: NotchAIUsageResult?, now: Date) -> NotchAIUsageResult? {
+        if result == .missing { return .missing }
+        guard case .available(let quota) = result else { return nil }
+        let windows = quota.windows.filter {
+            now < ($0.resetAt ?? $0.observedAt.addingTimeInterval(Double($0.minutes) * 60))
+        }
+        return windows.isEmpty ? nil : .available(.init(windows: windows))
     }
 
     private func readCodex(_ folder: URL) async -> NotchAIUsageResult? {

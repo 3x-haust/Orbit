@@ -28,20 +28,25 @@ enum ClaudeStatusLineBridge {
     }
 
     private static let disconnectedFoldersKey = "notch.home.claudeDisconnectedFolders"
+    private static let connectionLock = NSLock()
 
     /// Run only for enabled, visible Claude profiles. Missing or unsupported settings stay untouched.
     static func automaticallyConnect(_ profiles: [NotchAIProfile], preferences: UserDefaults) {
+        connectionLock.lock()
+        defer { connectionLock.unlock() }
         let disconnected = Set(preferences.stringArray(forKey: disconnectedFoldersKey) ?? [])
         var seen = Set<URL>()
         for profile in profiles where profile.provider == .claude && profile.isVisible {
             guard let folder = profile.sourceFolder, seen.insert(folder).inserted,
                   !disconnected.contains(folder.standardizedFileURL.path) else { continue }
             let state = state(in: folder)
-            if state == .available || state == .needsUpdate { try? setConnected(true, in: folder) }
+            if state == .available || state == .needsUpdate { try? updateConnection(true, in: folder) }
         }
     }
 
     static func setConnected(_ connected: Bool, in folder: URL, preferences: UserDefaults? = nil) throws {
+        connectionLock.lock()
+        defer { connectionLock.unlock() }
         try updateConnection(connected, in: folder)
         if let preferences {
             var disconnected = Set(preferences.stringArray(forKey: disconnectedFoldersKey) ?? [])
