@@ -114,7 +114,7 @@ struct NotchAIResetCountdown: Equatable {
     }
 }
 
-struct NotchAIQuotaWindow: Identifiable, Equatable, Sendable {
+struct NotchAIQuotaWindow: Identifiable, Codable, Equatable, Sendable {
     let minutes: Int
     let usedPercent: Double
     let resetAt: Date?
@@ -137,7 +137,7 @@ struct NotchAIQuotaWindow: Identifiable, Equatable, Sendable {
     }
 }
 
-struct NotchAIQuotaSnapshot: Equatable, Sendable {
+struct NotchAIQuotaSnapshot: Codable, Equatable, Sendable {
     let windows: [NotchAIQuotaWindow]
 }
 

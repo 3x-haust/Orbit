@@ -4,8 +4,8 @@ import KeyboardShortcuts
 
 @main
 enum OrbitEntryPoint {
-    @MainActor static func main() {
-        if NotchClaudeQuota.runCredentialHelperIfRequested() { return }
+    @MainActor static func main() async {
+        if await NotchClaudeQuota.runUsageHelperIfRequested() { return }
         OrbitApp.main()
     }
 }
