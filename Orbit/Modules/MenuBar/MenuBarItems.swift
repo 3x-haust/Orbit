@@ -1118,7 +1118,9 @@ final class MenuBarItems {
         ]
         guard let primary = NSScreen.screens.first else { return [] }
         return mine.compactMap { key, name, button, mobility in
-            guard let button, let f = button.window?.frame, f.width > 0 else { return nil }
+            // A window with no height isn't in the bar yet (right after launch): it would read as off
+            // screen, so as hidden.
+            guard let button, let f = button.window?.frame, f.width > 0, f.height > 0 else { return nil }
             let frame = CGRect(x: f.minX, y: primary.frame.maxY - f.maxY, width: f.width, height: f.height)
             return Raw(id: "com.lyu.orbit|\(key)", name: name, appIcon: icon, element: nil, button: button, frame: frame,
                        mobility: mobility, pid: ProcessInfo.processInfo.processIdentifier)
