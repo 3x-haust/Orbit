@@ -781,6 +781,11 @@
       "LeftOpen"
     ]
   },
+  "rows": {
+    "notch": {
+      "Home": ["캘린더", "음악"]
+    }
+  },
   "actions": {
     "darkMode": [
       "다크 모드 켜기",
@@ -931,5 +936,13 @@
   "skip": [],
   "keep": [
     "Trash"
-  ]
+  ],
+  "noTriggerByPage": {
+    "notch": [
+      "용량",
+      "windows",
+      "배치",
+      "사용량"
+    ]
+  }
 }

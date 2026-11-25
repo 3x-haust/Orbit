@@ -77,6 +77,8 @@ enum Palette {
     static let ink = dynamic(light: 0x0B0B0C, dark: 0xFAFAFA)
     static let inkSecondary = dynamic(light: 0x6B6B70, dark: 0x9C9CA3)
     static let hairline = dynamic(light: 0x000000, dark: 0xFFFFFF, alpha: (0.09, 0.11))
+    /// The deeper green already used by the runner on light backgrounds.
+    static let deepGreen = Color(red: 0x1A / 255.0, green: 0x94 / 255.0, blue: 0x36 / 255.0)
     /// Orbit orange. macOS would otherwise swap the app accent for the user's system accent,
     /// so the brand color is explicit; "Use system accent color" in Settings opts into the system one.
     static let brand = dynamic(light: 0xF55C1A, dark: 0xFF7338)

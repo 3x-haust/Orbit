@@ -6,6 +6,10 @@ import UniformTypeIdentifiers
 
 /// The open notch: tabs beside the camera, the chosen tab below.
 struct NotchOpenPanel: View {
+    static let contentInset: CGFloat = 16
+    static let contentTop: CGFloat = 8
+    static let contentBottom: CGFloat = 14
+
     let notch: CGSize
     let display: CGDirectDisplayID
     private var center: NotchCenter { .shared }
@@ -48,9 +52,9 @@ struct NotchOpenPanel: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 14)
+            .padding(.horizontal, Self.contentInset)
+            .padding(.top, Self.contentTop)
+            .padding(.bottom, Self.contentBottom)
             .transition(.opacity)
             .id(center.tab)
         }
@@ -119,11 +123,36 @@ private struct NotchBatteryChip: View {
 // MARK: - Home
 
 private struct NotchHomeTab: View {
+    private var layout: NotchHomeLayout { NotchCenter.shared.config.homeLayout }
     var body: some View {
-        HStack(spacing: 14) {
-            if NowPlaying.shared.track != nil { NotchMusicCard() } else { NotchNoMusic() }
-            Rectangle().fill(.white.opacity(0.08)).frame(width: 1)
-            NotchCalendarCard().frame(width: 170)
+        GeometryReader { geometry in
+            let widths = layout.widths(total: geometry.size.width, gap: NotchHomeLayout.gap)
+            HStack(spacing: 0) {
+                ForEach(Array(layout.widgets.enumerated()), id: \.element) { index, widget in
+                    if index > 0 {
+                        Rectangle().fill(.white.opacity(0.08)).frame(width: 1)
+                            .padding(.horizontal, (NotchHomeLayout.gap - 1) / 2)
+                            .accessibilityHidden(true)
+                    }
+                    card(widget, width: widths[index])
+                        .frame(width: widths[index], height: geometry.size.height)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func card(_ widget: NotchHomeWidget, width: CGFloat) -> some View {
+        switch widget {
+        case .music:
+            if NowPlaying.shared.track != nil {
+                NotchMusicCard(compact: width < 312)
+            } else {
+                NotchNoMusic()
+            }
+        case .calendar:
+            NotchCalendarCard()
+        case .aiUsage:
+            NotchAIUsageCard()
         }
     }
 }
@@ -139,42 +168,82 @@ private struct NotchNoMusic: View {
 }
 
 private struct NotchMusicCard: View {
+    let compact: Bool
     @State private var scrub: Double?
 
     var body: some View {
         let np = NowPlaying.shared
-        HStack(spacing: 14) {
-            Group {
-                if let art = np.artwork { Image(nsImage: art).resizable().aspectRatio(contentMode: .fill) }
-                else { CoverPlaceholder(appIcon: np.appIcon, side: 92) }
-            }
-            .frame(width: 92, height: 92)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .shadow(color: np.palette.accent.opacity(0.35), radius: 14, y: 4)
-            .onTapGesture { np.openSource() }
-
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(np.track?.title ?? "").font(.system(size: 14, weight: .semibold)).foregroundStyle(.white).lineLimit(1)
-                        Text(np.track?.artist ?? "").font(.system(size: 12)).foregroundStyle(.white.opacity(0.6)).lineLimit(1)
+        Group {
+            if compact {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        artwork(np, side: 36)
+                        trackDetails(np)
+                        likeButton(np)
                     }
-                    Spacer(minLength: 4)
-                    Equalizer(playing: np.playing, color: np.palette.accent).frame(width: 16, height: 14).padding(.top, 3)
+                    scrubber(np)
+                    playbackButtons(np)
                 }
-                scrubber(np)
-                HStack(spacing: 10) {
-                    NotchIconButton(symbol: np.liked ? "heart.fill" : "heart", help: "Like Song", size: 12, tint: np.liked ? Palette.brand : .white) { np.toggleLike() }
-                    Spacer(minLength: 0)
-                    NotchIconButton(symbol: "backward.fill", help: "Previous Song", size: 14) { np.previous() }
-                    NotchIconButton(symbol: np.playing ? "pause.fill" : "play.fill", help: "Play/Pause", size: 20) { np.togglePlayPause() }
-                    NotchIconButton(symbol: "forward.fill", help: "Next Song", size: 14) { np.next() }
-                    Spacer(minLength: 0)
-                    NotchIconButton(symbol: "arrow.up.forward.app", help: "Open", size: 12) { np.openSource() }
+            } else {
+                HStack(spacing: 14) {
+                    artwork(np, side: 92)
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(alignment: .top) {
+                            trackDetails(np)
+                            Spacer(minLength: 4)
+                            Equalizer(playing: np.playing, color: np.palette.accent)
+                                .frame(width: 16, height: 14).padding(.top, 3)
+                                .accessibilityHidden(true)
+                        }
+                        scrubber(np)
+                        HStack(spacing: 10) {
+                            likeButton(np)
+                            Spacer(minLength: 0)
+                            playbackButtons(np)
+                            Spacer(minLength: 0)
+                            NotchIconButton(symbol: "arrow.up.forward.app", help: "Open", size: 12) { np.openSource() }
+                        }
+                    }
                 }
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private func artwork(_ np: NowPlaying, side: CGFloat) -> some View {
+        Button { np.openSource() } label: {
+            Group {
+                if let art = np.artwork { Image(nsImage: art).resizable().aspectRatio(contentMode: .fill) }
+                else { CoverPlaceholder(appIcon: np.appIcon, side: side) }
+            }
+            .frame(width: side, height: side)
+            .clipShape(RoundedRectangle(cornerRadius: compact ? 7 : 14, style: .continuous))
+            .shadow(color: np.palette.accent.opacity(0.35), radius: compact ? 5 : 14, y: 4)
+        }
+        .buttonStyle(.plain)
+        .help("Open".loc)
+        .accessibilityLabel(Text("Open"))
+    }
+
+    private func trackDetails(_ np: NowPlaying) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(np.track?.title ?? "").font(.system(size: compact ? 12 : 14, weight: .semibold)).foregroundStyle(.white).lineLimit(1)
+            Text(np.track?.artist ?? "").font(.system(size: compact ? 10 : 12)).foregroundStyle(.white.opacity(0.6)).lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func likeButton(_ np: NowPlaying) -> some View {
+        NotchIconButton(symbol: np.liked ? "heart.fill" : "heart", help: "Like Song", size: 12, tint: np.liked ? Palette.brand : .white) { np.toggleLike() }
+    }
+
+    private func playbackButtons(_ np: NowPlaying) -> some View {
+        HStack(spacing: compact ? 4 : 10) {
+            NotchIconButton(symbol: "backward.fill", help: "Previous Song", size: 14) { np.previous() }
+            NotchIconButton(symbol: np.playing ? "pause.fill" : "play.fill", help: "Play/Pause", size: 20) { np.togglePlayPause() }
+            NotchIconButton(symbol: "forward.fill", help: "Next Song", size: 14) { np.next() }
+        }
+        .frame(maxWidth: compact ? .infinity : nil)
     }
 
     private func scrubber(_ np: NowPlaying) -> some View {
@@ -191,7 +260,10 @@ private struct NotchMusicCard: View {
                     .frame(maxHeight: .infinity)
                     .contentShape(Rectangle())
                     .gesture(DragGesture(minimumDistance: 0)
-                        .onChanged { v in scrub = min(max(v.location.x / g.size.width, 0), 1) * duration }
+                        .onChanged { value in
+                            guard g.size.width > 0 else { return }
+                            scrub = min(max(value.location.x / g.size.width, 0), 1) * duration
+                        }
                         .onEnded { _ in
                             if let scrub { np.seek(to: scrub) }
                             scrub = nil
@@ -218,11 +290,12 @@ private struct NotchCalendarCard: View {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(Date().formatted(.dateTime.day())).font(.system(size: 20, weight: .bold)).foregroundStyle(.white)
                 Text(Date().formatted(.dateTime.weekday(.wide))).font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.brand)
+                    .lineLimit(1)
             }
             switch model.access {
             case .fullAccess:
                 if model.events.isEmpty {
-                    Text("No more events today").font(.system(size: 11)).foregroundStyle(.white.opacity(0.45))
+                    Text("No more events today").font(.system(size: 11)).foregroundStyle(.white.opacity(0.45)).lineLimit(2)
                 } else {
                     ForEach(Array(model.events.prefix(3)), id: \.self) { e in
                         HStack(alignment: .top, spacing: 6) {
@@ -235,7 +308,7 @@ private struct NotchCalendarCard: View {
                     }
                 }
             default:
-                Text("See today's events here").font(.system(size: 11)).foregroundStyle(.white.opacity(0.5))
+                Text("See today's events here").font(.system(size: 11)).foregroundStyle(.white.opacity(0.5)).lineLimit(2)
                 Button("Allow Calendar") { model.requestAccess() }
                     .buttonStyle(.plain)
                     .font(.system(size: 11, weight: .semibold))

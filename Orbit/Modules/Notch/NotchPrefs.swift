@@ -21,6 +21,8 @@ enum NotchPrefs {
 
     // Tabs in the open notch
     static let tabHome = "notch.tab.home"
+    static let homeLayout = "notch.home.layout"
+    static let aiUsage = "notch.home.aiUsage"
     static let tabShelf = "notch.tab.shelf"
     static let tabMirror = "notch.tab.mirror"
     static let tabTimer = "notch.tab.timer"
