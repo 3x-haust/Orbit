@@ -258,9 +258,18 @@ macOS can no longer verify it because an update replaced its binary (every call
 then fails and closed-lid mode falls back to the password prompt). It also
 replaces a legacy helper that rejects the new app identity: an isolated,
 anonymous XPC listener reproduces the interrupted handshake returned by macOS.
-A current or newer helper, a slow response, an unrelated error domain, and an
+The listener rejects two consecutive handshakes on the same connection. A
+current or newer helper, a slow response, an unrelated error domain, and an
 invalid connection alone do not trigger replacement. No installed helper,
 system sleep settings, or user preferences are changed by this runner.
+
+`python3 tools/regressions/run-fan-helper-startup-tests.py` compiles the production
+recovery, version probe, removal, and connection methods with isolated service
+and XPC stand-ins. Its eight scenarios cover transient interruption without
+replacement, persistent rejection, an older helper, concurrent battery startup,
+stale enabled registration with unregister/register errors, approval after a
+failed recovery, timeouts, delayed invalidation, and explicit removal during
+recovery. Neither runner launches Orbit or changes the system service.
 
 # Runner regression
 
