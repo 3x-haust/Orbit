@@ -277,7 +277,11 @@ from the runner takes its colors from the same place, and both go plain when the
 It also puts a real runner in the menu bar (a logged-in desktop is required).
 It gives the new item the dark menu bar's look before macOS has laid it out in
 the bar, as at launch, and checks the runner doesn't take the grey a template
-comes out in then, but the bar's own color once it's there. Then it fades its
+comes out in then, but the bar's own color once it's there. It flips the item
+between DarkAqua and VibrantDark, as macOS 27 does each time it redraws the
+bar, and checks the runner doesn't measure its color again (a template drawn
+mid-flip can come out opaque grey), while a switch to the light bar still
+makes it measure again. Then it fades its
 button while the menu bar's appearance changes back, as when waking from sleep,
 and checks the runner is back at full color once the fading ends.
 
