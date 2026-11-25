@@ -227,8 +227,9 @@ final class HotCorners {
         active = nil
     }
 
-    /// Is `p` within `d` points of a real outer corner of some screen — one the pointer stops at,
-    /// not a corner that runs on into a neighbouring display?
+    /// Is `p` within `d` points of a real outer corner of the screen it's on — one the pointer stops
+    /// at, not a corner that runs on into a neighbouring display? A neighbour's corner touching this
+    /// one diagonally is that screen's own corner, not this one's.
     private func near(_ c: Corner, _ p: CGPoint, within d: CGFloat) -> Bool {
         Self.near(c, p, within: d, screens: NSScreen.screens.map(\.frame))
     }
@@ -239,7 +240,7 @@ final class HotCorners {
     }
 
     private static func near(_ c: Corner, _ p: CGPoint, within d: CGFloat, screens: [CGRect]) -> Bool {
-        for f in screens {
+        for f in screens where NSMouseInRect(p, f, false) {
             let x = c.isLeft ? f.minX : f.maxX - 1
             let y = c.isTop ? f.maxY - 1 : f.minY
             guard abs(p.x - x) <= d, abs(p.y - y) <= d else { continue }
