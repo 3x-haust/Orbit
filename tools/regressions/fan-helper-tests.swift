@@ -48,23 +48,25 @@ private final class RejectingHelper: NSObject, NSXPCListenerDelegate, HelperHand
         let connection = NSXPCConnection(listenerEndpoint: listener.endpoint)
         connection.remoteObjectInterface = NSXPCInterface(with: HelperHandshake.self)
         connection.resume()
-        let rejection: Error? = await withCheckedContinuation { done in
-            let once = FanControl.Once<Error?>(done)
-            let helper = connection.remoteObjectProxyWithErrorHandler { once.resume($0) } as? HelperHandshake
-            helper?.version { _ in once.resume(nil) }
-            DispatchQueue.global().asyncAfter(deadline: .now() + 3) { once.resume(nil) }
+        for attempt in 1...2 {
+            let rejection: Error? = await withCheckedContinuation { done in
+                let once = FanControl.Once<Error?>(done)
+                let helper = connection.remoteObjectProxyWithErrorHandler { once.resume($0) } as? HelperHandshake
+                helper?.version { _ in once.resume(nil) }
+                DispatchQueue.global().asyncAfter(deadline: .now() + 3) { once.resume(nil) }
+            }
+            check((rejection as NSError?)?.code == NSXPCConnectionInterrupted,
+                  "rejected handshake \(attempt) on the same connection reports interruption")
+            if let rejection {
+                check(FanControl.helperNeedsRestart(.failure(rejection)),
+                      "the real XPC rejection triggers replacement of the legacy helper")
+            } else {
+                check(false, "the real XPC rejection triggers replacement of the legacy helper")
+            }
         }
         connection.invalidate()
         listener.invalidate()
         withExtendedLifetime(service) {}
-        check((rejection as NSError?)?.code == NSXPCConnectionInterrupted,
-              "a listener rejecting the client signature reports an interrupted handshake")
-        if let rejection {
-            check(FanControl.helperNeedsRestart(.failure(rejection)),
-                  "the real XPC rejection triggers replacement of the legacy helper")
-        } else {
-            check(false, "the real XPC rejection triggers replacement of the legacy helper")
-        }
         exit(failed == 0 ? 0 : 1)
     }
 }
