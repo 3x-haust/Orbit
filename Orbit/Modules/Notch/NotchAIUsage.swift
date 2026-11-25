@@ -201,6 +201,14 @@ enum NotchAIUsageReader {
         })
     }
 
+    static func claudeAccountSnapshot(_ payload: [String: Any], now: Date) -> NotchAIUsageResult {
+        let dates = Dates(now: now)
+        return windows([(key: "five_hour", minutes: 300), (key: "seven_day", minutes: 10_080)].map { period in
+            window(payload[period.key], minutes: period.minutes, usedKey: "utilization", resetKey: "resets_at",
+                   observed: now, dates: dates)
+        })
+    }
+
     private static func claudeUsage(in folder: URL, dates: Dates) throws -> NotchAIUsageResult {
         var capture: NotchAIUsageResult = .missing
         var captureError: Error?

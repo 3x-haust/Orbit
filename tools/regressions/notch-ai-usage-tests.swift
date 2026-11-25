@@ -1,9 +1,50 @@
 import Foundation
 
+private final class ClaudeUsageHTTPFixture: URLProtocol, @unchecked Sendable {
+    private static let lock = NSLock()
+    private static var status = 200
+    private static var body = "{}"
+    private static var headers: [String: String] = [:]
+    private static var request: URLRequest?
+    static var lastRequest: URLRequest? { lock.withLock { request } }
+    static func set(status: Int, body: String, headers: [String: String] = [:]) {
+        lock.withLock { self.status = status; self.body = body; self.headers = headers }
+    }
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        let (status, body, headers) = Self.lock.withLock {
+            Self.request = request
+            return (Self.status, Self.body, Self.headers)
+        }
+        let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: headers)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(body.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}
+
+private final class ClaudeUsageReadProbe: @unchecked Sendable {
+    private let lock = NSLock()
+    private var time: Date
+    private var requests = 0
+    private let result: NotchClaudeQuota.Reading
+    init(now: Date, result: NotchClaudeQuota.Reading) { time = now; self.result = result }
+    var now: Date { lock.withLock { time } }
+    var count: Int { lock.withLock { requests } }
+    func advance(_ seconds: TimeInterval) { lock.withLock { time.addTimeInterval(seconds) } }
+    func read(_ folder: URL) async -> NotchClaudeQuota.Reading {
+        lock.withLock { requests += 1 }
+        try? await Task.sleep(for: .milliseconds(20))
+        return result
+    }
+}
+
 @main struct NotchAIUsageTests {
     private static let now = Date(timeIntervalSince1970: 1_795_000_000)
 
-    static func main() throws {
+    static func main() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("orbit-ai-quota-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -258,14 +299,14 @@ import Foundation
         _ = try runShell(wrappedCommand, input: otherOAuthInput, path: fixturePath, authMode: "other_oauth")
         let otherOAuth = try JSONSerialization.jsonObject(with: Data(contentsOf: costFile)) as? [String: Any]
         check(otherOAuth?["api_key_session"] as? Bool == false, "An unrelated OAuth provider cannot claim a Claude API cost session")
-        let v4Command = wrappedCommand.replacingOccurrences(of: "status line v5", with: "status line v4")
+        let v4Command = wrappedCommand.replacingOccurrences(of: "status line v6", with: "status line v4")
         var v4Settings = original
         v4Settings["statusLine"] = ["type": "command", "command": v4Command, "padding": 3]
         try JSONSerialization.data(withJSONObject: v4Settings).write(to: settings, options: .atomic)
         check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .needsUpdate, "The Console OAuth fix upgrades v4 connections")
         try ClaudeStatusLineBridge.setConnected(true, in: bridgeFolder)
         check(ClaudeStatusLineBridge.state(in: bridgeFolder) == .connected, "The v4 connection upgrades without nesting")
-        let v3Command = wrappedCommand.replacingOccurrences(of: "status line v5", with: "status line v3")
+        let v3Command = wrappedCommand.replacingOccurrences(of: "status line v6", with: "status line v3")
         var v3Settings = original
         v3Settings["statusLine"] = ["type": "command", "command": v3Command, "padding": 3]
         try JSONSerialization.data(withJSONObject: v3Settings).write(to: settings, options: .atomic)
@@ -290,7 +331,7 @@ import Foundation
         let slow = try startShell(wrappedCommand, input: earlier, path: fixturePath, authMode: "slow_api",
                                   marker: marker.path)
         for _ in 0..<100 where !FileManager.default.fileExists(atPath: marker.path) {
-            Thread.sleep(forTimeInterval: 0.01)
+            try await Task.sleep(for: .milliseconds(10))
         }
         precondition(FileManager.default.fileExists(atPath: marker.path))
         _ = try runShell(wrappedCommand, input: later, path: fixturePath, authMode: "api_key")
@@ -438,6 +479,128 @@ import Foundation
         let readBack = try JSONDecoder().decode([NotchAIProfile].self, from: profileStore)
         check(readBack == NotchAIProfile.builtIns && Set(readBack.map(\.id)).count == 2,
               "default profile identities persist independently")
+
+        let suite = "dev.orbit.claude-tests.\(UUID())"
+        let preferences = UserDefaults(suiteName: suite)!
+        defer { preferences.removePersistentDomain(forName: suite) }
+        let automatic = profile(.claude, "automatic", in: root)
+        let autoFolder = automatic.sourceFolder!
+        let autoSettings = try write(String(decoding: originalData, as: UTF8.self), to: "automatic/settings.json", in: root)
+        ClaudeStatusLineBridge.automaticallyConnect([automatic, automatic], preferences: preferences)
+        check(ClaudeStatusLineBridge.state(in: autoFolder) == .connected, "Enabling AI usage connects an existing Claude status line automatically")
+        let automaticData = try Data(contentsOf: autoSettings)
+        ClaudeStatusLineBridge.automaticallyConnect([automatic], preferences: preferences)
+        check(try Data(contentsOf: autoSettings) == automaticData, "Repeated preparation leaves an installed connection unchanged")
+        let oldBridge = String(decoding: automaticData, as: UTF8.self).replacingOccurrences(of: "status line v6", with: "status line v5")
+        try Data(oldBridge.utf8).write(to: autoSettings, options: .atomic)
+        ClaudeStatusLineBridge.automaticallyConnect([automatic], preferences: preferences)
+        check(try Data(contentsOf: autoSettings) == automaticData, "Automatic preparation upgrades older bridges without nesting the existing command")
+        let automaticDocument = try JSONSerialization.jsonObject(with: automaticData) as! [String: Any]
+        let automaticCommand = (automaticDocument["statusLine"] as! [String: Any])["command"] as! String
+        check(try runShell(automaticCommand, input: fixture) == "existing: " + fixture,
+              "Automatic connection preserves the original status line output and input")
+        let noReader = profile(.claude, "status-without-stdin", in: root)
+        let noReaderFile = try write(#"{"statusLine":{"type":"command","command":"printf 'fixed status'"}}"#,
+                                     to: "status-without-stdin/settings.json", in: root)
+        ClaudeStatusLineBridge.automaticallyConnect([noReader], preferences: preferences)
+        let noReaderSettings = try JSONSerialization.jsonObject(with: Data(contentsOf: noReaderFile)) as! [String: Any]
+        let noReaderCommand = (noReaderSettings["statusLine"] as! [String: Any])["command"] as! String
+        let largeInput = String(fixture.dropLast()) + ",\"unrelated\":\"" + String(repeating: "x", count: 128 * 1024) + "\"}"
+        check(try runShell(noReaderCommand, input: String(largeInput)) == "fixed status" && availableLiveQuota(noReader),
+              "A status line that exits without reading stdin cannot interrupt Orbit's quota capture")
+        try ClaudeStatusLineBridge.setConnected(false, in: autoFolder, preferences: preferences)
+        ClaudeStatusLineBridge.automaticallyConnect([automatic], preferences: preferences)
+        check(ClaudeStatusLineBridge.state(in: autoFolder) == .available, "A manual disconnect survives preparation and relaunch")
+        try ClaudeStatusLineBridge.setConnected(true, in: autoFolder, preferences: preferences)
+        ClaudeStatusLineBridge.automaticallyConnect([automatic], preferences: preferences)
+        check(ClaudeStatusLineBridge.state(in: autoFolder) == .connected, "Manual reconnect clears the automatic-connection opt-out")
+        let absent = profile(.claude, "not-installed", in: root)
+        var hidden = profile(.claude, "hidden", in: root)
+        hidden.isVisible = false
+        let hiddenFile = try write("{}", to: "hidden/settings.json", in: root)
+        let invalidAuto = profile(.claude, "invalid-auto", in: root)
+        let invalidFile = try write("{", to: "invalid-auto/settings.json", in: root)
+        ClaudeStatusLineBridge.automaticallyConnect([absent, hidden, invalidAuto], preferences: preferences)
+        check(!FileManager.default.fileExists(atPath: absent.sourceFolder!.path), "Automatic connection does not create a missing Claude folder")
+        check(try String(contentsOf: hiddenFile, encoding: .utf8) == "{}" && String(contentsOf: invalidFile, encoding: .utf8) == "{",
+              "Hidden profiles and malformed settings stay untouched")
+
+        let credentialJSON = """
+        {"claudeAiOauth":{"accessToken":"fixture-token","expiresAt":\((now.timeIntervalSince1970 + 3600) * 1000),
+        "scopes":["user:profile","user:inference"],"subscriptionType":"max"}}
+        """
+        let credentials = NotchClaudeQuota.Credentials.decode(Data(credentialJSON.utf8), now: now)!
+        check(credentials.subscriptionType == "max", "An existing unexpired subscription login can query shared quota")
+        for invalid in [credentialJSON.replacingOccurrences(of: "max", with: "api"),
+                        credentialJSON.replacingOccurrences(of: "user:profile", with: "other:scope"),
+                        credentialJSON.replacingOccurrences(of: "fixture-token", with: ""),
+                        credentialJSON.replacingOccurrences(of: "fixture-token", with: "bad token")] {
+            check(NotchClaudeQuota.Credentials.decode(Data(invalid.utf8), now: now) == nil,
+                  "Console, insufficient-scope, or malformed credentials cannot assert subscription quota")
+        }
+        check(NotchClaudeQuota.Credentials.decode(Data(credentialJSON.utf8), now: now.addingTimeInterval(3601)) == nil,
+              "Expired credentials are left for Claude to refresh")
+        let credentialFile = try write(credentialJSON, to: "credential-profile/.credentials.json", in: root)
+        check(NotchClaudeQuota.credentials(in: credentialFile.deletingLastPathComponent(), now: now)?.accessToken == "fixture-token",
+              "Custom profile credentials come from that profile")
+        let linkedCredentials = root.appendingPathComponent("linked-credentials")
+        try FileManager.default.createDirectory(at: linkedCredentials, withIntermediateDirectories: false)
+        try FileManager.default.createSymbolicLink(at: linkedCredentials.appendingPathComponent(".credentials.json"), withDestinationURL: credentialFile)
+        check(NotchClaudeQuota.credentials(in: linkedCredentials, now: now) == nil,
+              "A replaced credential symlink cannot select credentials from another profile")
+        let home = root.appendingPathComponent("home")
+        check(NotchClaudeQuota.keychainService(for: home.appendingPathComponent(".claude"), home: home) == "Claude Code-credentials",
+              "The default profile selects Claude Code's existing Keychain service")
+        check(NotchClaudeQuota.keychainService(for: autoFolder, home: home) != "Claude Code-credentials"
+              && NotchClaudeQuota.keychainService(for: autoFolder) != NotchClaudeQuota.keychainService(for: root),
+              "Separate profile folders never read the global or another profile's Keychain item")
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [ClaudeUsageHTTPFixture.self]
+        let session = URLSession(configuration: configuration)
+        defer { session.invalidateAndCancel() }
+        ClaudeUsageHTTPFixture.set(status: 200, body: #"{"five_hour":{"utilization":41,"resets_at":1795003600},"seven_day":{"utilization":12}}"#)
+        let live = await NotchClaudeQuota.fetch(credentials, session: session, now: now)
+        if case .available(let quota) = live.result {
+            check(quota.windows.map(\.usedPercent) == [41, 12] && quota.windows.allSatisfy { $0.observedAt == now },
+                  "Desktop usage reads both account limits without a status line invocation")
+        } else { check(false, "Desktop usage reads both account limits without a status line invocation") }
+        let request = ClaudeUsageHTTPFixture.lastRequest
+        check(request?.url?.absoluteString == "https://api.anthropic.com/api/oauth/usage"
+              && request?.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-token"
+              && request?.value(forHTTPHeaderField: "anthropic-beta") == "oauth-2025-04-20",
+              "The usage request sends the subscription bearer only to the fixed Anthropic endpoint")
+        for status in [401, 403, 500, 302] {
+            ClaudeUsageHTTPFixture.set(status: status, body: "{}")
+            check(await NotchClaudeQuota.fetch(credentials, session: session, now: now).result == nil,
+                  "HTTP \(status) leaves local sources available without asserting fresh quota")
+        }
+        ClaudeUsageHTTPFixture.set(status: 200, body: "{")
+        check(await NotchClaudeQuota.fetch(credentials, session: session).result == nil, "Invalid usage responses fall back to local sources")
+        ClaudeUsageHTTPFixture.set(status: 200, body: #"{"five_hour":{"utilization":true},"seven_day":{"utilization":37}}"#)
+        let partial = await NotchClaudeQuota.fetch(credentials, session: session, now: now)
+        if case .available(let quota) = partial.result {
+            check(quota.windows.map(\.usedPercent) == [37], "A malformed live quota window leaves its valid neighbor readable")
+        } else { check(false, "A malformed live quota window leaves its valid neighbor readable") }
+        ClaudeUsageHTTPFixture.set(status: 429, body: "{}", headers: ["Retry-After": "600"])
+        let limited = await NotchClaudeQuota.fetch(credentials, session: session)
+        check(limited.result == nil && limited.retryAfter == 600, "Anthropic rate limits back off instead of polling every minute")
+
+        let probe = ClaudeUsageReadProbe(now: now, result: live)
+        let service = NotchAIUsageService(claudeRead: { await probe.read($0) }, clock: { probe.now })
+        async let first = service.read(automatic)
+        async let second = service.read(automatic)
+        _ = await (first, second)
+        _ = await service.read(automatic)
+        check(probe.count == 1, "Concurrent card reads and repeated refreshes share one subscription request")
+        probe.advance(121)
+        _ = await service.read(automatic)
+        check(probe.count == 2, "Shared quota is queried again after two minutes")
+        _ = await service.read(hidden)
+        check(probe.count == 3, "Separate source folders do not reuse another account's cached quota")
+        let fallbackService = NotchAIUsageService(claudeRead: { _ in .init() })
+        check(await fallbackService.read(automatic) == NotchAIUsageReader.read(automatic),
+              "Unavailable subscription login keeps the existing status line source working")
 
         print("\(passed) passed, \(failed) failed")
         if failed > 0 { exit(1) }
