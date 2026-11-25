@@ -95,14 +95,21 @@ final class FanControl {
         }
         connection.invalidate()
         self.connection = nil
-        lastError = nil
-        do { try await service.unregister() } catch { lastError = error.localizedDescription }
+        // Fan callbacks also update lastError while these awaits run. Keep recovery's first
+        // failure private until recovery completes so those callbacks cannot erase its cause.
+        var recoveryError: String?
+        var attemptedRegistration = false
+        do { try await service.unregister() } catch { recoveryError = error.localizedDescription }
         // The unregistration can still be landing when the helper is registered again, which leaves it off.
         for delay in [0.5, 1, 2] {
             try? await Task.sleep(for: .seconds(delay))
             guard !Task.isCancelled else { return false }
-            do { try service.register() } catch { if lastError == nil { lastError = error.localizedDescription } }
+            if !attemptedRegistration || service.status != .enabled {
+                attemptedRegistration = true
+                do { try service.register() } catch { if recoveryError == nil { recoveryError = error.localizedDescription } }
+            }
             if service.status == .requiresApproval {
+                lastError = recoveryError
                 refresh()
                 Toast.show("Orbit Helper was updated", symbol: "key.fill", detail: "Allow it again in Login Items")
                 return false
@@ -115,10 +122,10 @@ final class FanControl {
                     refresh()
                     return true
                 }
-                if lastError == nil, case .failure(let error) = verified { lastError = error.localizedDescription }
+                if recoveryError == nil, case .failure(let error) = verified { recoveryError = error.localizedDescription }
             }
         }
-        if lastError == nil { lastError = "Orbit Helper did not answer with the updated version." }
+        lastError = recoveryError ?? "Orbit Helper did not answer with the updated version."
         refresh()
         return false
     }
