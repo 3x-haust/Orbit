@@ -23,10 +23,7 @@ for title, kind, unwanted in [
     ('Limit windows', 'row', {'스냅', '분할', 'snap'}),
 ]:
     assert not synonyms(entry(title, kind)) & unwanted, title
-home = entry('Home', 'row')
-for keyword in ['캘린더', '음악']:
-    assert keyword in ' '.join([home['subtitleKo'], *synonyms(home)]), 'Home widget discovery'
-print('PASS: notch search excludes storage/window synonyms and retains calendar/music discovery')
+print('PASS: notch search excludes storage/window synonyms')
 
 # Exercise the app's real ranking, not only the generated keyword lists.
 with tempfile.TemporaryDirectory(prefix='orbit-settings-search-') as scratch:
@@ -34,6 +31,12 @@ with tempfile.TemporaryDirectory(prefix='orbit-settings-search-') as scratch:
     main = scratch / 'main.swift'
     main.write_text(r'''import Foundation
 var failures = 0
+for query in ["캘린더", "음악"] {
+    if !SettingsSearch.search(query).contains(where: { $0.entry?.page == "notch" && $0.entry?.kind == .row && $0.entry?.title == "Home" }) {
+        print("FAIL: \(query) must find the notch Home row")
+        failures += 1
+    }
+}
 for query in ["스냅", "분할", "반쪽", "배치"] {
     let results = SettingsSearch.search(query)
     let index = results.firstIndex { $0.entry?.kind == .page && $0.entry?.page == "windows" }
@@ -59,4 +62,4 @@ exit(failures == 0 ? 0 : 1)
                     str(root / 'Orbit/App/Generated/SettingsIndex.swift'),
                     str(main), '-o', str(binary)], check=True)
     subprocess.run([str(binary)], check=True)
-print('PASS: Windows search ranking and direct row synonyms')
+print('PASS: notch Home discovery, Windows search ranking and direct row synonyms')
