@@ -619,6 +619,33 @@ private final class GatedClaudePreferences: UserDefaults, @unchecked Sendable {
         let independent = NotchClaudeQuota.source(for: credentialProfile,
             environment: ["CLAUDE_CONFIG_DIR": autoFolder.path, "CLAUDE_SECURESTORAGE_CONFIG_DIR": securePath], home: home)!
         check(independent == credentialSource, "Custom profiles do not inherit another profile's ambient credential overrides")
+        let helper = try write("""
+        #!/bin/sh
+        test "$1" = --orbit-claude-credentials || exit 1
+        case "$2" in
+          "Claude Code-credentials-00000000") printf 'missing\\n' ;;
+          "Claude Code-credentials-11111111") exec /bin/sleep 30 ;;
+          *) printf 'document\\n%s' '\(credentialJSON)' ;;
+        esac
+        """, to: "credential-helper", in: root)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
+        if case .document(let data) = NotchClaudeQuota.readKeychain("Claude Code-credentials", executable: helper) {
+            check(NotchClaudeQuota.Credentials.decode(data, now: now)?.accessToken == "fixture-token",
+                  "The parent reads credential packets through a bounded helper pipe")
+        } else { check(false, "The parent reads credential packets through a bounded helper pipe") }
+        if case .missing = NotchClaudeQuota.readKeychain("Claude Code-credentials-00000000", executable: helper) {
+            check(true, "The helper preserves absent-item status for the permitted plaintext fallback")
+        } else { check(false, "The helper preserves absent-item status for the permitted plaintext fallback") }
+        let blockedStart = ProcessInfo.processInfo.systemUptime
+        if case .unavailable = NotchClaudeQuota.readKeychain("Claude Code-credentials-11111111", executable: helper) {
+            check((7.5..<12).contains(ProcessInfo.processInfo.systemUptime - blockedStart), "A blocked credential helper cannot stall the usage service indefinitely")
+        } else { check(false, "A blocked credential helper cannot stall the usage service indefinitely") }
+        var fullCredentialDocument = try JSONSerialization.jsonObject(with: Data(credentialJSON.utf8)) as! [String: Any]
+        fullCredentialDocument["mcpOAuth"] = ["private": "unrelated-mcp-secret"]
+        let packet = NotchClaudeQuota.credentialPacket(.document(try JSONSerialization.data(withJSONObject: fullCredentialDocument)))
+        check(!String(decoding: packet, as: UTF8.self).contains("unrelated-mcp-secret")
+              && String(decoding: packet, as: UTF8.self).contains("fixture-token"),
+              "Credential helper packets omit unrelated secrets from the shared Keychain document")
 
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [ClaudeUsageHTTPFixture.self]
