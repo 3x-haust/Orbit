@@ -30,6 +30,7 @@ enum NotchUsageCLI {
     }
 
     static func run<T>(_ executable: URL, arguments: [String], overrides: [String: String],
+                       timeout: TimeInterval = 8,
                        input: (FileHandle, Output) throws -> T) -> T? {
         let process = Process()
         let stdin = Pipe()
@@ -53,7 +54,7 @@ enum NotchUsageCLI {
                 try? stdin.fileHandleForWriting.close()
                 if process.isRunning { process.terminate() }
             }
-            return try input(stdin.fileHandleForWriting, Output(descriptor: stdout.fileHandleForReading.fileDescriptor))
+            return try input(stdin.fileHandleForWriting, Output(descriptor: stdout.fileHandleForReading.fileDescriptor, timeout: timeout))
         } catch {
             return nil
         }
@@ -62,9 +63,14 @@ enum NotchUsageCLI {
     struct Output {
         let descriptor: Int32
         // All replies share a deadline and a byte budget, including unrelated notifications.
-        let deadline = ProcessInfo.processInfo.systemUptime + 8
+        let deadline: TimeInterval
         var buffer = Data()
         var received = 0
+
+        init(descriptor: Int32, timeout: TimeInterval = 8) {
+            self.descriptor = descriptor
+            deadline = ProcessInfo.processInfo.systemUptime + timeout
+        }
 
         mutating func nextLine() throws -> Data? {
             while true {
@@ -157,7 +163,7 @@ enum NotchClaudeQuota {
         var allowsPrevious = false
     }
 
-    struct Source: Hashable, Sendable {
+    struct Source: Codable, Hashable, Sendable {
         let folder: URL
         let credentialFolder: URL
         let keychainService: String
@@ -212,7 +218,7 @@ enum NotchClaudeQuota {
     }
 
     static func credentials(from source: Source, now: Date = .now,
-                            keychain: (String) -> StoredCredentials = { readKeychain($0) }) -> Credentials? {
+                            keychain: (String) -> StoredCredentials) -> Credentials? {
         // Match Claude Code's Keychain-first document selection. A present but unusable
         // account must not fall through to an older still-valid account in the plaintext file.
         switch keychain(source.keychainService) {
@@ -238,50 +244,78 @@ enum NotchClaudeQuota {
         return nil
     }
 
-    private static let credentialHelperArgument = "--orbit-claude-credentials"
+    private static let usageHelperArgument = "--orbit-claude-usage"
 
-    static func readKeychain(_ service: String, executable: URL? = Bundle.main.executableURL) -> StoredCredentials {
-        guard let executable else { return .unavailable }
-        return NotchUsageCLI.run(executable, arguments: [credentialHelperArgument, service], overrides: [:]) { stdin, stdout in
+    private struct UsagePacket: Codable {
+        var quota: NotchAIQuotaSnapshot?
+        var retryAfter: TimeInterval
+        var credentialID: String?
+        var allowsPrevious: Bool
+    }
+
+    static func usagePacket(_ reading: Reading) -> Data {
+        let quota: NotchAIQuotaSnapshot?
+        if case .available(let snapshot) = reading.result { quota = snapshot } else { quota = nil }
+        return (try? JSONEncoder().encode(UsagePacket(quota: quota, retryAfter: reading.retryAfter,
+            credentialID: reading.credentialID, allowsPrevious: reading.allowsPrevious))) ?? Data()
+    }
+
+    static func readHelper(_ source: Source, identityOnly: Bool = false,
+                           executable: URL? = Bundle.main.executableURL) -> Reading {
+        guard let executable, let input = try? JSONEncoder().encode(source), input.count <= 16384 else { return Reading() }
+        return NotchUsageCLI.run(executable, arguments: [usageHelperArgument, identityOnly ? "identity" : "quota"],
+                                overrides: [:], timeout: identityOnly ? 8 : 12) { stdin, stdout in
+            try stdin.write(contentsOf: input)
             try stdin.close()
             var stdout = stdout
-            let packet = try stdout.readDocument()
-            if packet == Data("missing\n".utf8) { return .missing }
-            let prefix = Data("document\n".utf8)
-            guard packet.starts(with: prefix) else { return .unavailable }
-            return .document(Data(packet.dropFirst(prefix.count)))
-        } ?? .unavailable
+            let packet = try JSONDecoder().decode(UsagePacket.self, from: stdout.readDocument())
+            guard packet.retryAfter.isFinite, (0...3600).contains(packet.retryAfter),
+                  packet.credentialID.map({ $0.range(of: #"\A[0-9a-f]{64}\z"#, options: .regularExpression) != nil }) ?? true,
+                  packet.quota?.windows.allSatisfy({ $0.minutes > 0 && $0.usedPercent.isFinite && (0...100).contains($0.usedPercent) }) ?? true else {
+                return Reading()
+            }
+            return Reading(result: packet.quota.map(NotchAIUsageResult.available), retryAfter: packet.retryAfter,
+                           credentialID: packet.credentialID, allowsPrevious: packet.allowsPrevious)
+        } ?? Reading()
     }
 
     /// Dispatched before SwiftUI startup in a short-lived copy of Orbit. Legacy Keychain's
     /// UI switch is process-wide, so it must never be changed in the normal app process.
-    static func runCredentialHelperIfRequested(arguments: [String] = CommandLine.arguments) -> Bool {
-        guard arguments.dropFirst().first == credentialHelperArgument else { return false }
-        var result: StoredCredentials = .unavailable
+    static func runUsageHelperIfRequested(arguments: [String] = CommandLine.arguments) async -> Bool {
+        guard arguments.dropFirst().first == usageHelperArgument else { return false }
+        // Bound even a blocked Security.framework call if the parent exits unexpectedly.
+        signal(SIGALRM, SIG_DFL)
+        alarm(arguments.last == "identity" ? 8 : 12)
+        defer { alarm(0) }
+        var reading = Reading()
         if arguments.count == 3,
-           arguments[2].range(of: #"^Claude Code-credentials(?:-[0-9a-f]{8})?$"#, options: .regularExpression) != nil,
-           SecKeychainSetUserInteractionAllowed(false) == errSecSuccess {
-            result = readKeychainDirect(arguments[2])
+           ["identity", "quota"].contains(arguments[2]),
+           let source = readHelperSource(),
+           source.keychainService.range(of: #"\AClaude Code-credentials(?:-[0-9a-f]{8})?\z"#, options: .regularExpression) != nil,
+           source.credentialFolder.isFileURL, source.credentialFolder.path.hasPrefix("/"),
+           SecKeychainSetUserInteractionAllowed(false) == errSecSuccess,
+           let credentials = credentials(from: source, keychain: readKeychainDirect) {
+            if arguments[2] == "identity" {
+                reading = Reading(credentialID: credentials.identity)
+            } else {
+                // The bearer and refresh token never leave this helper. Only this fixed
+                // endpoint is callable, and stdout contains validated quota metadata.
+                reading = await fetch(credentials, session: session)
+            }
         }
-        try? FileHandle.standardOutput.write(contentsOf: credentialPacket(result))
+        try? FileHandle.standardOutput.write(contentsOf: usagePacket(reading))
         return true
     }
 
-    static func credentialPacket(_ result: StoredCredentials) -> Data {
-        var packet: Data
-        switch result {
-        case .missing: packet = Data("missing\n".utf8)
-        case .unavailable: packet = Data("unavailable\n".utf8)
-        case .document(let data):
-            packet = Data("document\n".utf8)
-            // Never export unrelated MCP credentials held in the same Keychain document.
-            if let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-               let oauth = object["claudeAiOauth"],
-               let minimal = try? JSONSerialization.data(withJSONObject: ["claudeAiOauth": oauth]) {
-                packet.append(minimal)
+    private static func readHelperSource() -> Source? {
+        var input = Data()
+        do {
+            while let chunk = try FileHandle.standardInput.read(upToCount: min(4096, 16385 - input.count)), !chunk.isEmpty {
+                input.append(chunk)
+                guard input.count <= 16384 else { return nil }
             }
-        }
-        return packet
+            return try JSONDecoder().decode(Source.self, from: input)
+        } catch { return nil }
     }
 
     private static func readKeychainDirect(_ service: String) -> StoredCredentials {
@@ -318,8 +352,7 @@ enum NotchClaudeQuota {
     }()
 
     static func read(from source: Source) async -> Reading {
-        guard let credentials = credentials(from: source) else { return Reading() }
-        return await fetch(credentials, session: session)
+        readHelper(source)
     }
 
     static func fetch(_ credentials: Credentials, session: URLSession, now: Date = .now) async -> Reading {
@@ -373,7 +406,7 @@ actor NotchAIUsageService {
     private let clock: @Sendable () -> Date
 
     init(claudeRead: @escaping @Sendable (NotchClaudeQuota.Source) async -> NotchClaudeQuota.Reading = { await NotchClaudeQuota.read(from: $0) },
-         claudeIdentity: @escaping @Sendable (NotchClaudeQuota.Source) -> String? = { NotchClaudeQuota.credentials(from: $0)?.identity },
+         claudeIdentity: @escaping @Sendable (NotchClaudeQuota.Source) -> String? = { NotchClaudeQuota.readHelper($0, identityOnly: true).credentialID },
          clock: @escaping @Sendable () -> Date = { Date() }) {
         self.claudeRead = claudeRead
         self.claudeIdentity = claudeIdentity
