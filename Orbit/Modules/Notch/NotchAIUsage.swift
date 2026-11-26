@@ -67,7 +67,7 @@ struct NotchAIProfile: Identifiable, Codable, Equatable, Sendable {
         folder.isEmpty ? provider.defaultFolder : Self.folderURL(folder)
     }
 
-    static func folderURL(_ path: String) -> URL? {
+    fileprivate static func folderURL(_ path: String) -> URL? {
         let expanded = (path as NSString).expandingTildeInPath
         guard expanded.hasPrefix("/"), !expanded.utf8.contains(0) else { return nil }
         return URL(fileURLWithPath: expanded, isDirectory: true).standardizedFileURL
@@ -114,7 +114,7 @@ struct NotchAIResetCountdown: Equatable {
     }
 }
 
-struct NotchAIQuotaWindow: Identifiable, Codable, Equatable, Sendable {
+struct NotchAIQuotaWindow: Identifiable, Equatable, Sendable {
     let minutes: Int
     let usedPercent: Double
     let resetAt: Date?
@@ -137,7 +137,7 @@ struct NotchAIQuotaWindow: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-struct NotchAIQuotaSnapshot: Codable, Equatable, Sendable {
+struct NotchAIQuotaSnapshot: Equatable, Sendable {
     let windows: [NotchAIQuotaWindow]
 }
 
@@ -198,14 +198,6 @@ enum NotchAIUsageReader {
             let row = limits[key] as? JSON
             return window(row, minutes: codexMinutes(row?["windowDurationMins"]), usedKey: "usedPercent",
                           resetKey: "resetsAt", observed: now, dates: dates)
-        })
-    }
-
-    static func claudeAccountSnapshot(_ payload: [String: Any], now: Date) -> NotchAIUsageResult {
-        let dates = Dates(now: now)
-        return windows([(key: "five_hour", minutes: 300), (key: "seven_day", minutes: 10_080)].map { period in
-            window(payload[period.key], minutes: period.minutes, usedKey: "utilization", resetKey: "resets_at",
-                   observed: now, dates: dates)
         })
     }
 

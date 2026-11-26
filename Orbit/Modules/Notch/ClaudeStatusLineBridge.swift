@@ -27,36 +27,7 @@ enum ClaudeStatusLineBridge {
         }
     }
 
-    private static let disconnectedFoldersKey = "notch.home.claudeDisconnectedFolders"
-    private static let connectionLock = NSLock()
-
-    /// Run only for enabled, visible Claude profiles. Missing or unsupported settings stay untouched.
-    static func automaticallyConnect(_ profiles: [NotchAIProfile], preferences: UserDefaults) {
-        connectionLock.lock()
-        defer { connectionLock.unlock() }
-        let disconnected = Set(preferences.stringArray(forKey: disconnectedFoldersKey) ?? [])
-        var seen = Set<URL>()
-        for profile in profiles where profile.provider == .claude && profile.isVisible {
-            guard let folder = profile.sourceFolder, seen.insert(folder).inserted,
-                  !disconnected.contains(folder.standardizedFileURL.path) else { continue }
-            let state = state(in: folder)
-            if state == .available || state == .needsUpdate { try? updateConnection(true, in: folder) }
-        }
-    }
-
-    static func setConnected(_ connected: Bool, in folder: URL, preferences: UserDefaults? = nil) throws {
-        connectionLock.lock()
-        defer { connectionLock.unlock() }
-        try updateConnection(connected, in: folder)
-        if let preferences {
-            var disconnected = Set(preferences.stringArray(forKey: disconnectedFoldersKey) ?? [])
-            let path = folder.standardizedFileURL.path
-            if connected { disconnected.remove(path) } else { disconnected.insert(path) }
-            preferences.set(disconnected.sorted(), forKey: disconnectedFoldersKey)
-        }
-    }
-
-    private static func updateConnection(_ connected: Bool, in folder: URL) throws {
+    static func setConnected(_ connected: Bool, in folder: URL) throws {
         let (original, document) = try read(in: folder)
         var settings = document
         var status = try statusLine(in: settings)
@@ -133,7 +104,7 @@ enum ClaudeStatusLineBridge {
     }
 
     private static let interpreter = "/usr/bin/perl -MJSON::PP -MFile::Temp=tempfile -MFile::Basename=dirname -e "
-    private static let signature = "# Orbit Claude status line v6"
+    private static let signature = "# Orbit Claude status line v5"
     // SHA-256 fingerprints of the two unversioned bridge commands.
     private static let legacyScriptHashes: Set<String> = [
         "8f80c08b1949f6bdd235230e2f8710eadb4c9477d99e90dc27299f82ea5f9d5d",
@@ -144,7 +115,7 @@ enum ClaudeStatusLineBridge {
         guard command.hasPrefix(interpreter), let separator = command.range(of: " -- ") else { return nil }
         let script = command[command.index(command.startIndex, offsetBy: interpreter.count)..<separator.lowerBound]
         let currentVersion = script.hasPrefix("'" + signature + "\n")
-        if !currentVersion && !["v2", "v3", "v4", "v5"].contains(where: { script.hasPrefix("'# Orbit Claude status line " + $0 + "\n") }) {
+        if !currentVersion && !["v2", "v3", "v4"].contains(where: { script.hasPrefix("'# Orbit Claude status line " + $0 + "\n") }) {
             let hash = SHA256.hash(data: Data(script.utf8)).map { String(format: "%02x", $0) }.joined()
             guard legacyScriptHashes.contains(hash) else { return nil }
         }
@@ -178,11 +149,7 @@ enum ClaudeStatusLineBridge {
         my $input = <STDIN> // '';
         my ($target, $forward) = @ARGV;
         if ($forward) {
-            # Commands that do not consume stdin may close the pipe before forwarding finishes.
-            # A failed forward must not prevent the independent quota capture below.
-            $SIG{PIPE} = 'IGNORE';
             print $input;
-            close STDOUT;
             open STDOUT, '>', '/dev/null' or die $!;
         }
 
