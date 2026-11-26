@@ -329,7 +329,7 @@ private struct NotchAIProfileEditor: View {
     private func setClaudeConnection(_ connected: Bool) {
         guard let folder = claudeFolder else { return }
         do {
-            try ClaudeStatusLineBridge.setConnected(connected, in: folder)
+            try ClaudeStatusLineBridge.setConnected(connected, in: folder, preferences: Pref.defaults)
             claudeConnection = ClaudeStatusLineBridge.state(in: folder)
             claudeError = false
         } catch {
