@@ -255,24 +255,8 @@ bash tools/regressions/run-fan-helper-tests.sh \
 The runner imports the app's Debug module and checks when Orbit registers its
 privileged helper again at launch: when the running helper is older, or when
 macOS can no longer verify it because an update replaced its binary (every call
-then fails and closed-lid mode falls back to the password prompt). It also
-replaces a legacy helper that rejects the new app identity: an isolated,
-anonymous XPC listener reproduces the interrupted handshake returned by macOS.
-The listener rejects two consecutive handshakes on the same connection. A
-current or newer helper, a slow response, an unrelated error domain, and an
-invalid connection alone do not trigger replacement. No installed helper,
-system sleep settings, or user preferences are changed by this runner.
-
-`python3 tools/regressions/run-fan-helper-startup-tests.py` compiles the production
-recovery, version probe, removal, and connection methods with isolated service
-and XPC stand-ins. Its eleven scenarios cover transient interruption without
-replacement, persistent rejection, an older helper, concurrent battery startup,
-stale enabled registration with unregister/register errors, approval after a
-failed recovery, timeouts, delayed invalidation, explicit removal during recovery,
-fan callbacks overwriting shared errors, and silent or outdated replacements
-without duplicate registration. Append scenario names to run a focused subset,
-for example `python3 tools/regressions/run-fan-helper-startup-tests.py fan-error-race`.
-Neither runner launches Orbit or changes the system service.
+then fails and closed-lid mode falls back to the password prompt). A helper
+that is current, interrupted or slow to answer is left running.
 
 # Runner regression
 
