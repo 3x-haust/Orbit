@@ -103,11 +103,13 @@ final class LauncherModel {
         // carry Orbit as a keyword). Looser matches are a fallback for when nothing else fits.
         let pageScores = Page.allCases.compactMap { p in Fuzzy.score(q, p.title).map { (p, $0) } }
         let commandScores = OrbitAction.allCases.compactMap { a in Fuzzy.score(q, a.title, keywords: a.keywords).map { (a, $0) } }
-        let appScores = AppIndex.shared.apps.compactMap { app in Fuzzy.score(q, app.name).map { (app, $0) } }
+        let appScores = AppIndex.shared.apps.compactMap { app in app.score(q).map { (app, $0) } }
+        let appsByPath = Dictionary(AppIndex.shared.apps.map { ($0.path, $0) }, uniquingKeysWith: { a, _ in a })
         // A window matches by its own title, or a little below that by its app ("safa" → every Safari window).
         let windowScores: [(OpenWindows.Window, Int)] = OpenWindows.shared.windows.compactMap { w in
             let byTitle: Int? = Fuzzy.score(q, w.title)
-            let byApp: Int? = Fuzzy.score(q, w.appName).map { $0 - 100 }
+            let app = w.appPath.flatMap { appsByPath[$0] }
+            let byApp: Int? = (app.map { $0.score(q) } ?? Fuzzy.score(q, w.appName)).map { $0 - 100 }
             guard let score = [byTitle, byApp].compactMap({ $0 }).max() else { return nil }
             return (w, score)
         }
@@ -133,15 +135,15 @@ final class LauncherModel {
             .prefix(6)
             .map { command($0.0) }
 
-        let apps = appScores
+        let shownApps = appScores
             .filter { $0.1 >= floor }
             .map { ($0.0, $0.1 + Frecency.boost("app.\($0.0.path)")) }
             .sorted { $0.1 > $1.1 }
             .prefix(8)
-            .map { application($0.0) }
+        let apps = shownApps.map { application($0.0) }
 
         // Order sections by their best match.
-        if (apps.first.map { Fuzzy.score(q, $0.title) ?? 0 } ?? 0) >= (commands.first.map { Fuzzy.score(q, $0.title) ?? 0 } ?? 0) {
+        if (shownApps.first.map { $0.0.score(q) ?? 0 } ?? 0) >= (commands.first.map { Fuzzy.score(q, $0.title) ?? 0 } ?? 0) {
             result += apps + commands
         } else {
             result += commands + apps

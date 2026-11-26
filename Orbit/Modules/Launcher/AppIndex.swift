@@ -7,8 +7,26 @@ final class AppIndex {
     static let shared = AppIndex()
 
     struct App: Hashable, Sendable {
+        /// As Finder shows it, in the user's language ("홈" for Home.app on a Korean Mac).
         let name: String
         let path: String
+        /// The app's other names: its file name and the unlocalized bundle names ("Home", "KakaoTalk").
+        var aliases: [String] = []
+        /// Korean initials of `name` ("카카오톡" → "ㅋㅋㅇㅌ").
+        var initials = ""
+
+        /// How well a launcher query matches any of the app's names; nil = no match.
+        func score(_ query: String) -> Int? {
+            var best = Fuzzy.score(query, name)
+            for alias in aliases {
+                if let s = Fuzzy.score(query, alias) { best = max(best ?? .min, s - 5) }
+            }
+            if query.unicodeScalars.allSatisfy({ (0x3131...0x314E).contains($0.value) }) {
+                if initials.hasPrefix(query) { best = max(best ?? .min, 820) }
+                else if initials.contains(query) { best = max(best ?? .min, 640) }
+            }
+            return best
+        }
     }
 
     private(set) var apps: [App] = []
@@ -49,7 +67,14 @@ final class AppIndex {
                 let path = (root as NSString).appendingPathComponent(entry)
                 let name = fm.displayName(atPath: path).replacingOccurrences(of: ".app", with: "")
                 guard seen.insert(name).inserted else { continue }
-                result.append(App(name: name, path: path))
+                let info = Bundle(path: path)?.infoDictionary ?? [:]
+                var aliases: [String] = []
+                for other in [String(entry.dropLast(4)), info["CFBundleDisplayName"] as? String, info["CFBundleName"] as? String] {
+                    guard let other, !other.isEmpty, other.lowercased() != name.lowercased(),
+                          !aliases.contains(where: { $0.lowercased() == other.lowercased() }) else { continue }
+                    aliases.append(other)
+                }
+                result.append(App(name: name, path: path, aliases: aliases, initials: Hangul.initials(name)))
             }
         }
         return result.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
