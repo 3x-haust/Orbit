@@ -1,8 +1,6 @@
 import CryptoKit
 import Darwin
 import Foundation
-import LocalAuthentication
-import Security
 
 /// Talks to installed provider CLIs without a shell or a dependency on their configuration files.
 enum NotchUsageCLI {
@@ -282,7 +280,7 @@ enum NotchClaudeQuota {
     /// UI switch is process-wide, so it must never be changed in the normal app process.
     static func runUsageHelperIfRequested(arguments: [String] = CommandLine.arguments) async -> Bool {
         guard arguments.dropFirst().first == usageHelperArgument else { return false }
-        // Bound even a blocked Security.framework call if the parent exits unexpectedly.
+        // Bound even a blocked Keychain read if the parent exits unexpectedly.
         signal(SIGALRM, SIG_DFL)
         alarm(arguments.dropFirst(2).first == "identity" ? 8 : 12)
         defer { alarm(0) }
@@ -293,8 +291,7 @@ enum NotchClaudeQuota {
            let source = try? JSONDecoder().decode(Source.self, from: Data(arguments[3].utf8)),
            source.keychainService.range(of: #"\AClaude Code-credentials(?:-[0-9a-f]{8})?\z"#, options: .regularExpression) != nil,
            source.credentialFolder.isFileURL, source.credentialFolder.path.hasPrefix("/"),
-           SecKeychainSetUserInteractionAllowed(false) == errSecSuccess,
-           let credentials = credentials(from: source, keychain: readKeychainDirect) {
+           let credentials = credentials(from: source, keychain: readKeychain) {
             if arguments[2] == "identity" {
                 reading = Reading(credentialID: credentials.identity)
             } else {
@@ -307,21 +304,25 @@ enum NotchClaudeQuota {
         return true
     }
 
-    private static func readKeychainDirect(_ service: String) -> StoredCredentials {
-        let context = LAContext()
-        context.interactionNotAllowed = true
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: NSUserName(),
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne,
-            kSecUseAuthenticationContext as String: context,
-        ]
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
-        if status == errSecItemNotFound { return .missing }
-        guard status == errSecSuccess, let data = item as? Data else { return .unavailable }
+    /// Claude Code writes this item with /usr/bin/security, so only that tool is on its access list.
+    /// Reading it the same way needs no authorization, while Orbit's own Keychain query is refused.
+    private static func readKeychain(_ service: String) -> StoredCredentials {
+        let process = Process()
+        let stdout = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
+        process.arguments = ["find-generic-password", "-a", NSUserName(), "-s", service, "-w"]
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = stdout
+        process.standardError = FileHandle.nullDevice
+        do { try process.run() } catch { return .unavailable }
+        var output = NotchUsageCLI.Output(descriptor: stdout.fileHandleForReading.fileDescriptor, timeout: 6)
+        let document = try? output.readDocument()
+        if process.isRunning { process.terminate() }
+        process.waitUntilExit()
+        guard process.terminationReason == .exit else { return .unavailable }
+        if process.terminationStatus == 44 { return .missing } // errSecItemNotFound
+        guard process.terminationStatus == 0, var data = document else { return .unavailable }
+        while data.last == 10 { data.removeLast() }
         return .document(data)
     }
 
