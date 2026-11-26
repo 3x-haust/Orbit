@@ -396,3 +396,18 @@ be its own display's corner, or the bottom-right corner runs the top-left action
 
 Not covered: the pointer's dwell and the corner's action. Check by hand: set one
 corner to an action and the others to Nothing, then rest the pointer in each.
+
+# Launcher app search regression
+
+Build the Debug app, then run:
+
+```sh
+bash tools/regressions/run-launcher-app-search-tests.sh \
+  /tmp/orbit-launcher-build/Build/Products/Debug /tmp/orbit-launcher-tests
+```
+
+The runner imports the Debug module and searches the launcher the way it runs on
+a Korean Mac (the test program declares Korean, so Home.app shows as "홈"). Each
+app must come up under its Finder name, its English bundle and file names
+("home", "kakao", "hwp") and its Korean initials ("ㅋㅋㅇㅌ"). Apps that aren't
+installed on the machine are skipped, not failed.
