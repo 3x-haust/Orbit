@@ -51,6 +51,7 @@
 		2AB495710DF9ADCC4AED1DB1 /* AnnotatedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A06584240747CCD9BDD091 /* AnnotatedImage.swift */; };
 		2AB5F48CC911005715AEAA13 /* HomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EABB958605751517434087 /* HomePage.swift */; };
 		2AF901AA859A9BA6016FAA5F /* AppIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EF9243C2CAC6F12D5F960A /* AppIndex.swift */; };
+		2C982D957387664F2F07AB07 /* NotchHomeLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22E41FD1D9141107D55EE9A /* NotchHomeLayout.swift */; };
 		2E558695D178AB0EF3A44775 /* VideoEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D747643D5A4C654CFCD42BC /* VideoEditor.swift */; };
 		305BA15D5522E2EF0256244B /* LibArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B606BC2867F440CF3F59893 /* LibArchive.swift */; };
 		310A098DFE434B6ABC38D2A2 /* CaptureLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2A83ECF4538E35CFEE9692 /* CaptureLibrary.swift */; };
@@ -78,11 +79,6 @@
 		45B2E842BD3FA3C8CE4D8E6B /* AppsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3564120D48CDE745B9DB090D /* AppsCatalog.swift */; };
 		4663717942B58BD844CBA579 /* SystemActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08CD43FAE3991B9A6E497FBB /* SystemActions.swift */; };
 		47364602B8DB05386F86B391 /* ScriptedPlayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7801AE5639A87B07980FA80A /* ScriptedPlayers.swift */; };
-		79824F9D228C7A8D8F63B9ED /* NotchHomeLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */; };
-		54B239F2ECB0BDCA136D1603 /* ClaudeStatusLineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE199EFEF268C8ABEA690A2 /* ClaudeStatusLineBridge.swift */; };
-		A5568B582893B6BE46F197C4 /* NotchUsageCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9213DBA6C9BAA3572A2C6E7 /* NotchUsageCLI.swift */; };
-		5FC3A7A3C9C4A660DCAA5C57 /* NotchAIUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */; };
-		B03A123789F20B636472EEA1 /* NotchAIUsageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */; };
 		4BA52F6F9D6857E504DDFF8E /* NotchPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */; };
 		4C676EA04AA3BF2BD6E93D70 /* NotchRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DFA5140BB9FAB83BE84FB7 /* NotchRoom.swift */; };
 		4FEF02217080D2B8859E2D0E /* FaceEnrollment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093F489A591D4C02CAED3AF6 /* FaceEnrollment.swift */; };
@@ -119,6 +115,7 @@
 		6EB01FB988D760FDDC9937C1 /* ScrollingCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2722008A2650F4A9031E56E4 /* ScrollingCapture.swift */; };
 		6F5538342B74964A881E3495 /* PinWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3953E9216C01A0A7B10855DA /* PinWindow.swift */; };
 		7053460C20BED1AECE46810F /* OrbitFanHelper in Embed Dependencies */ = {isa = PBXBuildFile; fileRef = DD4A450337E47E83A9DF3DCB /* OrbitFanHelper */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		71EA109753B6EA8253AEBFD7 /* ClaudeStatusLineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF42779006E28794454A99C2 /* ClaudeStatusLineBridge.swift */; };
 		7222C69AE51DE463B2A74F5E /* SelectionGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0660F0D000A286B10EDC294 /* SelectionGeometry.swift */; };
 		72CA3ACB6FCD6FE7836674CB /* FeaturePages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E15BE9E436E9AB591E2D0A9 /* FeaturePages.swift */; };
 		74BAB1A0BC26C716F340A516 /* SearchMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 661A1861D5F6502058533B47 /* SearchMatcher.swift */; };
@@ -163,6 +160,7 @@
 		A7DEA5F2616636E6B6D8CB56 /* ArchiveHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741F84BA111D6712DC48CD8B /* ArchiveHUD.swift */; };
 		A94E350836727C5D807E337E /* LockScreenLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225A0D9E4D1D1403878F02F4 /* LockScreenLayer.swift */; };
 		AA93D15473FDBF0CB85ED5DC /* DiskScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0E77B26807492BA157D2C9 /* DiskScanner.swift */; };
+		AAF4FD2035A8CCF9E62D452E /* NotchAIUsageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0D082C23040B91F862B445 /* NotchAIUsageCard.swift */; };
 		AB48E84CD06C8B8168E84669 /* Shelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = C506FC8E8986ACC027A64870 /* Shelf.swift */; };
 		AB8F9E8F134DB7B890B24579 /* Cleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383CC35D6AA333437CF1BD4 /* Cleanup.swift */; };
 		AC835509F12D0AA870F62047 /* AuthPromptUnlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0489E383085140B8C153BB99 /* AuthPromptUnlock.swift */; };
@@ -178,6 +176,7 @@
 		B815E008CA00ED54EF5BCC8A /* ProcessMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C940636FD06C619EF972A1 /* ProcessMonitor.swift */; };
 		B98E4EB6CE7606D414C54944 /* MenuBarHosted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E9AEC5664C3886B8209C81 /* MenuBarHosted.swift */; };
 		B9E5D859297C72ADF1C7AC12 /* DisplayOSD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC008F374651F8B3CC0EE4C9 /* DisplayOSD.swift */; };
+		BB67FF25A8E70A85F943E6C2 /* NotchHomeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CE37E4A793968995C0D3DA /* NotchHomeSettings.swift */; };
 		BFBE64AC254AE6E25BBBFA9A /* NotchPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814260B5C9AC2E9E0C009A90 /* NotchPanel.swift */; };
 		C0D75AE50FD69AC4542174D5 /* WidgetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F1CB1ADE70C3C9A86BA5D5 /* WidgetStyle.swift */; };
 		C1E7F228E9CEDCE38FD39F6B /* PasswordsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E79D6398DBE3E2CA15BEF9 /* PasswordsPage.swift */; };
@@ -186,12 +185,12 @@
 		C317906E1A1CAE792A0C7E9E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9FEF45BFFE010BCA9A5D3000 /* Assets.xcassets */; };
 		C324DBF6209BB14D8041D259 /* ScrollStitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CC2D98F9983BC2F6179A7B /* ScrollStitcher.swift */; };
 		C69A9F245CA9BC88ED32C5DC /* LauncherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6425C398F27D814B72602854 /* LauncherModel.swift */; };
+		C846A8657ABC63F48F690803 /* NotchUsageCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA12FC46CB1A9B1A3B201E9C /* NotchUsageCLI.swift */; };
 		C8D0E0C65634CB0ABEDBA138 /* BatteryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A845C11DB47D3939AA2C2B3B /* BatteryManager.swift */; };
 		C92E2A2D7A566F6F69ABE5DC /* BatteryIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EE39EBD3FE87C465F957E6 /* BatteryIO.swift */; };
 		C954D0B9E8F11D75E3EAFFD4 /* OrbitQuickLook.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0828531D6A12CF39075F3E03 /* OrbitQuickLook.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB0B20325588C474ADD8088A /* FanHelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1FCB901AE0D21AD4D652B5 /* FanHelperProtocol.swift */; };
 		CD002485D9C0C611514C1E67 /* HotCornersPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */; };
-		5ABE11E3DA02E8BE1802DB35 /* NotchHomeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02853066BFD8A999D834ADB /* NotchHomeSettings.swift */; };
 		CD13FD0262A9FB1CE57C93EC /* NotchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4641B7D04484412A463BB1B7 /* NotchPage.swift */; };
 		CD853CD1D7B25BFB45DF11E6 /* NotchHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D420498634E50180A130C12 /* NotchHUD.swift */; };
 		CD95668ECA7BAC741B28273A /* SpellPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3558BC0BE033902158EC555 /* SpellPanel.swift */; };
@@ -219,6 +218,7 @@
 		DF94D039B5F6C833D74744B6 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74980D1CF09712A15C0910F9 /* Updater.swift */; };
 		E1E6671F7BCCF4513B836FAF /* EditorWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E65CFE6DC48CCDC5BD6EB1 /* EditorWindow.swift */; };
 		E286AE8C1A3A8EE99A37815F /* ArchivesPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B34257C69BD163D735E17DF /* ArchivesPage.swift */; };
+		E3368813A5A75B0FD210D8FF /* NotchAIUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5005A3E37CB02C6A4ADE5F2 /* NotchAIUsage.swift */; };
 		E3E705AAC1D281BBDA3DD3A1 /* HiddenBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA66667F616B7480F99B326 /* HiddenBar.swift */; };
 		E4078F8C5C644373D6FE36CB /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC6AF77BAB454B1CD81EB5D8 /* Permissions.swift */; };
 		E5BC56A34032B581222751FE /* RunnerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137E54221090E07A7BF5EF60 /* RunnerStore.swift */; };
@@ -378,7 +378,6 @@
 		4538EFE289F4A870DC563D8E /* KnockPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnockPage.swift; sourceTree = "<group>"; };
 		45E1758F6842DD178C67093F /* MenuBarLayoutEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLayoutEditor.swift; sourceTree = "<group>"; };
 		463813AFCAB44CF9C71A1C15 /* OrbitAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitAction.swift; sourceTree = "<group>"; };
-		B02853066BFD8A999D834ADB /* NotchHomeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeSettings.swift; sourceTree = "<group>"; };
 		4641B7D04484412A463BB1B7 /* NotchPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPage.swift; sourceTree = "<group>"; };
 		46A8ED97B013D95859769F92 /* LauncherPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherPanel.swift; sourceTree = "<group>"; };
 		46AD126FFA18662AD065C1A0 /* DisplaysPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaysPage.swift; sourceTree = "<group>"; };
@@ -473,20 +472,17 @@
 		A2C6EAF1CC8AAD43C9D3FD14 /* FileConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileConversion.swift; sourceTree = "<group>"; };
 		A32F78CC5FAD56E7B598379E /* RecordingChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingChrome.swift; sourceTree = "<group>"; };
 		A500758B091531D79013DFC1 /* WidgetWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetWindow.swift; sourceTree = "<group>"; };
-		59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeLayout.swift; sourceTree = "<group>"; };
-		FEE199EFEF268C8ABEA690A2 /* ClaudeStatusLineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStatusLineBridge.swift; sourceTree = "<group>"; };
-		C9213DBA6C9BAA3572A2C6E7 /* NotchUsageCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchUsageCLI.swift; sourceTree = "<group>"; };
-		30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsage.swift; sourceTree = "<group>"; };
-		A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsageCard.swift; sourceTree = "<group>"; };
 		A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPrefs.swift; sourceTree = "<group>"; };
 		A69984C3D397513BDC4EB8FD /* Vault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vault.swift; sourceTree = "<group>"; };
 		A7177418BE5818FFC61B9036 /* CaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureService.swift; sourceTree = "<group>"; };
 		A7EAD068FBF38FB8FD2544E7 /* OrbitRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitRing.swift; sourceTree = "<group>"; };
 		A845C11DB47D3939AA2C2B3B /* BatteryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryManager.swift; sourceTree = "<group>"; };
 		AA0E97AE18D6AF113D5ECCC8 /* Orbit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Orbit.entitlements; sourceTree = "<group>"; };
+		AA12FC46CB1A9B1A3B201E9C /* NotchUsageCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchUsageCLI.swift; sourceTree = "<group>"; };
 		AC008F374651F8B3CC0EE4C9 /* DisplayOSD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayOSD.swift; sourceTree = "<group>"; };
 		AC3B0AE48620FA7C72BABF08 /* MenuBarItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarItems.swift; sourceTree = "<group>"; };
 		ACBC129BC60C7332FBB67A36 /* MediaRemoteBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRemoteBridge.swift; sourceTree = "<group>"; };
+		AD0D082C23040B91F862B445 /* NotchAIUsageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsageCard.swift; sourceTree = "<group>"; };
 		AEEDE972E99413DFBF2A77A7 /* SystemDataSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemDataSection.swift; sourceTree = "<group>"; };
 		AEFA412A301AB72A0E130D71 /* RunnerArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerArt.swift; sourceTree = "<group>"; };
 		AF44D6AA48F4A732ABD4EE60 /* HotCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotCorners.swift; sourceTree = "<group>"; };
@@ -497,6 +493,7 @@
 		B340EAEAE200252EAC25373B /* MediaDucker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDucker.swift; sourceTree = "<group>"; };
 		B383CC35D6AA333437CF1BD4 /* Cleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cleanup.swift; sourceTree = "<group>"; };
 		B468094D0A81A0744832158C /* QuickLookExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookExtension.swift; sourceTree = "<group>"; };
+		B5005A3E37CB02C6A4ADE5F2 /* NotchAIUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchAIUsage.swift; sourceTree = "<group>"; };
 		B6F1CB1ADE70C3C9A86BA5D5 /* WidgetStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStyle.swift; sourceTree = "<group>"; };
 		B73C3BCF97DE156FD2CF44E4 /* Paster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Paster.swift; sourceTree = "<group>"; };
 		B7A770CD114D297CC07E9238 /* SystemVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemVolume.swift; sourceTree = "<group>"; };
@@ -509,6 +506,7 @@
 		BD3FF7F244EEAFFB9F683EE6 /* MenuBarSystemSwitches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSystemSwitches.swift; sourceTree = "<group>"; };
 		BE4AA143231EE285383B831E /* FaceUnlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceUnlock.swift; sourceTree = "<group>"; };
 		BF054AF38374B66F3105F1B9 /* NowPlayingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingPage.swift; sourceTree = "<group>"; };
+		BF42779006E28794454A99C2 /* ClaudeStatusLineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeStatusLineBridge.swift; sourceTree = "<group>"; };
 		C2E79D6398DBE3E2CA15BEF9 /* PasswordsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsPage.swift; sourceTree = "<group>"; };
 		C453D6B049BDC5E89C9D01E7 /* FloatingPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanel.swift; sourceTree = "<group>"; };
 		C4C559796E9A3AABB5C34C71 /* GestureAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureAction.swift; sourceTree = "<group>"; };
@@ -533,9 +531,11 @@
 		DCB401E34D45DB5A0E8B37F6 /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
 		DD4A450337E47E83A9DF3DCB /* OrbitFanHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = OrbitFanHelper; sourceTree = BUILT_PRODUCTS_DIR; };
 		E202285F2A53FBC6DB8C7743 /* RecordPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordPicker.swift; sourceTree = "<group>"; };
+		E22E41FD1D9141107D55EE9A /* NotchHomeLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeLayout.swift; sourceTree = "<group>"; };
 		E3942721151051DAD9121083 /* OpenWindows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenWindows.swift; sourceTree = "<group>"; };
 		E691E1A576C579A627A7BDDF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E6B8E26C39F30D9E06D317F6 /* PasswordsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsComponents.swift; sourceTree = "<group>"; };
+		E6CE37E4A793968995C0D3DA /* NotchHomeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchHomeSettings.swift; sourceTree = "<group>"; };
 		E79F65BDD24BE20F2CD875EF /* SettingsSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSearchView.swift; sourceTree = "<group>"; };
 		E81C22C75C738843DE6FA0AD /* MenuBarRemoval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarRemoval.swift; sourceTree = "<group>"; };
 		E8A06584240747CCD9BDD091 /* AnnotatedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotatedImage.swift; sourceTree = "<group>"; };
@@ -999,17 +999,17 @@
 		C5E6D90127A2273CBBD22A50 /* Notch */ = {
 			isa = PBXGroup;
 			children = (
+				BF42779006E28794454A99C2 /* ClaudeStatusLineBridge.swift */,
 				7C707ADF72E82EEF2871F8F4 /* NotchActivities.swift */,
+				B5005A3E37CB02C6A4ADE5F2 /* NotchAIUsage.swift */,
+				AD0D082C23040B91F862B445 /* NotchAIUsageCard.swift */,
 				5D868E5FDB67716BF9496EFF /* NotchCenter.swift */,
 				25D5F42C2953AA16A3D86051 /* NotchFolder.swift */,
+				E22E41FD1D9141107D55EE9A /* NotchHomeLayout.swift */,
 				814260B5C9AC2E9E0C009A90 /* NotchPanel.swift */,
-				59DB770514ECE24FDC3DD779 /* NotchHomeLayout.swift */,
-				FEE199EFEF268C8ABEA690A2 /* ClaudeStatusLineBridge.swift */,
-				C9213DBA6C9BAA3572A2C6E7 /* NotchUsageCLI.swift */,
-				30C5DC33FE38AAD77113FFC2 /* NotchAIUsage.swift */,
-				A9865C72A48D7F86291FBD42 /* NotchAIUsageCard.swift */,
 				A592063C7804AE1FBA1B2857 /* NotchPrefs.swift */,
 				69DFA5140BB9FAB83BE84FB7 /* NotchRoom.swift */,
+				AA12FC46CB1A9B1A3B201E9C /* NotchUsageCLI.swift */,
 				2AE81E19832E02AF985C6FFC /* NotchViews.swift */,
 				8CA25962DBF72E7ABE07BC60 /* NotchWindow.swift */,
 			);
@@ -1180,7 +1180,7 @@
 				05EABB958605751517434087 /* HomePage.swift */,
 				20908E64411E3DDA7AEACFA6 /* HotCornersPage.swift */,
 				4538EFE289F4A870DC563D8E /* KnockPage.swift */,
-				B02853066BFD8A999D834ADB /* NotchHomeSettings.swift */,
+				E6CE37E4A793968995C0D3DA /* NotchHomeSettings.swift */,
 				4641B7D04484412A463BB1B7 /* NotchPage.swift */,
 				BF054AF38374B66F3105F1B9 /* NowPlayingPage.swift */,
 				6FDB24D90B286F0507B5AB69 /* OverlapsPage.swift */,
@@ -1422,6 +1422,7 @@
 				310A098DFE434B6ABC38D2A2 /* CaptureLibrary.swift in Sources */,
 				A7BDF5F6E7AE519BE1706FBD /* CaptureService.swift in Sources */,
 				285881831A81A07AAF877CB2 /* ChromiumImport.swift in Sources */,
+				71EA109753B6EA8253AEBFD7 /* ClaudeStatusLineBridge.swift in Sources */,
 				AB8F9E8F134DB7B890B24579 /* Cleanup.swift in Sources */,
 				669777EE41AFADE9B83DDA9E /* ClickHighlighter.swift in Sources */,
 				03CDB9C33DEC067F1C29D720 /* ClickPainter.swift in Sources */,
@@ -1500,21 +1501,20 @@
 				99E61AE282CA542BB13A9F7D /* MenuCommands.swift in Sources */,
 				8C272F523E642B35F8D11943 /* MouseTrigger.swift in Sources */,
 				6B204D4609E7BAFE786CAF09 /* MultitouchSource.swift in Sources */,
+				E3368813A5A75B0FD210D8FF /* NotchAIUsage.swift in Sources */,
+				AAF4FD2035A8CCF9E62D452E /* NotchAIUsageCard.swift in Sources */,
 				81D3657D49116E00460CC860 /* NotchActivities.swift in Sources */,
 				1F6ADA95864EF03FDC1A0F86 /* NotchCenter.swift in Sources */,
 				E8FE4274BA4965C9D848F1EE /* NotchFolder.swift in Sources */,
 				CD853CD1D7B25BFB45DF11E6 /* NotchHUD.swift in Sources */,
-				5ABE11E3DA02E8BE1802DB35 /* NotchHomeSettings.swift in Sources */,
+				2C982D957387664F2F07AB07 /* NotchHomeLayout.swift in Sources */,
+				BB67FF25A8E70A85F943E6C2 /* NotchHomeSettings.swift in Sources */,
 				CD13FD0262A9FB1CE57C93EC /* NotchPage.swift in Sources */,
 				BFBE64AC254AE6E25BBBFA9A /* NotchPanel.swift in Sources */,
 				C2278FF040D05AF031F560E4 /* NotchPlayerViews.swift in Sources */,
-				79824F9D228C7A8D8F63B9ED /* NotchHomeLayout.swift in Sources */,
-				54B239F2ECB0BDCA136D1603 /* ClaudeStatusLineBridge.swift in Sources */,
-				A5568B582893B6BE46F197C4 /* NotchUsageCLI.swift in Sources */,
-				5FC3A7A3C9C4A660DCAA5C57 /* NotchAIUsage.swift in Sources */,
-				B03A123789F20B636472EEA1 /* NotchAIUsageCard.swift in Sources */,
 				4BA52F6F9D6857E504DDFF8E /* NotchPrefs.swift in Sources */,
 				4C676EA04AA3BF2BD6E93D70 /* NotchRoom.swift in Sources */,
+				C846A8657ABC63F48F690803 /* NotchUsageCLI.swift in Sources */,
 				E945B31314EB820D7F5489AF /* NotchViews.swift in Sources */,
 				A776CC6903DBD133C0A390FF /* NotchWindow.swift in Sources */,
 				DC57757AB8331D1F617F180A /* NowPlaying.swift in Sources */,
@@ -1764,7 +1764,7 @@
 				CODE_SIGN_IDENTITY = 7CBA1EA9C27F25912D4A2774F0D1B98B6C5A7BF5;
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = UM52UU4B7L;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1779,7 +1779,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.9.4;
+				MARKETING_VERSION = 1.9.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1920,7 +1920,7 @@
 				CODE_SIGN_IDENTITY = 7CBA1EA9C27F25912D4A2774F0D1B98B6C5A7BF5;
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = UM52UU4B7L;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1941,7 +1941,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.9.4;
+				MARKETING_VERSION = 1.9.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
