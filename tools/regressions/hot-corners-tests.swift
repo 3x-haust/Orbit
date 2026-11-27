@@ -34,6 +34,33 @@ import AppKit
         check(CGPoint(x: 1511, y: 1), on: [laptop, beside], is: nil, "side by side: laptop's bottom right runs on")
         check(CGPoint(x: 3431, y: 1), on: [laptop, beside], is: .bottomRight, "side by side: outer bottom right")
 
+        // Notification Center: a press that timed out may still have opened the panel, so the clock
+        // must not be pressed again (a second press closes it). Only a refused press tries the next one.
+        func press(_ result: AXError, landed expected: Bool, _ name: String) {
+            let ok = HotCorners.pressLanded(result) == expected
+            if !ok { failed += 1 }
+            print("\(ok ? "PASS" : "FAIL") \(name)")
+        }
+        press(.success, landed: true, "clock press: success stops")
+        press(.cannotComplete, landed: true, "clock press: timed out stops, no second press")
+        press(.actionUnsupported, landed: false, "clock press: unsupported tries the next element")
+        press(.apiDisabled, landed: false, "clock press: Accessibility refused tries the next element")
+
+        // Corners set to macOS's own actions are written into com.apple.dock with its codes and keys.
+        func macOS(_ t: HotCorners.Target, _ m: HotCorners.Modifier, is expected: (Int, Int)?, _ name: String) {
+            let found = HotCorners.macOSSetting(t, m)
+            let ok = found?.code == expected?.0 && found?.modifier == expected?.1
+            if !ok { failed += 1 }
+            print("\(ok ? "PASS" : "FAIL") \(name)")
+        }
+        macOS(.system(.notificationCenter), .none, is: (12, 0), "macOS corner: Notification Center")
+        macOS(.system(.missionControl), .command, is: (2, 1 << 20), "macOS corner: Mission Control with ⌘")
+        macOS(.system(.quickNote), .option, is: (14, 1 << 19), "macOS corner: Quick Note with ⌥")
+        macOS(.system(.desktop), .shift, is: (4, 1 << 17), "macOS corner: Desktop with ⇧")
+        macOS(.ring, .none, is: nil, "Orbit corner: the Ring stays with Orbit")
+        macOS(.command(.lockScreen), .none, is: nil, "Orbit corner: an Orbit command stays with Orbit")
+        macOS(.none, .none, is: nil, "empty corner: nothing for macOS")
+
         exit(failed == 0 ? 0 : 1)
     }
 }
