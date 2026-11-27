@@ -34,32 +34,27 @@ import AppKit
         check(CGPoint(x: 1511, y: 1), on: [laptop, beside], is: nil, "side by side: laptop's bottom right runs on")
         check(CGPoint(x: 3431, y: 1), on: [laptop, beside], is: .bottomRight, "side by side: outer bottom right")
 
-        // Notification Center: a press that timed out may still have opened the panel, so the clock
-        // must not be pressed again (a second press closes it). Only a refused press tries the next one.
-        func press(_ result: AXError, landed expected: Bool, _ name: String) {
-            let ok = HotCorners.pressLanded(result) == expected
+        // Notification Center opens through macOS's "Show Notification Center" shortcut (hot key 163).
+        func entry(_ enabled: Bool, _ params: [Int]) -> [String: Any] {
+            ["enabled": NSNumber(value: enabled), "value": ["parameters": params.map { NSNumber(value: $0) }, "type": "standard"]]
+        }
+        func shortcut(_ e: Any?, is expected: (Int, UInt64)?, _ name: String) {
+            let found = HotCorners.shortcut(from: e)
+            let ok = found.map { Int($0.keyCode) } == expected?.0 && found?.flags.rawValue == expected?.1
             if !ok { failed += 1 }
             print("\(ok ? "PASS" : "FAIL") \(name)")
         }
-        press(.success, landed: true, "clock press: success stops")
-        press(.cannotComplete, landed: true, "clock press: timed out stops, no second press")
-        press(.actionUnsupported, landed: false, "clock press: unsupported tries the next element")
-        press(.apiDisabled, landed: false, "clock press: Accessibility refused tries the next element")
-
-        // Corners set to macOS's own actions are written into com.apple.dock with its codes and keys.
-        func macOS(_ t: HotCorners.Target, _ m: HotCorners.Modifier, is expected: (Int, Int)?, _ name: String) {
-            let found = HotCorners.macOSSetting(t, m)
-            let ok = found?.code == expected?.0 && found?.modifier == expected?.1
-            if !ok { failed += 1 }
-            print("\(ok ? "PASS" : "FAIL") \(name)")
-        }
-        macOS(.system(.notificationCenter), .none, is: (12, 0), "macOS corner: Notification Center")
-        macOS(.system(.missionControl), .command, is: (2, 1 << 20), "macOS corner: Mission Control with ⌘")
-        macOS(.system(.quickNote), .option, is: (14, 1 << 19), "macOS corner: Quick Note with ⌥")
-        macOS(.system(.desktop), .shift, is: (4, 1 << 17), "macOS corner: Desktop with ⇧")
-        macOS(.ring, .none, is: nil, "Orbit corner: the Ring stays with Orbit")
-        macOS(.command(.lockScreen), .none, is: nil, "Orbit corner: an Orbit command stays with Orbit")
-        macOS(.none, .none, is: nil, "empty corner: nothing for macOS")
+        let orbit = HotCorners.orbitShortcut
+        shortcut(entry(true, orbit), is: (80, UInt64(orbit[2])), "shortcut: Orbit's ⌃⌥⇧⌘F19")
+        shortcut(entry(true, [110, 45, 1_835_008]), is: (45, 1_835_008), "shortcut: one you set yourself is used")
+        shortcut(entry(false, [110, 45, 1_835_008]), is: nil, "shortcut: turned off")
+        shortcut(entry(true, [65535, 65535, 0]), is: nil, "shortcut: on but without a key")
+        shortcut(nil, is: nil, "shortcut: never set")
+        let flags = CGEventFlags(rawValue: UInt64(orbit[2]))
+        let all: CGEventFlags = [.maskCommand, .maskAlternate, .maskControl, .maskShift, .maskSecondaryFn]
+        let ok = flags == all
+        if !ok { failed += 1 }
+        print("\(ok ? "PASS" : "FAIL") shortcut: Orbit's keys are ⌃⌥⇧⌘ with fn, as macOS stores F-keys")
 
         exit(failed == 0 ? 0 : 1)
     }
