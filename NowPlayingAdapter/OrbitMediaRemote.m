@@ -10,8 +10,7 @@ typedef void (*GetClientFn)(dispatch_queue_t, void (^)(id));
 typedef CFStringRef (*ClientStringFn)(id);
 typedef void (*RegisterFn)(dispatch_queue_t);
 typedef Boolean (*SendFn)(int, CFDictionaryRef);
-// Same call MRMediaRemoteSendCommand makes, with an app bundle ID instead of "whoever is now playing".
-typedef Boolean (*SendToAppFn)(int, CFDictionaryRef, void *, CFStringRef, int, void *, void *);
+typedef void (*SetOverrideFn)(CFStringRef);
 typedef void (*SetElapsedFn)(double);
 
 static void *mr;
@@ -22,7 +21,7 @@ static GetClientFn getClient;
 static ClientStringFn clientBundle, clientParentBundle, clientName;
 static RegisterFn registerNotes;
 static SendFn sendCommand;
-static SendToAppFn sendToApp;
+static SetOverrideFn setOverride;
 static SetElapsedFn setElapsed;
 
 static BOOL load(void) {
@@ -38,7 +37,7 @@ static BOOL load(void) {
     clientName = dlsym(mr, "MRNowPlayingClientGetDisplayName");
     registerNotes = dlsym(mr, "MRMediaRemoteRegisterForNowPlayingNotifications");
     sendCommand = dlsym(mr, "MRMediaRemoteSendCommand");
-    sendToApp = dlsym(mr, "MRMediaRemoteSendCommandToApp");
+    setOverride = dlsym(mr, "MRMediaRemoteSetOverriddenNowPlayingApplication");
     setElapsed = dlsym(mr, "MRMediaRemoteSetElapsedTime");
     return getInfo != NULL;
 }
@@ -144,19 +143,24 @@ void orbit_stream(void) {
     }
 }
 
-/// One command, from ORBIT_MR_CMD (a MediaRemote command number) or ORBIT_MR_SEEK (seconds).
+/// One command, from ORBIT_MR_CMD (a MediaRemote command number) or ORBIT_MR_SEEK (seconds). With
+/// ORBIT_MR_APP it goes to that app. MediaRemote hands every command, even one sent to a named app or
+/// player, to the app Now Playing is on (a paused video, say), so Now Playing is pointed at the app for
+/// this one command and then given back.
 void orbit_send(void) {
     @autoreleasepool {
         if (!load()) exit(2);
         const char *seek = getenv("ORBIT_MR_SEEK");
-        if (seek && setElapsed) { setElapsed(atof(seek)); usleep(150000); exit(0); }
         const char *cmd = getenv("ORBIT_MR_CMD");
-        if (!cmd || !sendCommand) exit(2);
+        if (seek ? !setElapsed : (!cmd || !sendCommand)) exit(2);
         const char *app = getenv("ORBIT_MR_APP");
-        Boolean ok = app && sendToApp
-            ? sendToApp(atoi(cmd), NULL, NULL, (__bridge CFStringRef)@(app), 0, NULL, NULL)
-            : sendCommand(atoi(cmd), NULL);
+        BOOL aimed = app && setOverride;
+        if (aimed) { setOverride((__bridge CFStringRef)@(app)); usleep(100000); }
+        Boolean ok = YES;
+        if (seek) setElapsed(atof(seek));
+        else ok = sendCommand(atoi(cmd), NULL);
         usleep(150000);
+        if (aimed) setOverride(NULL);
         exit(ok ? 0 : 1);
     }
 }

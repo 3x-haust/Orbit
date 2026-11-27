@@ -184,27 +184,28 @@ final class NowPlaying {
             playing.toggle()
         }
         if let app = scriptApp { Task { await ScriptedPlayers.send(.playPause, to: app) } }
-        else { bridge.send(.togglePlayPause) }
+        else { sendShown(.togglePlayPause) }
     }
 
     func next(heard: Bool = false) {
         ensureListening()
         MediaDucker.shared.userActed()
         if heard, heardElsewhere { bridge.send(.next); return }
-        if let app = scriptApp { Task { await ScriptedPlayers.send(.next, to: app) } } else { bridge.send(.next) }
+        if let app = scriptApp { Task { await ScriptedPlayers.send(.next, to: app) } } else { sendShown(.next) }
     }
 
     func previous(heard: Bool = false) {
         ensureListening()
         MediaDucker.shared.userActed()
         if heard, heardElsewhere { bridge.send(.previous); return }
-        if let app = scriptApp { Task { await ScriptedPlayers.send(.previous, to: app) } } else { bridge.send(.previous) }
+        if let app = scriptApp { Task { await ScriptedPlayers.send(.previous, to: app) } } else { sendShown(.previous) }
     }
 
     func seek(to seconds: Double) {
         elapsedAnchor = seconds
         anchorDate = Date()
-        if let app = scriptApp { Task { await ScriptedPlayers.send(.seek(seconds), to: app) } } else { bridge.seek(to: seconds) }
+        if let app = scriptApp { Task { await ScriptedPlayers.send(.seek(seconds), to: app) } }
+        else { bridge.seek(to: seconds, in: shownElsewhere) }
     }
 
     func toggleLike() {
@@ -221,7 +222,7 @@ final class NowPlaying {
         if ScriptedPlayers.enabled, track.bundle == ScriptedPlayers.App.music.rawValue {
             Task { await ScriptedPlayers.send(.like(on), to: .music) }
         } else if on {
-            bridge.send(.like) // apps that take Now Playing's "like" (Music without scripting, some players)
+            sendShown(.like) // apps that take Now Playing's "like" (Music without scripting, some players)
         }
         Toast.show(on ? "Liked" : "Removed from Liked", symbol: on ? "heart.fill" : "heart", detail: track.title)
     }
@@ -229,6 +230,18 @@ final class NowPlaying {
     /// A Now Playing command for one app (nil: whatever is now playing), for auto-pause.
     func send(_ command: MediaRemoteBridge.Command, to bundle: String?) {
         if let bundle { bridge.send(command, to: bundle) } else { bridge.send(command) }
+    }
+
+    /// The shown song's app, when macOS's Now Playing is on another one: after a video was paused, Now
+    /// Playing stays on it, and a plain command would start the video again instead of the song shown.
+    private var shownElsewhere: String? {
+        guard let bundle = track?.bundle, !bundle.hasPrefix("pid."), let other = systemSource, other.bundle != bundle else { return nil }
+        return bundle
+    }
+
+    /// A command from the player's own buttons, for the song they show.
+    private func sendShown(_ command: MediaRemoteBridge.Command) {
+        if let bundle = shownElsewhere { bridge.send(command, to: bundle) } else { bridge.send(command) }
     }
 
     /// Commands from a shortcut work even with every Now Playing feature off.
