@@ -124,7 +124,12 @@ final class MediaRemoteBridge {
         run(env: ["ORBIT_MR_CMD": String(command.rawValue), "ORBIT_MR_APP": bundle])
     }
 
-    func seek(to seconds: Double) { run(env: ["ORBIT_MR_SEEK": String(format: "%.3f", max(0, seconds))]) }
+    /// `bundle`: that app rather than whatever is now playing.
+    func seek(to seconds: Double, in bundle: String? = nil) {
+        var env = ["ORBIT_MR_SEEK": String(format: "%.3f", max(0, seconds))]
+        if let bundle { env["ORBIT_MR_APP"] = bundle }
+        run(env: env)
+    }
 
     private func run(env: [String: String]) {
         guard let lib = Self.library else { return }
