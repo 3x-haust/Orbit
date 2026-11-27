@@ -67,11 +67,6 @@ final class HotCorners {
             case .system(let s): s.symbol
             }
         }
-
-        /// macOS's own code for this action when macOS does it, so the corner is left to macOS.
-        var macOSCode: Int? {
-            if case .system(let s) = self { s.macOSCode } else { nil }
-        }
     }
 
     /// The corner actions macOS has, so Orbit can stand in for them.
@@ -99,18 +94,6 @@ final class HotCorners {
             case .screenSaver: "sparkles.tv"
             }
         }
-        /// The action's code in com.apple.dock's `wvous-<corner>-corner`.
-        var macOSCode: Int {
-            switch self {
-            case .missionControl: 2
-            case .appWindows: 3
-            case .desktop: 4
-            case .screenSaver: 5
-            case .launchpad: 11
-            case .notificationCenter: 12
-            case .quickNote: 14
-            }
-        }
     }
 
     /// Hold a key while reaching the corner, so it never fires by accident.
@@ -123,16 +106,6 @@ final class HotCorners {
             case .option: .option
             case .control: .control
             case .shift: .shift
-            }
-        }
-        /// The key in com.apple.dock's `wvous-<corner>-modifier`: its NSEvent flag bit.
-        var macOSBits: Int {
-            switch self {
-            case .none: 0
-            case .command: 1 << 20
-            case .option: 1 << 19
-            case .control: 1 << 18
-            case .shift: 1 << 17
             }
         }
         var label: String {
@@ -151,7 +124,7 @@ final class HotCorners {
     static let dragKey = "corners.whileDragging"
     static let glowKey = "corners.glow"
 
-    var enabled: Bool { didSet { Pref.defaults.set(enabled, forKey: Self.enabledKey); restart(); syncMacOS() } }
+    var enabled: Bool { didSet { Pref.defaults.set(enabled, forKey: Self.enabledKey); restart() } }
     /// Seconds the pointer has to rest in the corner.
     var delay: Double { didSet { Pref.defaults.set(delay, forKey: Self.delayKey) } }
     /// Fire while dragging something (a file to the Shelf, a window to Mission Control).
@@ -166,9 +139,6 @@ final class HotCorners {
     @ObservationIgnored private var monitors: [Any] = []
     @ObservationIgnored private var dwell: DispatchWorkItem?
     @ObservationIgnored private var armed: Set<Corner> = Set(Corner.allCases)
-    /// A synthetic click carries the pointer away from the corner and back. Until this time, that
-    /// trip doesn't count as leaving, so the corner isn't re-armed and fired a second time.
-    @ObservationIgnored var rearmPausedUntil = Date.distantPast
     @ObservationIgnored private let glow = CornerGlow()
 
     private init() {
@@ -193,20 +163,18 @@ final class HotCorners {
         targets[c] = t
         Pref.defaults.set(t.raw, forKey: "corners.\(c.rawValue)")
         if t != .none, !enabled { enabled = true }
-        syncMacOS()
     }
 
     func set(_ m: Modifier, for c: Corner) {
         modifiers[c] = m
         Pref.defaults.set(m.rawValue, forKey: "corners.\(c.rawValue).mod")
-        syncMacOS()
     }
 
     // MARK: Watching the pointer
 
     func start() {
         restart()
-        syncMacOS()
+        releaseMacOSCorners()
     }
 
     private func restart() {
@@ -228,9 +196,7 @@ final class HotCorners {
         let p = NSEvent.mouseLocation
         let dragging = event.type != .mouseMoved
         // Re-arm a corner once the pointer has clearly left it.
-        if Date() >= rearmPausedUntil {
-            for c in armed.symmetricDifference(Set(Corner.allCases)) where !near(c, p, within: 40) { armed.insert(c) }
-        }
+        for c in armed.symmetricDifference(Set(Corner.allCases)) where !near(c, p, within: 40) { armed.insert(c) }
 
         guard let corner = Self.corner(at: p, screens: NSScreen.screens.map(\.frame)) else {
             leave()
@@ -238,8 +204,7 @@ final class HotCorners {
         }
         guard corner != active else { return }
         leave()
-        // A corner set to one of macOS's own actions is macOS's to run.
-        guard armed.contains(corner), target(corner) != .none, target(corner).macOSCode == nil, !dragging || whileDragging,
+        guard armed.contains(corner), target(corner) != .none, !dragging || whileDragging,
               event.modifierFlags.intersection([.command, .option, .control, .shift]) == modifier(corner).flags
         else { return }
         active = corner
@@ -340,16 +305,66 @@ final class HotCorners {
 
     private static let log = Logger(subsystem: "dev.3xhaust.Orbit", category: "corners")
 
-    /// Did a press on the clock reach it? The clock toggles Notification Center, so a press that may
-    /// have landed must not be followed by another. While the panel slides in, the menu bar agent can
-    /// answer after the messaging timeout: the press went through but reports `.cannotComplete`.
-    static func pressLanded(_ result: AXError) -> Bool {
-        result == .success || result == .cannotComplete
+    /// macOS's "Show Notification Center" keyboard shortcut, by its id in com.apple.symbolichotkeys.
+    static let notificationCenterHotKey = "163"
+    /// The keys Orbit gives that shortcut when it has none: ⌃⌥⇧⌘F19, which no keyboard types by hand.
+    static let orbitShortcut: [Int] = [65535, 80, 0x800000 | 0x100000 | 0x80000 | 0x40000 | 0x20000]
+
+    /// The key code and modifier flags of a symbolic hot key entry, if it's on and has a key.
+    static func shortcut(from entry: Any?) -> (keyCode: CGKeyCode, flags: CGEventFlags)? {
+        guard let entry = entry as? [String: Any], (entry["enabled"] as? NSNumber)?.boolValue == true,
+              let value = entry["value"] as? [String: Any], let p = value["parameters"] as? [NSNumber], p.count == 3,
+              p[1].intValue != 65535 else { return nil }
+        return (CGKeyCode(p[1].intValue), CGEventFlags(rawValue: UInt64(p[2].intValue)))
     }
 
-    /// Notification Center opens from the clock in the menu bar: click it, or press it through
-    /// Accessibility when its frame can't be read.
+    /// Notification Center opens through macOS's own "Show Notification Center" shortcut: it only
+    /// opens (never toggles shut) and leaves the pointer where it is. The shortcut is off by default,
+    /// so Orbit gives it keys once, unless you set your own. If that can't be done, Orbit clicks the
+    /// clock in the menu bar instead.
     private static func openNotificationCenter() {
+        let current = UserDefaults(suiteName: "com.apple.symbolichotkeys")?
+            .dictionary(forKey: "AppleSymbolicHotKeys")?[notificationCenterHotKey]
+        if let key = shortcut(from: current) {
+            press(key)
+            return
+        }
+        let activate = "/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings"
+        guard FileManager.default.isExecutableFile(atPath: activate) else {
+            clickClock()
+            return
+        }
+        let k = orbitShortcut
+        let entry = "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array>"
+            + k.map { "<integer>\($0)</integer>" }.joined()
+            + "</array><key>type</key><string>standard</string></dict></dict>"
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/sh")
+        p.arguments = ["-c", "defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add \(notificationCenterHotKey) '\(entry)' && '\(activate)' -u"]
+        p.terminationHandler = { done in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                MainActor.assumeIsolated {
+                    guard done.terminationStatus == 0 else { clickClock(); return }
+                    log.notice("Notification Center: gave its shortcut Orbit's keys")
+                    press((CGKeyCode(k[1]), CGEventFlags(rawValue: UInt64(k[2]))))
+                }
+            }
+        }
+        do { try p.run() } catch { clickClock() }
+    }
+
+    private static func press(_ key: (keyCode: CGKeyCode, flags: CGEventFlags)) {
+        let src = CGEventSource(stateID: .hidSystemState)
+        for down in [true, false] {
+            let e = CGEvent(keyboardEventSource: src, virtualKey: key.keyCode, keyDown: down)
+            e?.flags = key.flags
+            e?.post(tap: .cghidEventTap)
+        }
+    }
+
+    /// The clock in the menu bar opens Notification Center too: click it where it's drawn and put
+    /// the pointer back. (An Accessibility press on it closes the panel again on macOS 27.2.)
+    private static func clickClock() {
         guard AXIsProcessTrusted(),
               let agent = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.MenuBarAgent").first else { return }
         let root = AXUIElementCreateApplication(agent.processIdentifier)
@@ -366,30 +381,17 @@ final class HotCorners {
                 let content = (attribute(slot, kAXChildrenAttribute) as [AXUIElement]?)?.first
                 let extra = content.flatMap { (attribute($0, kAXChildrenAttribute) as [AXUIElement]?)?.first } ?? content
                 guard let extra, (attribute(extra, kAXIdentifierAttribute) as String?) == "com.apple.menuextra.clock" else { continue }
-                // Click the clock where it's drawn, as a person would. From macOS 27.2 an Accessibility
-                // press on the clock opens Notification Center and closes it again a moment later.
                 var p = CGPoint.zero, s = CGSize.zero
-                if let pos: AXValue = attribute(slot, kAXPositionAttribute), let size: AXValue = attribute(slot, kAXSizeAttribute),
-                   AXValueGetValue(pos, .cgPoint, &p), AXValueGetValue(size, .cgSize, &s) {
-                    let center = CGPoint(x: p.x + s.width / 2, y: p.y + s.height / 2)
-                    let original = CGEvent(source: nil)?.location ?? center
-                    HotCorners.shared.rearmPausedUntil = Date().addingTimeInterval(0.25)
-                    for type in [CGEventType.leftMouseDown, .leftMouseUp] {
-                        CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: center, mouseButton: .left)?.post(tap: .cghidEventTap)
-                    }
-                    CGWarpMouseCursorPosition(original)
-                    CGAssociateMouseAndMouseCursorPosition(1)
-                    log.notice("Notification Center: clicked the clock")
-                    return
+                guard let pos: AXValue = attribute(slot, kAXPositionAttribute), let size: AXValue = attribute(slot, kAXSizeAttribute),
+                      AXValueGetValue(pos, .cgPoint, &p), AXValueGetValue(size, .cgSize, &s) else { return }
+                let center = CGPoint(x: p.x + s.width / 2, y: p.y + s.height / 2)
+                let original = CGEvent(source: nil)?.location ?? center
+                for type in [CGEventType.leftMouseDown, .leftMouseUp] {
+                    CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: center, mouseButton: .left)?.post(tap: .cghidEventTap)
                 }
-                // Its frame is unknown: press it through Accessibility, once.
-                var results: [AXError] = []
-                for target in [extra, content, slot].compactMap({ $0 }) {
-                    let result = AXUIElementPerformAction(target, kAXPressAction as CFString)
-                    results.append(result)
-                    if pressLanded(result) { break }
-                }
-                log.notice("Notification Center: pressed the clock (\(results.map(\.rawValue), privacy: .public))")
+                CGWarpMouseCursorPosition(original)
+                CGAssociateMouseAndMouseCursorPosition(1)
+                log.notice("Notification Center: clicked the clock")
                 return
             }
         }
@@ -449,14 +451,10 @@ final class HotCorners {
         }
     }
 
-    /// Corners where macOS and Orbit would both fire, once Orbit is on. A corner Orbit handed to
-    /// macOS (one of macOS's own actions) isn't one.
+    /// Corners where macOS and Orbit would both fire, once Orbit is on.
     var conflicts: [Corner] {
-        macOSCorners.compactMap { c, code in
-            if target(c).macOSCode == code { return nil }
-            return target(c) != .none || Self.target(macOS: code) != nil ? c : nil
-        }
-        .sorted { $0.rawValue < $1.rawValue }
+        macOSCorners.compactMap { c, code in target(c) != .none || Self.target(macOS: code) != nil ? c : nil }
+            .sorted { $0.rawValue < $1.rawValue }
     }
 
     /// Orbit takes over: macOS's corners are moved into Orbit and switched off in macOS. A corner
@@ -466,10 +464,7 @@ final class HotCorners {
         for (c, code) in macOSCorners {
             if target(c) == .none, let t = Self.target(macOS: code) { set(t, for: c) }
         }
-        enabled = true
-        syncMacOS()
-        // Corners running an Orbit tool: switch macOS's action there off.
-        let taken = conflicts.filter { target($0) != .none && target($0).macOSCode == nil }
+        let taken = conflicts.filter { target($0) != .none }
         guard !taken.isEmpty else { return }
         let script = taken.map { "defaults write com.apple.dock \($0.dockKey) -int 1" }.joined(separator: "; ") + "; killall Dock"
         let p = Process()
@@ -479,44 +474,28 @@ final class HotCorners {
             DispatchQueue.main.async { MainActor.assumeIsolated { HotCorners.shared.macOSChanged += 1 } }
         }
         try? p.run()
+        enabled = true
     }
 
     /// Bumped when macOS's corner settings change, so the page re-reads them.
     var macOSChanged = 0
 
-    /// What com.apple.dock should hold for a corner: macOS's code and modifier for one of its own
-    /// actions, nil for anything Orbit runs.
-    static func macOSSetting(_ t: Target, _ m: Modifier) -> (code: Int, modifier: Int)? {
-        t.macOSCode.map { ($0, m.macOSBits) }
-    }
-
-    /// Hand corners set to macOS's own actions to macOS: write them into its hot corners, where they
-    /// run natively, and clear a corner Orbit wrote once it's set to something else or Orbit is off.
-    /// Corners macOS had before Orbit touched them are left alone. The Dock restarts to read them.
-    private func syncMacOS() {
-        CFPreferencesAppSynchronize("com.apple.dock" as CFString)
+    /// Orbit 1.9.5 handed corners set to macOS's own actions to macOS's hot corners, which don't fire
+    /// at a corner another display touches. Orbit runs them again: clear each corner it wrote there,
+    /// if macOS still has what Orbit wrote. Corners you set in macOS yourself are left alone.
+    private func releaseMacOSCorners() {
         let dock = UserDefaults(suiteName: "com.apple.dock")
         var writes: [String] = []
         for c in Corner.allCases {
-            let modKey = "wvous-\(c.rawValue)-modifier", ownKey = "corners.\(c.rawValue).macOS"
-            let code = dock?.object(forKey: c.dockKey) as? Int ?? 1
-            let mod = dock?.object(forKey: modKey) as? Int ?? 0
-            if enabled, let want = Self.macOSSetting(target(c), modifier(c)) {
-                Pref.defaults.set(want.code, forKey: ownKey)
-                if code != want.code || mod != want.modifier {
-                    writes += ["defaults write com.apple.dock \(c.dockKey) -int \(want.code)",
-                               "defaults write com.apple.dock \(modKey) -int \(want.modifier)"]
-                }
-            } else if let own = Pref.defaults.object(forKey: ownKey) as? Int {
-                Pref.defaults.removeObject(forKey: ownKey)
-                if code == own {
-                    writes += ["defaults write com.apple.dock \(c.dockKey) -int 1",
-                               "defaults write com.apple.dock \(modKey) -int 0"]
-                }
+            let ownKey = "corners.\(c.rawValue).macOS"
+            guard let own = Pref.defaults.object(forKey: ownKey) as? Int else { continue }
+            Pref.defaults.removeObject(forKey: ownKey)
+            if dock?.object(forKey: c.dockKey) as? Int == own {
+                writes += ["defaults write com.apple.dock \(c.dockKey) -int 1",
+                           "defaults write com.apple.dock wvous-\(c.rawValue)-modifier -int 0"]
             }
         }
         guard !writes.isEmpty else { return }
-        Self.log.notice("Hot corners: handed to macOS (\(writes.count / 2, privacy: .public) corners changed)")
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/sh")
         p.arguments = ["-c", (writes + ["killall Dock"]).joined(separator: "; ")]
