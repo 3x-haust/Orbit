@@ -142,6 +142,18 @@ open Orbit.xcodeproj
 
 Set your own team in `project.yml` (`DEVELOPMENT_TEAM` and `CODE_SIGN_IDENTITY`) before building — Orbit's helper (fan control, battery) and Quick Look extension need a real signing identity.
 
+### Notarize a Release app
+
+Build Orbit using the [release instructions](docs/releasing.md). The script discovers the app's embedded code from the bundle, so it works across Orbit releases with different versions, bundle IDs, and helper layouts. It takes a Developer ID Application identity and a [notarytool keychain profile](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow). For distribution, use the Orbit release team's identity because the updater and fan helper verify the team ID.
+
+```bash
+mkdir -p dist
+python3 tools/dmg/sign-and-notarize.py build-rel/Build/Products/Release/Orbit.app dist/notarized \
+  --identity "$SIGN_IDENTITY" --keychain-profile "$NOTARY_PROFILE"
+```
+
+The script signs a copy, submits it to Apple, and writes the stapled app to the new output directory after Gatekeeper verification. To distribute a ZIP, package that stapled copy.
+
 ### Project layout
 
 ```
